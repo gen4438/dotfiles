@@ -21,6 +21,7 @@
     url = "https://github.com/greymd/tmux-xpanes.git"
     refreshPeriod = "168h"
 
+{{- if ne .chezmoi.os "darwin" }}
 [".tmux/plugins/tpm"]
     type = "git-repo"
     url = "https://github.com/tmux-plugins/tpm.git"
@@ -53,3 +54,4 @@
     type = "git-repo"
     url = "https://github.com/znz/anyenv-update.git"
     refreshPeriod = "168h"
+{{- end }}

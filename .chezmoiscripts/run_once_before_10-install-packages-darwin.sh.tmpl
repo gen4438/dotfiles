@@ -25,7 +25,7 @@ fi
 brew update
 
 # Install essential packages using Homebrew Bundle
-brew bundle --no-lock --file=/dev/stdin <<EOF
+brew bundle --file=/dev/stdin <<EOF
 # Essential development tools
 brew "git"
 brew "curl"
@@ -49,6 +49,14 @@ brew "tree"
 brew "tmux"
 brew "fzf"
 brew "unzip"
+
+# Version managers
+brew "nvm"
+brew "pyenv"
+brew "pyenv-virtualenv"
+
+# Shell plugins
+brew "zplug"
 
 # macOS specific tools
 brew "mas"  # Mac App Store CLI

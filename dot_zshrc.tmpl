@@ -16,7 +16,11 @@ elif [[ -f ~/.zplug/init.zsh ]]; then
 fi
 {{- else if eq .chezmoi.os "darwin" }}
 # macOS - check brew zplug location
-if [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
+if [[ -f /opt/homebrew/opt/zplug/init.zsh ]]; then
+    source /opt/homebrew/opt/zplug/init.zsh
+elif [[ -f /usr/local/opt/zplug/init.zsh ]]; then
+    source /usr/local/opt/zplug/init.zsh
+elif [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
     source /opt/homebrew/share/zplug/init.zsh
 elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
     source /usr/local/share/zplug/init.zsh
@@ -27,6 +31,8 @@ fi
 
 # Load zplug plugins if available
 if command -v zplug &> /dev/null; then
+    # Use modern zstyle instead of deprecated ZPLUG_SHALLOW
+    zstyle ':zplug:tag' depth 1
     # oh-my-zsh plugins
     zplug "lib/completion", from:oh-my-zsh
     zplug "lib/directories", from:oh-my-zsh
@@ -45,6 +51,7 @@ if command -v zplug &> /dev/null; then
 
     # Other plugins
     zplug "mafredri/zsh-async", from:github
+    zplug "zsh-users/zsh-history-substring-search", defer:2
     zplug "changyuheng/fz", defer:1
     zplug "rupa/z", use:z.sh
     zplug "greymd/tmux-xpanes"

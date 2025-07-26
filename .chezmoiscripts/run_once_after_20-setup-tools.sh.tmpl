@@ -65,13 +65,79 @@ if [[ -d "$HOME/.anyenv" ]]; then
     
     if command -v anyenv >/dev/null 2>&1; then
         # Initialize anyenv if not already done
-        if [[ ! -d "$HOME/.anyenv/envs" ]]; then
-            anyenv install --force-init
+        if [[ ! -d "$HOME/.config/anyenv/anyenv-install" ]]; then
+            anyenv install --init
             echo "✅ anyenv initialized"
         fi
         
         eval "$(anyenv init -)"
     fi
+fi
+
+# Setup zplug and install plugins
+echo "Setting up zplug plugins..."
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS - check brew zplug location
+if [[ -f /opt/homebrew/opt/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/opt/homebrew/opt/zplug
+elif [[ -f /usr/local/opt/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/local/opt/zplug
+elif [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/opt/homebrew/share/zplug
+elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/local/share/zplug
+elif [[ -f ~/.zplug/init.zsh ]]; then
+    export ZPLUG_HOME=~/.zplug
+fi
+{{- else if eq .chezmoi.os "linux" }}
+# Linux - check common zplug locations
+if [[ -f /usr/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/share/zplug
+elif [[ -f ~/.zplug/init.zsh ]]; then
+    export ZPLUG_HOME=~/.zplug
+fi
+{{- end }}
+
+if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
+    echo "Installing zplug plugins..."
+    
+    # zplug requires zsh, so we run it in a zsh subshell
+    if command -v zsh >/dev/null 2>&1; then
+        zsh -c "
+            export ZPLUG_HOME='$ZPLUG_HOME'
+            source '$ZPLUG_HOME/init.zsh'
+            zstyle ':zplug:tag' depth 1
+            
+            # Define plugins (matching .zshrc.tmpl)
+            zplug 'lib/completion', from:oh-my-zsh
+            zplug 'lib/directories', from:oh-my-zsh
+            zplug 'lib/functions', from:oh-my-zsh
+            zplug 'lib/history', from:oh-my-zsh
+            zplug 'plugins/git', from:oh-my-zsh
+            zplug 'plugins/dotenv', from:oh-my-zsh
+            zplug 'plugins/poetry', from:oh-my-zsh
+            zplug 'plugins/npm', from:oh-my-zsh
+            zplug 'plugins/kubectl', from:oh-my-zsh
+            zplug 'plugins/gh', from:oh-my-zsh
+            zplug 'plugins/vi-mode', from:oh-my-zsh
+            zplug 'sindresorhus/pure', use:pure.zsh, from:github, as:theme
+            zplug 'mafredri/zsh-async', from:github
+            zplug 'zsh-users/zsh-history-substring-search', defer:2
+            zplug 'changyuheng/fz', defer:1
+            zplug 'rupa/z', use:z.sh
+            zplug 'greymd/tmux-xpanes'
+            zplug 'qoomon/zsh-lazyload'
+            
+            # Install plugins
+            zplug install
+        "
+        echo "✅ zplug plugins installed"
+    else
+        echo "⚠️ zsh not available, skipping zplug plugin installation"
+    fi
+else
+    echo "⚠️ zplug not found, skipping plugin installation"
 fi
 
 # Setup tmux plugin manager

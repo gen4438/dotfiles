@@ -9,7 +9,11 @@ Include config.d/*.conf
 
 Host *
 Port 22
+{{- if .ssh_identity_file }}
+IdentityFile {{ .ssh_identity_file }}
+{{- else }}
 IdentityFile ~/.ssh/id_ed25519
+{{- end }}
 Compression yes
 ForwardX11 yes
 IdentitiesOnly yes
