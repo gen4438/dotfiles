@@ -1,0 +1,223 @@
+[user]
+	name = {{ .git.name }}
+	email = {{ .git.email }}
+
+[core]
+	editor = nvim
+	quotepath = false
+	
+	# Global gitignore file location
+	# While ~/.config/git/ignore is a default path in Git 2.32+, explicit setting ensures
+	# priority over other candidate paths and makes configuration intent clear
+	excludesfile = ~/.config/git/ignore
+	
+	# Cross-platform line ending and encoding settings
+	safecrlf = warn
+	
+	# macOS Unicode normalization (recommended for cross-platform compatibility)
+	# macOS uses NFD (decomposed) form: "é" = "e" + "´" (accent separate)
+	# Linux/Windows use NFC (composed) form: "é" = single character
+	# This setting normalizes to NFC within Git to prevent filename issues
+	precomposeunicode = true
+	
+	# Enhanced diff viewer (requires 'delta' to be installed)
+	# Install: cargo install git-delta, brew install git-delta, or apt install git-delta
+	# Provides syntax highlighting, line numbers, and better visual diff format
+	# pager = delta
+
+[init]
+	defaultBranch = main
+
+[push]
+	default = simple
+	
+	# Automatically setup remote branch on first push (Git 2.37+)
+	# Eliminates need for "git push -u origin branch-name" on new branches
+	# Comment out if you prefer explicit remote setup for safety
+	# autoSetupRemote = true
+
+[pull]
+	ff = only
+
+[merge]
+	tool = nvimdiff
+	ff = false
+
+[mergetool "nvimdiff"]
+	cmd = "nvim -d -c \"4wincmd w | wincmd J\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"  \"$MERGED\""
+
+[diff]
+	tool = nvimdiff
+	
+	# Highlight moved code blocks in different colors
+	# Makes refactoring and code reorganization more visible
+	# Options: no, default, plain, blocks, zebra, dimmed-zebra
+	colorMoved = default
+
+[difftool]
+	prompt = true
+
+[difftool "nvimdiff"]
+	cmd = "nvim -R -d -c \"wincmd l\" -d \"$LOCAL\" \"$REMOTE\""
+
+# Delta configuration (only used if pager = delta is enabled above)
+# Provides enhanced diff viewing with syntax highlighting and better formatting
+# [delta]
+	# navigate = true              # Use n/p to move between hunks
+	# light = false               # Dark theme (set to true for light backgrounds)
+	# side-by-side = true         # Show old and new versions side by side
+	# line-numbers = true         # Show line numbers
+	# syntax-theme = OneHalfDark  # Color theme for syntax highlighting
+
+# Use delta for interactive diffs (git add -p, etc.)
+# [interactive]
+	# diffFilter = delta --color-only
+
+[rebase]
+	autostash = true
+	autosquash = true
+
+[rerere]
+	enabled = true
+
+[branch]
+	autosetupmerge = true
+	autosetuprebase = always
+
+[commit]
+	template = ~/.gitmessage.txt
+	verbose = true
+
+[status]
+	# Show all untracked files individually, including files in untracked directories
+	# Default: "normal" - shows only directory names for untracked directories
+	# With "all": shows every untracked file path explicitly
+	# Example difference:
+	#   normal: "node_modules/"
+	#   all:    "node_modules/package1/index.js", "node_modules/package2/lib.js", ...
+	# Useful for detailed file tracking but can be verbose in large projects
+	showUntrackedFiles = all
+
+[log]
+	date = iso
+
+[color]
+	ui = auto
+	branch = auto
+	diff = auto
+	status = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+# Git Aliases - Shortcuts and Enhanced Commands
+[alias]
+	# Basic shortcuts for common operations
+	a = add                          # Stage files
+	aa = add --all                   # Stage all changes (including deletions)
+	ap = add --patch                 # Interactive staging (choose hunks)
+	c = commit                       # Create commit
+	ca = commit --amend              # Modify last commit
+	cam = commit --amend --message   # Modify last commit message
+	cm = commit --message            # Commit with inline message
+	co = checkout                    # Switch branches (legacy command)
+	cob = checkout -b                # Create and switch to new branch
+	cp = cherry-pick                 # Apply specific commit to current branch
+	d = diff                         # Show unstaged changes
+	dc = diff --cached               # Show staged changes
+	ds = diff --stat                 # Show diff statistics (files changed, insertions, deletions)
+	f = fetch                        # Download objects and refs from remote
+	m = merge                        # Merge branches
+	p = push                         # Upload changes to remote
+	pf = push --force-with-lease     # Safe force push (checks remote state first)
+	pl = pull                        # Fetch and merge from remote
+	r = rebase                       # Reapply commits on top of another base
+	ri = rebase --interactive        # Interactive rebase for commit editing
+	s = status                       # Show working tree status
+	st = status --short              # Compact status display
+	sw = switch                      # Switch branches (modern command, Git 2.23+)
+	unstage = reset HEAD             # Remove files from staging area
+	
+	# Enhanced log display aliases
+	l = ! "git log --color --date=short --pretty=format:'%C(yellow)%h %Cgreen%ad %Cblue%an %Creset%s' | less -RX"           # Compact log with short dates
+	ll = ! "git log --color --stat --decorate=short --pretty=format:'%C(yellow)%h %Cgreen%ar %Cblue%an%Cred%d %Creset%s %C(cyan)%b' | less -RX"  # Detailed log with file statistics
+	lm = ! "git log --color --merges --pretty=format:'%C(yellow)%h %Cgreen%ai %Cblue%an%Cred%d %Creset%s %C(cyan)%b' | less -RX"     # Show only merge commits
+	lg = ! "git log --color --graph --date=relative --decorate=short --pretty=format:'%C(yellow)%h %Cgreen%ad %Cblue%an%Cred%d %Creset%s' | less -RX"  # Graph view with relative dates
+	lga = ! "git log --color --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --abbrev-commit | less -RX"  # All branches graph view
+	sgraph = !"git log --oneline --graph"   # Simple one-line graph
+	
+	# Diff utilities (preserve existing functionality)
+	difff = diff --name-only                 # Show only filenames that changed
+	diffs = diff --cached                    # Show staged changes (alias for dc)
+	dp = diff --no-prefix                    # Diff without a/ b/ prefixes
+	dsp = diff --cached --no-prefix          # Staged diff without prefixes
+	
+	# Branch ancestry and relationship tools
+	ancestor = !bash -c 'diff -u <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | sed -ne \"s/^ //p\" | head -n 1' -  # Find common ancestor
+	
+	# Branch management utilities
+	br = branch                              # List local branches
+	bra = branch --all                       # List all branches (local + remote)
+	brd = branch --delete                    # Delete branch (safe - checks if merged)
+	brdf = branch --delete --force           # Force delete branch (DESTRUCTIVE - loses commits!)
+	brm = branch --merged                    # Show branches merged into current branch
+	brnm = branch --no-merged                # Show branches not yet merged
+	
+	# Stash management (temporary storage)
+	stash-all = stash save --include-untracked      # Stash all changes including untracked files
+	stash-unstaged = stash save --keep-index        # Stash only unstaged changes, keep staged
+	
+	# Commit undo operations (USE WITH CAUTION)
+	undo = reset HEAD~1 --mixed              # Undo last commit, keep changes in working directory
+	undohard = reset HEAD~1 --hard           # DESTRUCTIVE: Undo last commit and discard all changes
+	
+	# Repository analysis and information
+	contributors = shortlog --summary --numbered --email     # List contributors with commit counts
+	current-branch = branch --show-current                   # Get current branch name (Git 2.22+)
+	show-files = diff-tree --no-commit-id --name-only -r    # Show files changed in a specific commit
+	ignored = ls-files --others --ignored --exclude-standard # Show files ignored by .gitignore
+	
+	# Branch cleanup (POTENTIALLY DESTRUCTIVE)
+	clean-merged = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"  # Delete merged branches except main/master/develop
+	
+	# Search and discovery
+	search = "!f() { git log --all --grep=\"$1\" --oneline; }; f"  # Search commit messages across all branches
+
+# Security settings
+[gpg]
+	# Set GPG program path if needed
+	# program = gpg   # macOS default
+	# program = gpg2  # Linux default
+
+[commit]
+	# Uncomment to enable GPG signing by default
+	# gpgsign = true
+
+# Credential helper settings
+[credential]
+	# Choose appropriate helper for your platform:
+	# Windows: helper = manager-core
+	# macOS:   helper = osxkeychain  
+	# Linux:   helper = store
+	helper = store
+
+# URL rewrites for easier access
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+# Include local config if it exists
+[include]
+	path = ~/.gitconfig.local

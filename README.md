@@ -68,6 +68,19 @@ chezmoi cd
 chezmoi update
 ```
 
+## Configuration Updates
+
+To update configuration values (like git name/email):
+
+```bash
+chezmoi edit-config
+```
+
+Edit the `[data]` section with your new values, then apply changes:
+```bash
+chezmoi apply
+```
+
 ## Contributing
 
 Feel free to fork and customize for your own use!

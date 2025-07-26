@@ -1,0 +1,136 @@
+# <type>: <summary in 50 characters or less>
+
+# Detailed explanation (wrap at 72 characters)
+# - Why is this change necessary?
+# - What problem does it solve?
+# - What are the implications or side effects?
+
+# Related information
+# Fixes #123
+# Closes #456
+# Co-authored-by: Name <email@example.com>
+
+# ──────────────────────────────────────────────────────────────────────────────
+# COMMIT MESSAGE GUIDELINES
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# COMMIT TYPES (Conventional Commits):
+#   feat     ✨ New feature for the user
+#   fix      🐛 Bug fix for the user
+#   docs     📝 Documentation changes
+#   style    💄 Code formatting, missing semicolons, etc (no logic change)
+#   refactor ♻️  Code change that neither fixes a bug nor adds a feature
+#   perf     ⚡ Performance improvements
+#   test     ✅ Adding or updating tests
+#   chore    🔧 Maintenance tasks, dependency updates
+#   ci       👷 CI/CD pipeline changes
+#   build    📦 Changes to build system or external dependencies
+#   revert   ⏪ Reverting a previous commit
+#
+# SUBJECT LINE (first line):
+#   - Use imperative mood: "Add" not "Added" or "Adding"
+#   - Keep under 50 characters
+#   - Don't end with a period
+#   - Capitalize first letter
+#   - Can be in English or Japanese
+#
+# BODY (detailed explanation):
+#   - Wrap at 72 characters
+#   - Explain WHY, not WHAT (the diff shows what changed)
+#   - Use present tense: "Fix bug" not "Fixed bug"
+#   - Include motivation and contrast with previous behavior
+#
+# FOOTER (optional):
+#   - Reference issues and pull requests
+#   - Breaking changes: "BREAKING CHANGE: description"
+#   - Co-authored-by: Name <email@example.com>
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# EXAMPLES
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# feat: add user authentication system
+#
+# Implement JWT-based authentication to secure API endpoints.
+# Users can now login and access protected resources with proper
+# token validation and refresh mechanisms.
+#
+# This addresses security concerns raised in the security audit
+# and enables role-based access control for future features.
+#
+# Fixes #142
+# Closes #156
+#
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# fix: resolve memory leak in image processing
+#
+# The image resizing function was not properly releasing memory
+# after processing large files. This caused gradual memory usage
+# increase during batch operations.
+#
+# Added explicit cleanup of intermediate buffers and proper
+# resource disposal in error conditions.
+#
+# Fixes #203
+#
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# docs: update API documentation for v2.0
+#
+# Add comprehensive examples for new authentication endpoints
+# and update deprecated method warnings. Include migration
+# guide from v1.x API.
+#
+# Co-authored-by: Jane Doe <jane@example.com>
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# JAPANESE EXAMPLES (日本語の例)
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# feat: ユーザー認証システムを追加
+#
+# API エンドポイントのセキュリティ強化のため、JWT ベースの
+# 認証システムを実装。ユーザーのログインと、適切なトークン
+# 検証・更新機能を提供する。
+#
+# セキュリティ監査で指摘された懸念事項に対応し、将来の
+# ロールベースアクセス制御機能の基盤を構築。
+#
+# Fixes #142
+#
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# GITMOJI REFERENCE (Optional emoji prefixes):
+#   🎉 :tada: Initial commit
+#   ✨ :sparkles: New feature
+#   🐛 :bug: Bug fix
+#   🔥 :fire: Remove code or files
+#   📝 :memo: Add or update documentation
+#   🚀 :rocket: Deploy stuff
+#   💄 :lipstick: Add or update the UI and style files
+#   🎨 :art: Improve structure / format of the code
+#   ⚡️ :zap: Improve performance
+#   🔒️ :lock: Fix security issues
+#   ➕ :heavy_plus_sign: Add a dependency
+#   ➖ :heavy_minus_sign: Remove a dependency
+#   🔧 :wrench: Add or update configuration files
+#   🌐 :globe_with_meridians: Internationalization and localization
+#
+# More gitmoji: https://gitmoji.dev/
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# BREAKING CHANGES:
+#
+# When introducing breaking changes, include "BREAKING CHANGE:" in the footer:
+#
+# feat: change API response format
+#
+# Update user endpoint to return standardized response structure
+# with consistent error handling and pagination support.
+#
+# BREAKING CHANGE: The user API now returns data in a different format.
+# Update your client code to use the new `data` wrapper object.
+#
+# Migration guide: https://docs.example.com/migration/v2
+# ──────────────────────────────────────────────────────────────────────────────
