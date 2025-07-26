@@ -1,0 +1,5 @@
+if [ "$TMUX" ]; then
+  source $BYOBU_PREFIX/share/byobu/profiles/bashrc #byobu-prompt#
+  # delete byobu_prompt_runtime
+  export PS1="${debian_chroot:+($debian_chroot)}\[\e[38;5;202m\]\$(byobu_prompt_status)\[\e[00m\]\[\e[38;5;245m\]\u\[\e[00m\]@\[\e[38;5;172m\]\h\[\e[00m\]:\[\e[38;5;5m\]\w\[\e[00m\]\$(byobu_prompt_symbol) "
+fi

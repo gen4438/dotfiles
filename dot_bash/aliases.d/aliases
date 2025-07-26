@@ -1,0 +1,129 @@
+#!/bin/bash
+
+# File Operations
+# Use trash-put for safer file deletion (if available)
+if command -v trash-put >/dev/null 2>&1; then
+    alias rm=trash-put
+fi
+
+# Interactive file operations for safety
+alias mv='mv -i'
+alias cp='cp -i'
+
+# Navigation shortcuts
+alias ..="cd ../"
+alias ...="cd ../../"
+alias ....="cd ../../../"
+alias .....="cd ../../../../"
+alias gd="pushd"
+alias bd="popd"
+
+# Editor Configuration
+alias vi=nvim
+alias vim=nvim
+alias vimdiff='nvim -d'
+
+# Memo/Note-taking shortcuts (requires MEMO_DIR environment variable)
+if [[ -n "$MEMO_DIR" && -d "$MEMO_DIR" ]]; then
+    alias todo="vim ${MEMO_DIR}/todo.md"
+    alias memo="vim ${MEMO_DIR}/$(date +'%Y')_memo.md"
+    alias memoToday="vim ${MEMO_DIR}/$(date +'%Y-%m-%d')_memo.md"
+fi
+
+# Tool Enhancements
+# Use batcat (Ubuntu/Debian package name) as bat
+if command -v batcat >/dev/null 2>&1; then
+    alias bat='batcat'
+fi
+
+# Enhanced less with color support
+alias less='less -R'
+
+# Clipboard Operations (requires xclip)
+if command -v xclip >/dev/null 2>&1; then
+    alias clip='tee >(v=$(cat) ;echo -n "$v" | xclip -selection clipboard)'
+    alias yp='pwd | clip'    # Copy current path
+    alias yy='pwd | clip'    # Copy current path (alternative)
+    alias yd='pwd | clip'    # Copy current path (alternative)
+fi
+
+# System Utilities
+alias xo='xdg-open'
+alias LANG_ja='LANG=ja_JP.UTF-8'
+
+# Development Environment
+# direnv shortcuts
+alias da='direnv allow'
+alias dr='direnv reload'
+alias de='direnv edit'
+
+# Git shortcuts
+alias gb='git branch'
+alias gco='git checkout'
+alias gl='git log'
+
+# Docker Compose shortcuts
+alias dcup='docker compose up'
+alias dcupd='docker compose up -d'
+alias dcupb='docker compose up --build'
+alias dcupbd='docker compose up --build -d'
+
+# GitLab/GitHub tools
+alias glr='gitlab-runner exec docker'
+alias lpb='lab project browse'
+
+# Browser
+if command -v google-chrome >/dev/null 2>&1; then
+    alias gc='google-chrome'
+fi
+
+# GitHub CLI shortcuts
+alias ghpr='gh pr list'
+alias ghprc='gh pr checkout'
+alias ghil='gh issue list'
+alias ghis='gh issue show'
+alias ghist='gh issue status'
+alias ghie='gh issue edit'
+alias ghic='gh issue create'
+
+# Python Development
+alias pip_install_essentials="pip install -U pip ipython isort black flake8"
+alias pip_upgrade_all="pip list -o | tail -n +3 | awk '{ print \$1 }' | xargs pip install -U"
+
+# Jupyter shortcuts
+alias j2p='jupyter-nbconvert --to python'
+alias jl='nohup jupyter-lab > /dev/null 2>&1 &'
+alias jn='nohup jupyter-notebook > /dev/null 2>&1 &'
+
+# Web Development
+alias bs_start='browser-sync start --server --files="**/*.html, **/*.css, **/*.js"'
+alias bs_start_here='browser-sync start --server --files="*.html, *.css, *.js"'
+
+# System Tools
+alias gogh='bash -c  "$(wget -qO- https://git.io/vQgMr)"'
+alias xpanes_ssh='xpanes -tc "ssh {}"'
+
+# File System
+alias google_drive_mount='google-drive-ocamlfuse /mnt/google-drive'
+
+# Security (requires specific SSH key setup)
+alias openssl_register_password='openssl rsautl -encrypt -inkey ~/.ssh/id_rsa_nopass'
+
+# Hardware-Specific Configuration
+# LG laptop battery management (only if device exists)
+if [[ -f "/sys/devices/platform/lg-laptop/battery_care_limit" ]]; then
+    alias battery_80='echo 80 | sudo tee /sys/devices/platform/lg-laptop/battery_care_limit'
+    alias battery_100='echo 100 | sudo tee /sys/devices/platform/lg-laptop/battery_care_limit'
+fi
+
+# Application-Specific Settings
+alias wine='LC_ALL=ja_JP.UTF-8 wine'
+alias lsync='lsyncd -delay 1 -nodaemon -rsyncssh'
+alias marp_watch='marp -w --html'
+
+# Terminal/Session Management
+# tmux/byobu shortcuts
+alias byobu_sync='tmux set-window-option synchronize-panes on'
+alias byobu_sync_off='tmux set-window-option synchronize-panes off'
+alias byobu_kill_session='a=(`byobu ls | cut -d " " -f 1`); byobu ls | cat -n; read b; byobu kill-session -t ${a[$b-1]}'
+alias update_display='export DISPLAY=$(tmux show-env | sed -n "s/^DISPLAY=//p")'

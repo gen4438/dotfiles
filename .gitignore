@@ -1,0 +1,245 @@
+# Chezmoi Dotfiles Repository .gitignore
+
+# ==============================================================================
+# SENSITIVE DATA - NEVER COMMIT THESE
+# ==============================================================================
+
+# SSH Keys and Certificates
+**/*_rsa*
+**/*_dsa*
+**/*_ecdsa*
+**/*_ed25519*
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*.key
+**/*.crt
+**/*.cert
+**/*.cer
+
+# GPG/PGP Keys
+**/*.gpg
+**/*.asc
+**/*.pgp
+private_**/gnupg/
+private_**/gpg/
+
+# API Keys and Tokens
+**/*token*
+**/*secret*
+**/*password*
+**/*credential*
+**/.env
+**/api_key*
+**/auth_token*
+
+# Password Manager Data
+**/*.kdbx
+**/*.1pif
+**/Passwords.txt
+
+# ==============================================================================
+# TEMPORARY AND CACHE FILES
+# ==============================================================================
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+.swp
+.swo
+*.tmp
+*.temp
+
+# Editor Files
+.vscode/
+.idea/
+*.sublime-*
+.vim/sessions/
+**/.netrwhist
+
+# Log Files
+*.log
+**/logs/
+**/*.log.*
+
+# ==============================================================================
+# DYNAMIC/SESSION DATA
+# ==============================================================================
+
+# SSH Agent and Session Data
+**/.ssh-agent*
+**/*ssh-agent*
+**/ssh_auth_sock*
+
+# Tmux/Byobu Session Data
+**/resurrect/
+**/last-used*
+**/reload-required*
+**/socketdir*
+
+# Shell History (if accidentally added)
+**/.bash_history
+**/.zsh_history
+**/.history
+
+# Browser Session Data
+**/Session Storage/
+**/Local Storage/
+**/Cache/
+**/cookies*
+
+# ==============================================================================
+# APPLICATION-SPECIFIC EXCLUDES
+# ==============================================================================
+
+# Package Manager Lock Files (usually auto-generated)
+**/package-lock.json
+**/yarn.lock
+**/Cargo.lock
+**/Pipfile.lock
+**/poetry.lock
+**/lazy-lock.json
+
+# Node.js
+**/node_modules/
+**/.npm/
+**/.node_repl_history
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/pip-log.txt
+**/pip-delete-this-directory.txt
+
+# Database Files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# ==============================================================================
+# PERSONAL/MACHINE-SPECIFIC DATA
+# ==============================================================================
+
+# Personal Documents (if accidentally added to config dirs)
+**/Documents/
+**/Downloads/
+**/Desktop/
+**/Pictures/
+**/Music/
+**/Videos/
+
+# Application Data Directories
+**/app-data/
+**/user-data/
+**/profile-data/
+
+# Browser Profiles (personal data)
+**/Profile*/
+**/Default/
+**/User Data/
+
+# ==============================================================================
+# BUILD AND BACKUP FILES
+# ==============================================================================
+
+# Backup Files
+**/*.bak
+**/*.backup
+**/*.old
+**/*~
+
+# Archive Files
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.rar
+**/*.7z
+
+# Compiled Files
+**/*.o
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.exe
+
+# ==============================================================================
+# LARGE/BINARY FILES
+# ==============================================================================
+
+# Media Files
+**/*.mp4
+**/*.avi
+**/*.mov
+**/*.mp3
+**/*.wav
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.ico
+**/*.pdf
+
+# Font Files (usually downloaded)
+**/*.ttf
+**/*.otf
+**/*.woff
+**/*.woff2
+
+# ==============================================================================
+# SPECIAL CHEZMOI CONSIDERATIONS
+# ==============================================================================
+
+# Chezmoi State Files (if accidentally added)
+.chezmoi-state.boltdb
+
+# Age/GPG encrypted files working copies
+*.age.tmp
+*.gpg.tmp
+
+# ==============================================================================
+# OVERRIDE PATTERNS (Force include important files)
+# ==============================================================================
+
+# Force include documentation and configuration
+!README.md
+!LICENSE
+!CLAUDE.md
+!docs/
+!.chezmoiignore*
+!.chezmoitemplates/
+!.chezmoiscripts/
+
+# Force include essential dotfiles even if they match above patterns
+!dot_gitignore_global
+!dot_gitconfig*
+!dot_gitattributes
+
+# Force include safe configuration files
+!**/*.conf
+!**/*.config
+!**/*.toml
+!**/*.yaml
+!**/*.yml
+!**/*.json
+!**/*.xml
+
+# Force include scripts (but not their outputs)
+!**/run_*
+!**/executable_*
+!**/*.sh
+!**/*.bash
+!**/*.zsh
+
+# Force include text-based configuration
+!**/*.txt
+!**/*.md
+!**/*.rst

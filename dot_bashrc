@@ -1,0 +1,329 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+#shopt -s globstar
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color|*-256color) color_prompt=yes;;
+esac
+
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+#force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
+
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+### User Customizations
+
+# Helper function to add to PATH without duplicates
+add_to_path() {
+    if [[ -d "$1" ]] && [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="$1:$PATH"
+    fi
+}
+
+# Byobu integration
+[ -r ~/.config/byobu/prompt ] && source ~/.config/byobu/prompt   #byobu-prompt#
+
+# Vi mode for command line editing
+set -o vi
+
+# Extended history settings (override default HISTSIZE=1000)
+HISTSIZE=9999
+
+# WSL (Windows Subsystem for Linux) specific settings
+if [[ -n "$IS_WSL" || -n "$WSL_DISTRO_NAME" ]]; then
+    # Windows Explorer alias
+    alias e='explorer.exe'
+    
+    # X11 display for WSL (GWSL configuration)
+    # Note: Adjust IP range according to your network setup
+    export DISPLAY=$(ipconfig.exe /all | grep -a IPv4 | grep -o -e "192.168.11.[0-9]\{1,3\}"):0.0
+fi
+
+# Development Tools PATH Configuration
+# Using add_to_path function to prevent duplicates
+
+# anyenv (any language version manager)
+add_to_path "$HOME/.anyenv/bin"
+
+# pyenv (Python version manager)
+export PYENV_ROOT="$HOME/.pyenv"
+add_to_path "$PYENV_ROOT/bin"
+
+# Poetry (Python package manager)
+add_to_path "$HOME/.poetry/bin"
+
+# Kubernetes plugins (Krew)
+add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
+
+# CUDA Toolkit
+if [[ -d "/usr/local/cuda" ]]; then
+    export CUDA_ROOT=/usr/local/cuda
+    export CPATH=/usr/local/cuda/include:$CPATH
+    add_to_path "/usr/local/cuda/bin"
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+fi
+
+# Java Development Kit
+if [[ -d "$HOME/.local/jdk-11" ]]; then
+    export JAVA_HOME="$HOME/.local/jdk-11"
+    export MANPATH="$JAVA_HOME/man:$MANPATH"
+    add_to_path "$JAVA_HOME/bin"
+    export LD_LIBRARY_PATH="$JAVA_HOME/lib:$LD_LIBRARY_PATH"
+fi
+
+# Environment Configuration
+# Load user-specific environment variables
+if [[ -f "$HOME/.env" ]]; then
+    set -a; source "$HOME/.env"; set +a
+fi
+
+# External Tools Integration
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+[[ -f ~/bin/z/z.sh ]] && source ~/bin/z/z.sh
+[[ -f ~/bin/fz/fz.sh ]] && source ~/bin/fz/fz.sh
+[[ -f ~/bin/tmux-xpanes/activate.sh ]] && source ~/bin/tmux-xpanes/activate.sh
+
+# Version Managers Initialization
+
+# anyenv (any language environment manager)
+if command -v anyenv >/dev/null 2>&1; then
+    eval "$(anyenv init -)"
+fi
+
+# goenv PATH fix (see: https://github.com/go-nv/goenv/issues/247)
+if [[ -n "$GOENV_ROOT" ]]; then
+    add_to_path "$GOENV_ROOT/shims"
+fi
+
+# pyenv (Python version manager)
+if command -v pyenv >/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+fi
+
+# pipenv configuration
+export PIPENV_SKIP_LOCK=true
+
+# Remove specific pyenv shims to use system versions
+# These commands work better with system versions rather than pyenv-managed ones
+for cmd in black blackd grip rg gettext envsubst rst2man.py; do
+    if command -v "/usr/bin/$cmd" >/dev/null 2>&1 && [[ -f "$HOME/.pyenv/shims/$cmd" ]]; then
+        rm -f "$HOME/.pyenv/shims/$cmd"
+    fi
+done
+
+# Node Version Manager (nvm)
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+[[ -s "$NVM_DIR/bash_completion" ]] && \. "$NVM_DIR/bash_completion"
+
+# Tool-Specific Configuration
+
+# Git internationalization
+export GIT_INTERNAL_GETTEXT_TEST_FALLBACKS=1
+
+# fzf (fuzzy finder) with ripgrep integration
+if command -v rg >/dev/null 2>&1; then
+    export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-y:toggle-all,ctrl-s:toggle-sort'
+    export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git/*'"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+
+# Kubernetes configuration
+if command -v kubectl >/dev/null 2>&1; then
+    # kubectl aliases (https://github.com/ahmetb/kubectl-aliases)
+    [[ -f ~/.kubectl_aliases ]] && source ~/.kubectl_aliases
+    complete -o default -F __start_kubectl k
+    export KUBE_EDITOR=vim
+fi
+
+# direnv (directory-specific environment variables)
+if command -v direnv >/dev/null 2>&1; then
+    eval "$(direnv hook bash)"
+fi
+
+# Modular Configuration Loading
+# Load custom configuration from organized directories
+
+# Aliases
+if [[ -d ~/.bash/aliases.d ]]; then
+    for script in ~/.bash/aliases.d/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Bash completions
+if [[ -d ~/.bash/completion.d ]]; then
+    for script in ~/.bash/completion.d/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Custom functions
+if [[ -d ~/.bash/functions.d ]]; then
+    for script in ~/.bash/functions.d/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Key bindings
+if [[ -d ~/.bash/keybindings.d ]]; then
+    for script in ~/.bash/keybindings.d/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Prompt Customization
+# Disable pyenv's automatic virtualenv prompt (we'll handle it ourselves)
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+
+# Show Python virtual environment in prompt (when using direnv)
+show_virtual_env() {
+    if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
+        echo "($(basename "$VIRTUAL_ENV"))"
+    fi
+}
+export -f show_virtual_env
+PS1='$(show_virtual_env)'$PS1
+
+# Show Conda environment in prompt (when using direnv)
+show_conda_env() {
+    if [[ -n "$CONDA_DEFAULT_ENV" && -n "$DIRENV_DIR" ]]; then
+        echo "($(basename "$CONDA_DEFAULT_ENV"))"
+    fi
+}
+export -f show_conda_env
+PS1='$(show_conda_env)'$PS1
+
+# Show Node.js version in prompt (when using direnv with nvm)
+show_nvm_version() {
+    if [[ -n "$DIRENV_NVM_VERSION" && -n "$DIRENV_DIR" ]]; then
+        echo "(node-$(node --version))"
+    fi
+}
+export -f show_nvm_version
+PS1='$(show_nvm_version)'$PS1
+
+# Node.js local modules PATH
+add_to_path "node_modules/bin"
+
+# Additional Tool Configuration
+
+# fzf completions for various commands
+if command -v _fzf_setup_completion >/dev/null 2>&1; then
+    _fzf_setup_completion path ag git kubectl ll vim
+    _fzf_setup_completion dir tree
+fi
+
+# Disable Ctrl+S/Ctrl+Q flow control (allows Ctrl+S for search)
+stty -ixon
+
+# Rust Cargo environment
+if [[ -f "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
+fi

@@ -1,0 +1,2 @@
+source $BYOBU_PREFIX/share/byobu/profiles/common
+BYOBU_SESSIONS_AUTO=select

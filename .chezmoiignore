@@ -1,14 +1,167 @@
-# Repository files that should not be copied to HOME directory
+# Chezmoi Ignore Patterns
+# Files and directories that should NOT be copied to the home directory
+
+# ==============================================================================
+# REPOSITORY METADATA - Never copy these to HOME
+# ==============================================================================
+
+# Documentation and repository files
 README.md
 LICENSE
+CLAUDE.md
 .gitignore
-.github/
+.gitignore_old
 docs/
 scripts/
 
-# Documentation files
-*.md
+# Version control
+.git/
+.github/
+.gitlab/
 
-# Development files
+# Development environment
 .vscode/
 .idea/
+.devcontainer/
+
+# All markdown files (documentation only)
+*.md
+
+# ==============================================================================
+# DYNAMIC/SESSION FILES - Platform agnostic
+# ==============================================================================
+
+# SSH agent sockets and session data
+.config/byobu/.ssh-agent
+.config/byobu/.tmux/resurrect/
+.ssh/ssh_auth_sock*
+.ssh/agent.*
+
+# Shell history files
+.bash_history
+.zsh_history
+.fish_history
+
+# Editor session files
+.vim/sessions/
+.nvim/sessions/
+.config/nvim/sessions/
+
+# Application caches and temporary data
+.cache/
+.tmp/
+.temp/
+
+# ==============================================================================
+# PLATFORM-SPECIFIC EXCLUDES
+# ==============================================================================
+
+{{- if ne .chezmoi.os "darwin" }}
+# Exclude macOS-specific files on non-macOS systems
+Library/
+.DS_Store
+.config/karabiner/
+{{- end }}
+
+{{- if ne .chezmoi.os "linux" }}
+# Exclude Linux-specific files on non-Linux systems
+.config/dconf/
+.config/gnome/
+.config/kde/
+.local/share/applications/
+{{- end }}
+
+{{- if ne .chezmoi.os "windows" }}
+# Exclude Windows-specific files on non-Windows systems
+AppData/
+Documents/WindowsPowerShell/
+{{- end }}
+
+# ==============================================================================
+# APPLICATION-SPECIFIC DYNAMIC DATA
+# ==============================================================================
+
+# VS Code
+.config/Code/User/workspaceStorage/
+.config/Code/User/History/
+.config/Code/logs/
+.config/Code/CachedExtensions/
+
+# Firefox/Browser data
+.mozilla/firefox/*/lock
+.mozilla/firefox/*/places.sqlite*
+.mozilla/firefox/*/cookies.sqlite*
+.config/google-chrome/*/History*
+.config/google-chrome/*/Cookies*
+
+# JetBrains IDEs
+.config/JetBrains/*/eval/
+.config/JetBrains/*/logs/
+.config/JetBrains/*/system/
+
+# Package managers lock files (auto-generated)
+.config/*/node_modules/
+.config/*/package-lock.json
+.config/*/yarn.lock
+.config/*/lazy-lock.json
+
+# ==============================================================================
+# SECURITY-SENSITIVE PATTERNS
+# ==============================================================================
+
+# Exclude any files that might contain secrets
+**/secret*
+**/password*
+**/token*
+**/credential*
+**/.env
+**/api_key*
+
+# Private keys (double security with .gitignore)
+**/*_rsa
+**/*_dsa  
+**/*_ecdsa
+**/*_ed25519
+**/*.pem
+**/*.key
+
+# ==============================================================================
+# USER DATA DIRECTORIES - Never manage these
+# ==============================================================================
+
+# Personal data directories
+Documents/
+Downloads/
+Desktop/
+Pictures/
+Music/
+Videos/
+Public/
+
+# Application user data
+.local/share/Trash/
+.local/share/recently-used*
+.local/share/gvfs-metadata/
+
+# ==============================================================================
+# BACKUP AND TEMPORARY FILES
+# ==============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+*.swp
+*.swo
+
+# Log files
+*.log
+logs/
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
