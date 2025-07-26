@@ -20,6 +20,9 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), featuring 
 # Install chezmoi (if not already installed)
 sh -c "$(curl -fsLS get.chezmoi.io)"
 
+# Initialize chezmoi with my dotfiles repository
+chezmoi init gen4438
+
 # Clone and apply dotfiles
 chezmoi init --apply gen4438
 ```
