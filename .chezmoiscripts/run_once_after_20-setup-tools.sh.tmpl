@@ -1,0 +1,113 @@
+#!/bin/bash
+# Setup development tools after package installation
+
+set -e
+
+echo "Setting up development tools..."
+
+# Setup fzf
+if [[ -d "$HOME/.fzf" ]]; then
+    echo "Setting up fzf..."
+    cd "$HOME/.fzf"
+    ./install --all
+    echo "✅ fzf setup completed"
+fi
+
+# Setup pyenv
+if [[ -d "$HOME/.pyenv" ]]; then
+    echo "Setting up pyenv..."
+    
+    # Initialize pyenv in current session
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init -)"
+        
+        # Install latest Python if none installed
+        if [[ -z "$(pyenv versions --bare)" ]]; then
+            echo "Installing latest Python version..."
+            LATEST_PYTHON=$(pyenv install --list | grep -E "^\s*3\.[0-9]+\.[0-9]+$" | tail -1 | xargs)
+            if [[ -n "$LATEST_PYTHON" ]]; then
+                pyenv install "$LATEST_PYTHON"
+                pyenv global "$LATEST_PYTHON"
+                echo "✅ Python $LATEST_PYTHON installed and set as global"
+            fi
+        fi
+    fi
+fi
+
+# Setup nvm
+if [[ -d "$HOME/.nvm" ]]; then
+    echo "Setting up nvm..."
+    
+    # Source nvm in current session
+    export NVM_DIR="$HOME/.nvm"
+    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+    
+    if command -v nvm >/dev/null 2>&1; then
+        # Install latest LTS Node.js if none installed
+        if [[ -z "$(nvm list | grep -v 'N/A')" ]]; then
+            echo "Installing latest LTS Node.js..."
+            nvm install --lts
+            nvm use --lts
+            nvm alias default lts/*
+            echo "✅ Node.js LTS installed and set as default"
+        fi
+    fi
+fi
+
+# Setup anyenv
+if [[ -d "$HOME/.anyenv" ]]; then
+    echo "Setting up anyenv..."
+    
+    export PATH="$HOME/.anyenv/bin:$PATH"
+    
+    if command -v anyenv >/dev/null 2>&1; then
+        # Initialize anyenv if not already done
+        if [[ ! -d "$HOME/.anyenv/envs" ]]; then
+            anyenv install --force-init
+            echo "✅ anyenv initialized"
+        fi
+        
+        eval "$(anyenv init -)"
+    fi
+fi
+
+# Setup tmux plugin manager
+if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
+    echo "Setting up tmux plugin manager..."
+    
+    # Install tmux plugins if tmux is available
+    if command -v tmux >/dev/null 2>&1; then
+        # Run TPM install script
+        "$HOME/.tmux/plugins/tpm/bin/install_plugins"
+        echo "✅ tmux plugins installed"
+    fi
+fi
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS specific setup
+echo "Setting up macOS specific tools..."
+
+# Additional macOS-specific tools can be added here
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+# Linux specific setup
+echo "Setting up Linux specific tools..."
+
+# Setup direnv if available
+if command -v direnv >/dev/null 2>&1; then
+    echo "✅ direnv is available"
+fi
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+# Windows specific setup (PowerShell)
+echo "Setting up Windows specific tools..."
+
+# This will be handled in PowerShell scripts
+{{- end }}
+
+echo "✅ Development tools setup completed"

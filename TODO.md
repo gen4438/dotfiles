@@ -86,9 +86,17 @@
 - [ ] Add IDE configurations (VS Code settings)
 - [ ] Add terminal emulator configurations
 
-### Automation
-- [ ] Create installation scripts
-- [ ] Add system package installation automation
+### Automation (2025-07-26)
+- [x] Create installation scripts
+  - [x] .chezmoiexternal.toml for external tool management
+  - [x] OS-specific package installation scripts (Linux/macOS/Windows)
+  - [x] Tool setup scripts for development environment
+  - [x] Makefile with convenience commands
+- [x] Add system package installation automation
+  - [x] Linux: apt with Rust CLI tools (exa, zoxide, dust, teladeer)
+  - [x] macOS: Homebrew with essential development tools
+  - [x] Windows: winget with package list
+- [x] Fix chezmoi script template syntax and permissions
 - [ ] Create backup/restore scripts
 
 ### Documentation

@@ -1,0 +1,41 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+# Install essential packages for Linux development environment
+
+set -e
+
+echo "Installing essential packages for Linux..."
+
+# Detect package manager
+if command -v apt >/dev/null 2>&1; then
+    # Debian/Ubuntu
+    echo "Detected apt package manager"
+    
+    # Update package lists
+    sudo apt update
+    
+    # Install essential packages
+    sudo apt install -y \
+        build-essential \
+        curl \
+        wget \
+        git \
+        vim \
+        ripgrep \
+        fd-find \
+        bat \
+        git-delta \
+        direnv \
+        xclip \
+        jq \
+        etckeeper \
+        python3-pip \
+        python3-venv
+        
+else
+    echo "Unsupported package manager. Please install packages manually."
+    exit 1
+fi
+
+echo "✅ Essential packages installed successfully"
+{{- end }}

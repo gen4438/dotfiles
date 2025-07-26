@@ -1,0 +1,61 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# Install essential packages for macOS development environment
+
+set -e
+
+echo "Installing essential packages for macOS..."
+
+# Install Homebrew if not present
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH for current session
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        # Apple Silicon
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+        # Intel
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+fi
+
+# Update Homebrew
+brew update
+
+# Install essential packages using Homebrew Bundle
+brew bundle --no-lock --file=/dev/stdin <<EOF
+# Essential development tools
+brew "git"
+brew "curl"
+brew "wget"
+brew "vim"
+brew "neovim"
+brew "ripgrep"
+brew "fd"
+brew "bat"
+brew "git-delta"
+brew "direnv"
+brew "jq"
+brew "ctags"
+brew "cmake"
+brew "pkg-config"
+brew "python"
+brew "xz"
+brew "zlib"
+brew "node"
+brew "tree"
+brew "tmux"
+brew "fzf"
+brew "unzip"
+
+# macOS specific tools
+brew "mas"  # Mac App Store CLI
+EOF
+
+# Install fzf key bindings and fuzzy completion
+$(brew --prefix)/opt/fzf/install --all
+
+echo "✅ Essential packages installed successfully"
+{{- end }}

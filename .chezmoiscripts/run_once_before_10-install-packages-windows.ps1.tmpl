@@ -1,0 +1,74 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install essential packages for Windows development environment
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Installing essential packages for Windows..."
+
+# Check if winget is available
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Error "winget is not available. Please install Windows Package Manager first."
+    exit 1
+}
+
+# Update winget sources
+Write-Host "Updating winget sources..."
+winget source update
+
+# Install packages from winget.json
+$packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\winget.json"
+if (Test-Path $packageFile) {
+    Write-Host "Installing packages from winget.json..."
+    winget import --import-file $packageFile --ignore-unavailable --accept-package-agreements --accept-source-agreements
+} else {
+    Write-Host "Package file not found, installing essential packages individually..."
+    
+    # Essential development tools
+    $packages = @(
+        "Git.Git",
+        "OpenJS.NodeJS.LTS", 
+        "Python.Python.3.13",
+        "Neovim.Neovim",
+        "Microsoft.VisualStudioCode",
+        "Microsoft.PowerToys",
+        "7zip.7zip",
+        "voidtools.Everything",
+        "Google.Chrome",
+        "BurntSushi.ripgrep.MSVC",
+        "junegunn.fzf"
+    )
+    
+    foreach ($package in $packages) {
+        Write-Host "Installing $package..."
+        try {
+            winget install $package --accept-package-agreements --accept-source-agreements --silent
+            Write-Host "✅ $package installed successfully"
+        } catch {
+            Write-Warning "❌ Failed to install $package`: $_"
+        }
+    }
+}
+
+# Enable PowerShell execution policy for current user
+Write-Host "Setting PowerShell execution policy..."
+try {
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Write-Host "✅ PowerShell execution policy set successfully"
+} catch {
+    Write-Warning "❌ Failed to set PowerShell execution policy: $_"
+}
+
+# Install PowerShell modules
+Write-Host "Installing PowerShell modules..."
+$modules = @("PSReadLine", "posh-git", "Terminal-Icons")
+foreach ($module in $modules) {
+    try {
+        Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber
+        Write-Host "✅ $module installed successfully"
+    } catch {
+        Write-Warning "❌ Failed to install $module`: $_"
+    }
+}
+
+Write-Host "✅ Essential packages installation completed"
+{{- end }}

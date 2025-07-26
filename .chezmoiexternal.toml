@@ -1,0 +1,55 @@
+# Chezmoi External Tool Management
+# This file manages external tools downloaded from git repositories or archives
+
+[".fzf"]
+    type = "git-repo"
+    url = "https://github.com/junegunn/fzf.git"
+    refreshPeriod = "168h"  # Weekly updates
+
+["bin/z"]
+    type = "git-repo"
+    url = "https://github.com/rupa/z.git"
+    refreshPeriod = "168h"
+
+["bin/fz"]
+    type = "git-repo"
+    url = "https://github.com/changyuheng/fz.git"
+    refreshPeriod = "168h"
+
+["bin/tmux-xpanes"]
+    type = "git-repo"
+    url = "https://github.com/greymd/tmux-xpanes.git"
+    refreshPeriod = "168h"
+
+[".tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    refreshPeriod = "168h"
+
+# Python environment manager
+[".pyenv"]
+    type = "git-repo"
+    url = "https://github.com/pyenv/pyenv.git"
+    refreshPeriod = "168h"
+
+[".pyenv/plugins/pyenv-virtualenv"]
+    type = "git-repo"
+    url = "https://github.com/pyenv/pyenv-virtualenv.git"
+    refreshPeriod = "168h"
+
+# Node.js version manager
+[".nvm"]
+    type = "git-repo"
+    url = "https://github.com/nvm-sh/nvm.git"
+    refreshPeriod = "168h"
+
+# Multi-language environment manager
+[".anyenv"]
+    type = "git-repo"
+    url = "https://github.com/anyenv/anyenv.git"
+    refreshPeriod = "168h"
+
+[".anyenv/plugins/anyenv-update"]
+    type = "git-repo"
+    url = "https://github.com/znz/anyenv-update.git"
+    refreshPeriod = "168h"

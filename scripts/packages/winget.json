@@ -1,0 +1,71 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "CreationDate": "2025-07-26T00:00:00.000-00:00",
+  "Sources": [
+    {
+      "Packages": [
+        {
+          "PackageIdentifier": "Git.Git"
+        },
+        {
+          "PackageIdentifier": "OpenJS.NodeJS.LTS"
+        },
+        {
+          "PackageIdentifier": "Python.Python.3.12"
+        },
+        {
+          "PackageIdentifier": "Neovim.Neovim"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VisualStudioCode"
+        },
+        {
+          "PackageIdentifier": "Microsoft.WindowsTerminal.Preview"
+        },
+        {
+          "PackageIdentifier": "Microsoft.PowerToys"
+        },
+        {
+          "PackageIdentifier": "7zip.7zip"
+        },
+        {
+          "PackageIdentifier": "voidtools.Everything"
+        },
+        {
+          "PackageIdentifier": "Google.Chrome"
+        },
+        {
+          "PackageIdentifier": "Google.JapaneseIME"
+        },
+        {
+          "PackageIdentifier": "marha.VcXsrv"
+        },
+        {
+          "PackageIdentifier": "JanDeDobbeleer.OhMyPosh"
+        },
+        {
+          "PackageIdentifier": "junegunn.fzf"
+        },
+        {
+          "PackageIdentifier": "BurntSushi.ripgrep.MSVC"
+        },
+        {
+          "PackageIdentifier": "sharkdp.fd"
+        },
+        {
+          "PackageIdentifier": "sharkdp.bat"
+        },
+        {
+          "PackageIdentifier": "Gyan.FFmpeg"
+        }
+      ],
+      "SourceDetails": {
+        "Argument": "https://cdn.winget.microsoft.com/cache",
+        "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+        "Name": "winget",
+        "Type": "Microsoft.PreIndexed.Package"
+      }
+    }
+  ],
+  "WinGetVersion": "1.6.0"
+}

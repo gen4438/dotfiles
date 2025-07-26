@@ -1,0 +1,85 @@
+#!/bin/bash
+# Update shell completions for various tools
+# This script runs when this file changes (indicated by hash comment below)
+
+{{- $completionHash := include ".chezmoiscripts/run_onchange_30-update-completions.sh.tmpl" | sha256sum }}
+# Completion update script hash: {{ $completionHash }}
+
+set -e
+
+echo "Updating shell completions..."
+
+# Create completion directories if they don't exist
+mkdir -p "$HOME/.bash/completion.d"
+mkdir -p "$HOME/.zsh/completion.d"
+
+# Function to safely download completion files
+download_completion() {
+    local url="$1"
+    local output="$2"
+    local description="$3"
+    
+    echo "Downloading $description..."
+    if curl -fsSL "$url" -o "$output"; then
+        echo "✅ $description updated"
+    else
+        echo "❌ Failed to download $description"
+    fi
+}
+
+# Git completions (bash)
+if command -v git >/dev/null 2>&1; then
+    GIT_VERSION=$(git --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    download_completion \
+        "https://raw.githubusercontent.com/git/git/v${GIT_VERSION}/contrib/completion/git-completion.bash" \
+        "$HOME/.bash/completion.d/git-completion.bash" \
+        "Git bash completion"
+    
+    download_completion \
+        "https://raw.githubusercontent.com/git/git/v${GIT_VERSION}/contrib/completion/git-prompt.sh" \
+        "$HOME/.bash/completion.d/git-prompt.sh" \
+        "Git prompt script"
+fi
+
+# GitHub CLI completion
+if command -v gh >/dev/null 2>&1; then
+    gh completion -s bash > "$HOME/.bash/completion.d/gh.bash" 2>/dev/null && echo "✅ GitHub CLI bash completion updated" || echo "❌ Failed to update GitHub CLI completion"
+    gh completion -s zsh > "$HOME/.zsh/completion.d/_gh" 2>/dev/null && echo "✅ GitHub CLI zsh completion updated" || echo "❌ Failed to update GitHub CLI zsh completion"
+fi
+
+# Docker completions
+if command -v docker >/dev/null 2>&1; then
+    download_completion \
+        "https://raw.githubusercontent.com/mnowotnik/docker-fzf-completion/master/docker-fzf.bash" \
+        "$HOME/.bash/completion.d/docker-fzf.bash" \
+        "Docker fzf bash completion"
+fi
+
+# Kubectl completion
+if command -v kubectl >/dev/null 2>&1; then
+    kubectl completion bash > "$HOME/.bash/completion.d/kubectl.bash" 2>/dev/null && echo "✅ kubectl bash completion updated" || echo "❌ Failed to update kubectl completion"
+    kubectl completion zsh > "$HOME/.zsh/completion.d/_kubectl" 2>/dev/null && echo "✅ kubectl zsh completion updated" || echo "❌ Failed to update kubectl zsh completion"
+fi
+
+# npm completion
+if command -v npm >/dev/null 2>&1; then
+    npm completion > "$HOME/.bash/completion.d/npm.bash" 2>/dev/null && echo "✅ npm bash completion updated" || echo "❌ Failed to update npm completion"
+fi
+
+# Poetry completion
+if command -v poetry >/dev/null 2>&1; then
+    poetry completions bash > "$HOME/.bash/completion.d/poetry.bash" 2>/dev/null && echo "✅ Poetry bash completion updated" || echo "❌ Failed to update Poetry completion"
+    poetry completions zsh > "$HOME/.zsh/completion.d/_poetry" 2>/dev/null && echo "✅ Poetry zsh completion updated" || echo "❌ Failed to update Poetry zsh completion"
+fi
+
+# Yarn completion
+download_completion \
+    "https://raw.githubusercontent.com/dsifford/yarn-completion/master/yarn-completion.bash" \
+    "$HOME/.bash/completion.d/yarn-completion.bash" \
+    "Yarn bash completion"
+
+# Set appropriate permissions
+chmod +x "$HOME"/.bash/completion.d/*.bash 2>/dev/null || true
+chmod +x "$HOME"/.zsh/completion.d/_* 2>/dev/null || true
+
+echo "✅ Shell completions update completed"
