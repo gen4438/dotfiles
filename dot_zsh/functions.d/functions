@@ -1,0 +1,75 @@
+# Zsh-specific functions
+
+# Quick cd to frequently used directories
+function work() {
+    if [[ $# -eq 0 ]]; then
+        cd ~/work
+    else
+        cd ~/work/"$1"
+    fi
+}
+
+function proj() {
+    if [[ $# -eq 0 ]]; then
+        cd ~/projects
+    else
+        cd ~/projects/"$1"
+    fi
+}
+
+# Zsh globbing helpers
+function find-large-files() {
+    local size=${1:-100M}
+    find . -type f -size +$size -exec ls -lh {} \; | sort -k5 -hr
+}
+
+# Quick file search with zsh globbing
+function qfind() {
+    local pattern="$1"
+    shift
+    print -l **/*${pattern}*${^@}
+}
+
+# Create and activate Python virtual environment
+function venv-create() {
+    local name=${1:-venv}
+    python -m venv "$name"
+    source "$name/bin/activate"
+}
+
+# Quick git operations
+function gclone() {
+    git clone "$1"
+    cd "$(basename "$1" .git)"
+}
+
+# Directory bookmarks (simple version)
+function bookmark() {
+    local name="$1"
+    if [[ -z "$name" ]]; then
+        echo "Usage: bookmark <name>"
+        return 1
+    fi
+    echo "export bookmark_$name='$(pwd)'" >> ~/.zsh_bookmarks
+    echo "Bookmarked $(pwd) as '$name'"
+}
+
+function goto() {
+    local name="$1"
+    if [[ -z "$name" ]]; then
+        echo "Available bookmarks:"
+        grep "export bookmark_" ~/.zsh_bookmarks 2>/dev/null | sed 's/export bookmark_\([^=]*\)=.*/  \1/'
+        return 0
+    fi
+    
+    source ~/.zsh_bookmarks 2>/dev/null
+    local var="bookmark_$name"
+    local path="${(P)var}"
+    
+    if [[ -n "$path" ]]; then
+        cd "$path"
+    else
+        echo "Bookmark '$name' not found"
+        return 1
+    fi
+}

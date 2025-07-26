@@ -9,7 +9,7 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 sh -c "$(curl -fsLS get.chezmoi.io)"
 
 # Clone and apply dotfiles
-chezmoi init --apply https://github.com/yourusername/dotfiles.git
+chezmoi init --apply gen4438
 ```
 
 ## Manual Setup
@@ -80,6 +80,21 @@ Edit the `[data]` section with your new values, then apply changes:
 ```bash
 chezmoi apply
 ```
+
+## Testing
+
+To test shell configurations after making changes:
+
+```bash
+# Quick test
+./docs/run-shell-tests.sh
+
+# Manual testing (see docs/shell-testing-guide.md for details)
+bash --rcfile ~/.bashrc -i -c "echo 'Bash test: EDITOR=' \$EDITOR"
+zsh -c "source ~/.zshrc && echo 'Zsh test: EDITOR=' \$EDITOR"
+```
+
+See `docs/shell-testing-guide.md` for comprehensive testing procedures.
 
 ## Contributing
 

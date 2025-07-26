@@ -1,0 +1,44 @@
+# Zsh-specific key bindings
+
+# Use emacs-style key bindings
+bindkey -e
+
+# Enhanced history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+
+# Word movement (Alt + arrow keys)
+bindkey '^[[1;3C' forward-word     # Alt + Right
+bindkey '^[[1;3D' backward-word    # Alt + Left
+
+# Line editing shortcuts
+bindkey '^A' beginning-of-line     # Ctrl + A
+bindkey '^E' end-of-line          # Ctrl + E
+bindkey '^K' kill-line            # Ctrl + K
+bindkey '^U' backward-kill-line   # Ctrl + U
+bindkey '^W' backward-kill-word   # Ctrl + W
+
+# Delete key
+bindkey '^[[3~' delete-char       # Delete
+
+# Home and End keys
+bindkey '^[[H' beginning-of-line  # Home
+bindkey '^[[F' end-of-line        # End
+
+# Page Up / Page Down for history
+bindkey '^[[5~' up-line-or-history     # Page Up
+bindkey '^[[6~' down-line-or-history   # Page Down
+
+# Ctrl + left/right for word movement
+bindkey '^[[1;5C' forward-word    # Ctrl + Right
+bindkey '^[[1;5D' backward-word   # Ctrl + Left
+
+# Alt + Backspace to delete word
+bindkey '^[^?' backward-kill-word
+
+# Ctrl + Delete to delete word forward
+bindkey '^[[3;5~' kill-word
+
+# Quick directory navigation
+bindkey '^[u' up-line-or-beginning-search    # Alt + U
+bindkey '^[d' down-line-or-beginning-search  # Alt + D

@@ -1,0 +1,190 @@
+# Common shell configuration for bash and zsh
+# This file contains aliases, functions, and environment variables
+# that are shared between bash and zsh
+# Based on bash configuration structure
+
+# Helper function to add to PATH without duplicates
+# Works in both bash and zsh
+add_to_path() {
+    if [[ -d "$1" ]] && [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="$1:$PATH"
+    fi
+}
+
+# Shell detection for compatibility
+if [ -n "$ZSH_VERSION" ]; then
+    export SHELL_TYPE="zsh"
+    export CONFIG_DIR="$HOME/.zsh"
+elif [ -n "$BASH_VERSION" ]; then
+    export SHELL_TYPE="bash"
+    export CONFIG_DIR="$HOME/.bash"
+else
+    export SHELL_TYPE="unknown"
+    export CONFIG_DIR="$HOME/.shell"
+fi
+
+# Environment variables
+export EDITOR="nvim"
+export VISUAL="nvim"
+export PAGER="less"
+
+# Common aliases
+alias ll='ls -alF'
+alias la='ls -A' 
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Git aliases
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log'
+alias gd='git diff'
+
+# Directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Safety aliases
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract various archive formats
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"   ;;
+            *.tar.gz)    tar xzf "$1"   ;;
+            *.bz2)       bunzip2 "$1"   ;;
+            *.rar)       unrar x "$1"   ;;
+            *.gz)        gunzip "$1"    ;;
+            *.tar)       tar xf "$1"    ;;
+            *.tbz2)      tar xjf "$1"   ;;
+            *.tgz)       tar xzf "$1"   ;;
+            *.zip)       unzip "$1"     ;;
+            *.Z)         uncompress "$1";;
+            *.7z)        7z x "$1"      ;;
+            *)           echo "'$1' cannot be extracted" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# OS-specific configurations
+{{- if eq .chezmoi.os "linux" }}
+# Linux specific aliases
+alias ls='ls --color=auto'
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+
+# Add snap binaries to PATH if exists
+add_to_path "/snap/bin"
+{{- else if eq .chezmoi.os "darwin" }}
+# macOS specific aliases
+alias ls='ls -G'
+{{- end }}
+
+# Add user's private bin to PATH if it exists
+add_to_path "$HOME/.local/bin"
+add_to_path "$HOME/bin"
+
+# Programming language specific configurations
+# Go
+if command -v go &> /dev/null; then
+    export GOPATH="$HOME/go"
+    add_to_path "$GOPATH/bin"
+fi
+
+# Rust
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env"
+fi
+
+# Node.js (nvm)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Python (pyenv)
+export PYENV_ROOT="$HOME/.pyenv"
+add_to_path "$PYENV_ROOT/bin"
+if command -v pyenv &> /dev/null; then
+    eval "$(pyenv init -)"
+fi
+
+# Development Tools
+# anyenv (any language version manager)
+add_to_path "$HOME/.anyenv/bin"
+
+# Poetry (Python package manager)
+add_to_path "$HOME/.poetry/bin"
+
+# Kubernetes plugins (Krew)
+add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
+
+# CUDA Toolkit
+if [[ -d "/usr/local/cuda" ]]; then
+    export CUDA_ROOT="/usr/local/cuda"
+    export CPATH="/usr/local/cuda/include:$CPATH"
+    add_to_path "/usr/local/cuda/bin"
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+fi
+
+# Java
+if [[ -n "$JAVA_HOME" && -d "$JAVA_HOME" ]]; then
+    add_to_path "$JAVA_HOME/bin"
+fi
+
+# Go (additional version manager support)
+if [[ -d "$HOME/.goenv" ]]; then
+    export GOENV_ROOT="$HOME/.goenv"
+    add_to_path "$GOENV_ROOT/bin"
+    add_to_path "$GOENV_ROOT/shims"
+fi
+
+# Modular Configuration Loading (bash-style)
+# Load custom configuration from organized directories
+
+# Aliases
+if [[ -d "$CONFIG_DIR/aliases.d" ]]; then
+    for script in "$CONFIG_DIR/aliases.d"/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Completions (shell-specific)
+if [[ -d "$CONFIG_DIR/completion.d" ]]; then
+    for script in "$CONFIG_DIR/completion.d"/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Custom functions
+if [[ -d "$CONFIG_DIR/functions.d" ]]; then
+    for script in "$CONFIG_DIR/functions.d"/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Key bindings
+if [[ -d "$CONFIG_DIR/keybindings.d" ]]; then
+    for script in "$CONFIG_DIR/keybindings.d"/*; do
+        [[ -f "$script" ]] && source "$script"
+    done
+fi
+
+# Load local configurations if exists
+if [ -f "$HOME/.shell_local" ]; then
+    source "$HOME/.shell_local"
+fi

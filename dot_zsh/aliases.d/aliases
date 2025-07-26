@@ -1,0 +1,26 @@
+# Zsh-specific aliases
+
+# Zsh configuration management
+alias zshrc='${EDITOR:-vim} ~/.zshrc'
+alias zshedit='${EDITOR:-vim} ~/.zshrc'
+alias zshreload='source ~/.zshrc && echo "Zsh configuration reloaded"'
+
+# Zsh history management
+alias h='history'
+alias hgrep='history | grep'
+
+# Zsh directory stack
+alias d='dirs -v'
+alias 1='cd +1'
+alias 2='cd +2'
+alias 3='cd +3'
+alias 4='cd +4'
+alias 5='cd +5'
+
+# Plugin management (if using zplug)
+if command -v zplug &> /dev/null; then
+    alias zplug-update='zplug update'
+    alias zplug-install='zplug install'
+    alias zplug-clean='zplug clean'
+    alias zplug-status='zplug status'
+fi

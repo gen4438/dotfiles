@@ -1,5 +1,5 @@
 # Chezmoi Ignore Patterns
-# Files and directories that should NOT be copied to the home directory
+# Focus: Files that should NOT be copied from chezmoi source to HOME directory
 
 # ==============================================================================
 # REPOSITORY METADATA - Never copy these to HOME
@@ -19,7 +19,7 @@ scripts/
 .github/
 .gitlab/
 
-# Development environment
+# Development environment  
 .vscode/
 .idea/
 .devcontainer/
@@ -99,38 +99,15 @@ Documents/WindowsPowerShell/
 .config/JetBrains/*/logs/
 .config/JetBrains/*/system/
 
-# Package managers lock files (auto-generated)
-.config/*/node_modules/
-.config/*/package-lock.json
-.config/*/yarn.lock
-.config/*/lazy-lock.json
-
 # ==============================================================================
 # SECURITY-SENSITIVE PATTERNS
 # ==============================================================================
 
-# Exclude any files that might contain secrets
-**/secret*
-**/password*
-**/token*
-**/credential*
-**/.env
-**/api_key*
-
-# Private keys (double security with .gitignore)
-**/*_rsa
-**/*_dsa  
-**/*_ecdsa
-**/*_ed25519
-**/*.pem
-**/*.key
-
-# SSH specific files
+# SSH specific files (should be manually managed)
 .ssh/id_*
 .ssh/known_hosts*
 .ssh/authorized_keys*
 .ssh/sockets/
-.ssh/config.d/
 
 # ==============================================================================
 # USER DATA DIRECTORIES - Never manage these
@@ -165,10 +142,3 @@ Public/
 # Log files
 *.log
 logs/
-
-# Archive files
-*.zip
-*.tar
-*.tar.gz
-*.rar
-*.7z

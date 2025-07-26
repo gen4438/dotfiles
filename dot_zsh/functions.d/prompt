@@ -1,0 +1,38 @@
+# Zsh prompt configuration
+
+# Simple clean prompt if p10k is not available
+setup_simple_prompt() {
+    # Enable parameter expansion in prompts
+    setopt PROMPT_SUBST
+    
+    # Git branch function
+    git_branch() {
+        local branch
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            branch=$(git branch 2>/dev/null | grep '^*' | colrm 1 2)
+            if [[ -n "$branch" ]]; then
+                echo " %F{yellow}($branch)%f"
+            fi
+        fi
+    }
+    
+    # Virtual environment info
+    venv_info() {
+        if [[ -n "$VIRTUAL_ENV" ]]; then
+            echo "%F{green}($(basename $VIRTUAL_ENV))%f "
+        fi
+    }
+    
+    # Simple two-line prompt
+    PROMPT='
+$(venv_info)%F{cyan}%n%f@%F{blue}%m%f:%F{green}%~%f$(git_branch)
+%F{red}❯%f '
+    
+    # Right prompt with time
+    RPROMPT='%F{240}%T%f'
+}
+
+# Check if p10k is available, otherwise use simple prompt
+if [[ ! -f ~/.p10k.zsh ]] && ! command -v starship &> /dev/null; then
+    setup_simple_prompt
+fi
