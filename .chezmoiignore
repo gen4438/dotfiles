@@ -61,6 +61,7 @@ scripts/
 Library/
 .DS_Store
 .config/karabiner/
+!.config/karabiner/karabiner.json
 {{- end }}
 
 {{- if ne .chezmoi.os "linux" }}
