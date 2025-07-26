@@ -71,6 +71,16 @@ chezmoi edit ~/.bashrc
 - Enhanced completions and aliases
 - Development environment variables
 
+### Cross-Platform Features
+- **Neovim Configuration**: Unified config across Linux/macOS/Windows
+  - Windows: Automatic junction creation (`%LOCALAPPDATA%\nvim` → `~/.config/nvim`)
+  - Shared Lua configuration with 30+ plugins
+  - Cross-platform snippet support
+- **Windows-Specific Setup**: Automatic system configuration
+  - Keyboard repeat rate optimization (faster key response)
+  - User/local bin directories creation and PATH setup
+  - PowerShell profile directory initialization
+
 ## Convenience Commands
 
 This repository includes a Makefile with shortcuts for common operations:
@@ -216,6 +226,15 @@ See `docs/shell-testing-guide.md` for comprehensive testing procedures.
    
    # Fix permissions
    chmod +x ~/.chezmoiscripts/*.sh
+   ```
+
+5. **Windows-specific issues**:
+   ```powershell
+   # Check if Neovim junction was created properly
+   Get-Item $env:LOCALAPPDATA\nvim | Select-Object LinkType, Target
+   
+   # Manually create junction if needed
+   New-Item -Path "$env:LOCALAPPDATA\nvim" -ItemType Junction -Value "$env:USERPROFILE\.config\nvim"
    ```
 
 ### Getting Help

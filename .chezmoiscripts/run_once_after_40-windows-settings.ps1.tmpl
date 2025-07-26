@@ -1,0 +1,70 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Windows-specific system settings and PATH configuration
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Configuring Windows-specific settings..."
+
+# Function to add directory to PATH
+function Add-ToPath {
+    param (
+        [string]$NewPath
+    )
+    
+    if (Test-Path $NewPath) {
+        $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
+        $pathEntries = $currentPath -split ';' | Where-Object { $_ -ne '' }
+        
+        if ($NewPath -notin $pathEntries) {
+            Write-Host "Adding $NewPath to user PATH"
+            $newUserPath = ($pathEntries + $NewPath) -join ';'
+            [System.Environment]::SetEnvironmentVariable('PATH', $newUserPath, [System.EnvironmentVariableTarget]::User)
+            Write-Host "✅ Added $NewPath to PATH"
+        } else {
+            Write-Host "✅ $NewPath is already in PATH"
+        }
+    } else {
+        Write-Host "⏳ Directory $NewPath does not exist yet, skipping"
+    }
+}
+
+# Create and add user bin directories to PATH
+$userBinPath = "$env:USERPROFILE\bin"
+$localBinPath = "$env:USERPROFILE\.local\bin"
+
+# Create directories if they don't exist
+@($userBinPath, $localBinPath) | ForEach-Object {
+    if (-not (Test-Path $_)) {
+        New-Item -ItemType Directory -Path $_ -Force | Out-Null
+        Write-Host "✅ Created directory: $_"
+    }
+}
+
+# Add to PATH
+Add-ToPath $userBinPath
+Add-ToPath $localBinPath
+
+# Apply keyboard repeat rate settings
+$regFile = "{{ .chezmoi.sourceDir }}\scripts\windows\key_speed.reg"
+if (Test-Path $regFile) {
+    try {
+        Write-Host "Applying keyboard repeat rate settings..."
+        Start-Process -FilePath "reg" -ArgumentList "import", "`"$regFile`"" -Wait -NoNewWindow
+        Write-Host "✅ Keyboard settings applied"
+    } catch {
+        Write-Warning "❌ Failed to apply keyboard settings: $_"
+    }
+} else {
+    Write-Warning "⏳ Registry file not found: $regFile"
+}
+
+# Create PowerShell profile directory if it doesn't exist
+$profileDir = Split-Path $PROFILE -Parent
+if (-not (Test-Path $profileDir)) {
+    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+    Write-Host "✅ Created PowerShell profile directory"
+}
+
+Write-Host "✅ Windows settings configuration completed"
+Write-Host "📝 Note: You may need to restart your shell or log out/in for PATH changes to take effect"
+{{- end }}
