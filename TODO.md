@@ -47,6 +47,27 @@
   - [x] UltiSnips for multi-language snippet support
   - [x] memo.nvim with MEMO_DIR environment variable support
 
+### Input Method & System Integration (2025-07-26)
+- [x] Add readline configuration (.inputrc)
+  - [x] Vi mode with visual indicators
+  - [x] Enhanced tab completion
+- [x] Add Mozc keymap configuration
+- [x] Add X11 initialization files
+  - [x] Fix .xinitrc typo and modernize
+  - [x] Implement fcitx5/fcitx auto-detection
+  - [x] Remove redundant .xinputrc
+- [x] Add fcitx/fcitx5 configurations
+  - [x] Use blacklist/whitelist approach in .chezmoiignore
+  - [x] Remove dynamic/cache files
+- [x] Add direnv configuration
+  - [x] Python environment layouts (pyenv, poetry)
+  - [x] Node.js environment layout (nvm)
+  - [x] Remove deprecated Anaconda function
+- [x] Add Karabiner-Elements configuration (macOS)
+  - [x] Terminal-specific Ctrl/Cmd swapping
+  - [x] Application shortcuts
+  - [x] Arrow key behavior customization
+
 ## Pending Tasks
 
 ### Core Configurations
