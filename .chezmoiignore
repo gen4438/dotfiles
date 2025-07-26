@@ -99,6 +99,15 @@ Documents/WindowsPowerShell/
 .config/JetBrains/*/logs/
 .config/JetBrains/*/system/
 
+# Input Method (fcitx/fcitx5) - Blacklist all, then whitelist configs
+.config/fcitx/**
+.config/fcitx5/**
+# Whitelist only configuration files
+!.config/fcitx/config
+!.config/fcitx/conf/*.config
+!.config/fcitx5/config
+!.config/fcitx5/conf/*.conf
+
 # ==============================================================================
 # SECURITY-SENSITIVE PATTERNS
 # ==============================================================================
