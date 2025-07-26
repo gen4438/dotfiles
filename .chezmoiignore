@@ -1,0 +1,14 @@
+# Repository files that should not be copied to HOME directory
+README.md
+LICENSE
+.gitignore
+.github/
+docs/
+scripts/
+
+# Documentation files
+*.md
+
+# Development files
+.vscode/
+.idea/
