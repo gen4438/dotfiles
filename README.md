@@ -20,11 +20,8 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), featuring 
 # Install chezmoi (if not already installed)
 sh -c "$(curl -fsLS get.chezmoi.io)"
 
-# Initialize with this repository (auto-installs packages and tools)
-chezmoi init --apply https://github.com/g1e2n04/dotfiles.git
-
-# Reload shell to activate new configurations
-exec $SHELL
+# Clone and apply dotfiles
+chezmoi init --apply gen4438
 ```
 
 This will automatically:
