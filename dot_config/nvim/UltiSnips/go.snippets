@@ -1,0 +1,7 @@
+snippet fopen "Open file" b
+f, err := os.Open("$1")
+if err != nil {
+	log.Fatal(err)
+}
+defer f.Close()
+endsnippet

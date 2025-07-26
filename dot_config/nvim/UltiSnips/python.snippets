@@ -1,0 +1,698 @@
+snippet click_template "" b
+import click
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(help="sub command")
+@click.option("-i", "--input-file", required=True, type=click.Path(), help="input file")
+@click.option("-o", "--output-file", type=click.Path(), help="output file")
+@click.option("-n", "--number", type=int, default=100, help="some number")
+def sub_command(
+    input_file: str,
+    output_file: str,
+    number: int,
+):
+    print(f"{input_file=}")
+    print(f"{output_file=}")
+    print(f"{number=}")
+
+
+if __name__ == "__main__":
+    cli()
+endsnippet
+
+
+snippet myEncoder "" b
+from bson import ObjectId
+from datetime import datetime
+from types import ModuleType
+class myEncoder(json.JSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, ObjectId):
+			return str(obj)
+		elif isinstance(obj, datetime):
+			return str(obj)
+		elif isinstance(obj, np.ndarray):
+			return obj.tolist()
+		return json.JSONEncoder.default(self, obj)
+$0
+endsnippet
+
+snippet pymongo_init "" b
+from pymongo import MongoClient
+client = MongoClient("${1:${VISUAL:localhost}}", ${2:${VISUAL:27017}})
+db = client["${3:${VISUAL:db_name}}"]
+collection = db["${4:${VISUAL:collection_name}}"]
+endsnippet
+
+snippet breakpoint "" b
+	import pdb;pdb.set_trace()
+endsnippet
+
+snippet ipy_timeit "" b
+get_ipython().run_line_magic("timeit", ${1:${VISUAL:func}})
+endsnippet
+
+snippet torch_device "" b
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device
+endsnippet
+
+snippet logging_template "" b
+import logging
+
+LOGGER = logging.getLogger(__name__)
+# formatter = logging.Formatter(logging.BASIC_FORMAT)
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(filename)s:%(name)s:%(funcName)s:%(message)s')
+
+LOGGER.setLevel(logging.DEBUG)
+streamhandler = logging.StreamHandler()
+streamhandler.setLevel(logging.DEBUG)
+streamhandler.setFormatter(formatter)
+filehandler = logging.FileHandler("LOG_FILE_PATH")
+filehandler.setLevel(logging.INFO)
+filehandler.setFormatter(formatter)
+LOGGER.addHandler(streamhandler)
+LOGGER.addHandler(filehandler)
+endsnippet
+
+snippet logging_basic_debug "" b
+import logging
+
+fmt = '%(asctime)s:%(levelname)s:%(filename)s:%(name)s:%(funcName)s:%(message)s'
+logging.basicConfig(level=logging.DEBUG, filename="", format=fmt)
+endsnippet
+
+snippet jupyter_notebook_cell "jupyter-notebook cell" b
+# %%
+endsnippet
+
+snippet jupyter_notebook_markdown "jupyter-notebook markdown" b
+# %% [markdown]
+endsnippet
+
+snippet jupyter_notebook_tags "jupyter-notebook tags" b
+# %% tags=["${1:${VISUAL:tag}}"]
+endsnippet
+
+snippet ipython_session_dump "Dump ipython session." b
+import dill
+dill.dump_session('${1:${VISUAL:ipython_env.db}}')
+endsnippet
+
+snippet ipython_session_load "Load ipython session." b
+import dill
+dill.load_session('${1:${VISUAL:ipython_env.db}}')
+endsnippet
+
+snippet terminal_colors "ANSI escape code" b
+class Term:
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+    RESET = '\033[0m'
+    BOLD = '\038[1m'
+    UNDERLINE = '\033[4m'
+    INVISIBLE = '\033[08m'
+    REVERCE = '\033[07m'
+endsnippet
+
+snippet matplotlib_color_names "Color names for matplotlib." b
+{'aliceblue': '#F0F8FF',
+ 'antiquewhite': '#FAEBD7',
+ 'aqua': '#00FFFF',
+ 'aquamarine': '#7FFFD4',
+ 'azure': '#F0FFFF',
+ 'beige': '#F5F5DC',
+ 'bisque': '#FFE4C4',
+ 'black': '#000000',
+ 'blanchedalmond': '#FFEBCD',
+ 'blue': '#0000FF',
+ 'blueviolet': '#8A2BE2',
+ 'brown': '#A52A2A',
+ 'burlywood': '#DEB887',
+ 'cadetblue': '#5F9EA0',
+ 'chartreuse': '#7FFF00',
+ 'chocolate': '#D2691E',
+ 'coral': '#FF7F50',
+ 'cornflowerblue': '#6495ED',
+ 'cornsilk': '#FFF8DC',
+ 'crimson': '#DC143C',
+ 'cyan': '#00FFFF',
+ 'darkblue': '#00008B',
+ 'darkcyan': '#008B8B',
+ 'darkgoldenrod': '#B8860B',
+ 'darkgray': '#A9A9A9',
+ 'darkgreen': '#006400',
+ 'darkgrey': '#A9A9A9',
+ 'darkkhaki': '#BDB76B',
+ 'darkmagenta': '#8B008B',
+ 'darkolivegreen': '#556B2F',
+ 'darkorange': '#FF8C00',
+ 'darkorchid': '#9932CC',
+ 'darkred': '#8B0000',
+ 'darksalmon': '#E9967A',
+ 'darkseagreen': '#8FBC8F',
+ 'darkslateblue': '#483D8B',
+ 'darkslategray': '#2F4F4F',
+ 'darkslategrey': '#2F4F4F',
+ 'darkturquoise': '#00CED1',
+ 'darkviolet': '#9400D3',
+ 'deeppink': '#FF1493',
+ 'deepskyblue': '#00BFFF',
+ 'dimgray': '#696969',
+ 'dimgrey': '#696969',
+ 'dodgerblue': '#1E90FF',
+ 'firebrick': '#B22222',
+ 'floralwhite': '#FFFAF0',
+ 'forestgreen': '#228B22',
+ 'fuchsia': '#FF00FF',
+ 'gainsboro': '#DCDCDC',
+ 'ghostwhite': '#F8F8FF',
+ 'gold': '#FFD700',
+ 'goldenrod': '#DAA520',
+ 'gray': '#808080',
+ 'green': '#008000',
+ 'greenyellow': '#ADFF2F',
+ 'grey': '#808080',
+ 'honeydew': '#F0FFF0',
+ 'hotpink': '#FF69B4',
+ 'indianred': '#CD5C5C',
+ 'indigo': '#4B0082',
+ 'ivory': '#FFFFF0',
+ 'khaki': '#F0E68C',
+ 'lavender': '#E6E6FA',
+ 'lavenderblush': '#FFF0F5',
+ 'lawngreen': '#7CFC00',
+ 'lemonchiffon': '#FFFACD',
+ 'lightblue': '#ADD8E6',
+ 'lightcoral': '#F08080',
+ 'lightcyan': '#E0FFFF',
+ 'lightgoldenrodyellow': '#FAFAD2',
+ 'lightgray': '#D3D3D3',
+ 'lightgreen': '#90EE90',
+ 'lightgrey': '#D3D3D3',
+ 'lightpink': '#FFB6C1',
+ 'lightsalmon': '#FFA07A',
+ 'lightseagreen': '#20B2AA',
+ 'lightskyblue': '#87CEFA',
+ 'lightslategray': '#778899',
+ 'lightslategrey': '#778899',
+ 'lightsteelblue': '#B0C4DE',
+ 'lightyellow': '#FFFFE0',
+ 'lime': '#00FF00',
+ 'limegreen': '#32CD32',
+ 'linen': '#FAF0E6',
+ 'magenta': '#FF00FF',
+ 'maroon': '#800000',
+ 'mediumaquamarine': '#66CDAA',
+ 'mediumblue': '#0000CD',
+ 'mediumorchid': '#BA55D3',
+ 'mediumpurple': '#9370DB',
+ 'mediumseagreen': '#3CB371',
+ 'mediumslateblue': '#7B68EE',
+ 'mediumspringgreen': '#00FA9A',
+ 'mediumturquoise': '#48D1CC',
+ 'mediumvioletred': '#C71585',
+ 'midnightblue': '#191970',
+ 'mintcream': '#F5FFFA',
+ 'mistyrose': '#FFE4E1',
+ 'moccasin': '#FFE4B5',
+ 'navajowhite': '#FFDEAD',
+ 'navy': '#000080',
+ 'oldlace': '#FDF5E6',
+ 'olive': '#808000',
+ 'olivedrab': '#6B8E23',
+ 'orange': '#FFA500',
+ 'orangered': '#FF4500',
+ 'orchid': '#DA70D6',
+ 'palegoldenrod': '#EEE8AA',
+ 'palegreen': '#98FB98',
+ 'paleturquoise': '#AFEEEE',
+ 'palevioletred': '#DB7093',
+ 'papayawhip': '#FFEFD5',
+ 'peachpuff': '#FFDAB9',
+ 'peru': '#CD853F',
+ 'pink': '#FFC0CB',
+ 'plum': '#DDA0DD',
+ 'powderblue': '#B0E0E6',
+ 'purple': '#800080',
+ 'rebeccapurple': '#663399',
+ 'red': '#FF0000',
+ 'rosybrown': '#BC8F8F',
+ 'royalblue': '#4169E1',
+ 'saddlebrown': '#8B4513',
+ 'salmon': '#FA8072',
+ 'sandybrown': '#F4A460',
+ 'seagreen': '#2E8B57',
+ 'seashell': '#FFF5EE',
+ 'sienna': '#A0522D',
+ 'silver': '#C0C0C0',
+ 'skyblue': '#87CEEB',
+ 'slateblue': '#6A5ACD',
+ 'slategray': '#708090',
+ 'slategrey': '#708090',
+ 'snow': '#FFFAFA',
+ 'springgreen': '#00FF7F',
+ 'steelblue': '#4682B4',
+ 'tan': '#D2B48C',
+ 'teal': '#008080',
+ 'thistle': '#D8BFD8',
+ 'tomato': '#FF6347',
+ 'turquoise': '#40E0D0',
+ 'violet': '#EE82EE',
+ 'wheat': '#F5DEB3',
+ 'white': '#FFFFFF',
+ 'whitesmoke': '#F5F5F5',
+ 'yellow': '#FFFF00',
+ 'yellowgreen': '#9ACD32'}
+endsnippet
+
+snippet matplotlib_colormap_names "Colormap names for matplotlib." b
+['Accent',
+ 'Accent_r',
+ 'Blues',
+ 'Blues_r',
+ 'BrBG',
+ 'BrBG_r',
+ 'BuGn',
+ 'BuGn_r',
+ 'BuPu',
+ 'BuPu_r',
+ 'CMRmap',
+ 'CMRmap_r',
+ 'Dark2',
+ 'Dark2_r',
+ 'GnBu',
+ 'GnBu_r',
+ 'Greens',
+ 'Greens_r',
+ 'Greys',
+ 'Greys_r',
+ 'OrRd',
+ 'OrRd_r',
+ 'Oranges',
+ 'Oranges_r',
+ 'PRGn',
+ 'PRGn_r',
+ 'Paired',
+ 'Paired_r',
+ 'Pastel1',
+ 'Pastel1_r',
+ 'Pastel2',
+ 'Pastel2_r',
+ 'PiYG',
+ 'PiYG_r',
+ 'PuBu',
+ 'PuBuGn',
+ 'PuBuGn_r',
+ 'PuBu_r',
+ 'PuOr',
+ 'PuOr_r',
+ 'PuRd',
+ 'PuRd_r',
+ 'Purples',
+ 'Purples_r',
+ 'RdBu',
+ 'RdBu_r',
+ 'RdGy',
+ 'RdGy_r',
+ 'RdPu',
+ 'RdPu_r',
+ 'RdYlBu',
+ 'RdYlBu_r',
+ 'RdYlGn',
+ 'RdYlGn_r',
+ 'Reds',
+ 'Reds_r',
+ 'Set1',
+ 'Set1_r',
+ 'Set2',
+ 'Set2_r',
+ 'Set3',
+ 'Set3_r',
+ 'Spectral',
+ 'Spectral_r',
+ 'Wistia',
+ 'Wistia_r',
+ 'YlGn',
+ 'YlGnBu',
+ 'YlGnBu_r',
+ 'YlGn_r',
+ 'YlOrBr',
+ 'YlOrBr_r',
+ 'YlOrRd',
+ 'YlOrRd_r',
+ 'afmhot',
+ 'afmhot_r',
+ 'autumn',
+ 'autumn_r',
+ 'binary',
+ 'binary_r',
+ 'bone',
+ 'bone_r',
+ 'brg',
+ 'brg_r',
+ 'bwr',
+ 'bwr_r',
+ 'cividis',
+ 'cividis_r',
+ 'cool',
+ 'cool_r',
+ 'coolwarm',
+ 'coolwarm_r',
+ 'copper',
+ 'copper_r',
+ 'cubehelix',
+ 'cubehelix_r',
+ 'flag',
+ 'flag_r',
+ 'gist_earth',
+ 'gist_earth_r',
+ 'gist_gray',
+ 'gist_gray_r',
+ 'gist_heat',
+ 'gist_heat_r',
+ 'gist_ncar',
+ 'gist_ncar_r',
+ 'gist_rainbow',
+ 'gist_rainbow_r',
+ 'gist_stern',
+ 'gist_stern_r',
+ 'gist_yarg',
+ 'gist_yarg_r',
+ 'gnuplot',
+ 'gnuplot2',
+ 'gnuplot2_r',
+ 'gnuplot_r',
+ 'gray',
+ 'gray_r',
+ 'hot',
+ 'hot_r',
+ 'hsv',
+ 'hsv_r',
+ 'inferno',
+ 'inferno_r',
+ 'jet',
+ 'jet_r',
+ 'magma',
+ 'magma_r',
+ 'nipy_spectral',
+ 'nipy_spectral_r',
+ 'ocean',
+ 'ocean_r',
+ 'pink',
+ 'pink_r',
+ 'plasma',
+ 'plasma_r',
+ 'prism',
+ 'prism_r',
+ 'rainbow',
+ 'rainbow_r',
+ 'seismic',
+ 'seismic_r',
+ 'spring',
+ 'spring_r',
+ 'summer',
+ 'summer_r',
+ 'tab10',
+ 'tab10_r',
+ 'tab20',
+ 'tab20_r',
+ 'tab20b',
+ 'tab20b_r',
+ 'tab20c',
+ 'tab20c_r',
+ 'terrain',
+ 'terrain_r',
+ 'twilight',
+ 'twilight_r',
+ 'twilight_shifted',
+ 'twilight_shifted_r',
+ 'viridis',
+ 'viridis_r',
+ 'winter',
+ 'winter_r']
+endsnippet
+
+snippet vtk_CameraPosition "" b
+def CameraModifiedCallback(caller, event):
+    """A callback that gives you the camera position and focal point.
+		Used to estimate positions similar to the book illustrations.
+    :param caller:
+    :param event:
+    :return:
+    """
+    print(caller.GetClassName(), "modified")
+    # Print the interesting stuff.
+    res = f'\tcamera = renderer.GetActiveCamera()\n'
+    res += f'\tcamera.SetPosition({", ".join(map("{0:0.6f}".format, caller.GetPosition()))})\n'
+    res += f'\tcamera.SetFocalPoint({", ".join(map("{0:0.6f}".format, caller.GetFocalPoint()))})\n'
+    res += f'\tcamera.SetViewUp({", ".join(map("{0:0.6f}".format, caller.GetViewUp()))})\n'
+    res += f'\tcamera.SetDistance({"{0:0.6f}".format(caller.GetDistance())})\n'
+    res += f'\tcamera.SetClippingRange({", ".join(map("{0:0.6f}".format, caller.GetClippingRange()))})\n'
+    print(res)
+
+# Typical usage
+renWin.Render()
+ren.GetActiveCamera().AddObserver('ModifiedEvent', CameraModifiedCallback)
+endsnippet
+
+snippet vtk_CameraPosition "" b
+endsnippet
+
+
+snippet vtk_GetProgramParameters "" b
+def get_program_parameters():
+		"""Get the program parameters.
+		This particular snippet requires a file name and an optional figure number.
+		"""
+    import argparse
+    description = 'What the program does.'
+    epilogue = '''
+        An expanded description of what the program does.
+   '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue)
+    parser.add_argument('filename', help='A required filename.')
+    parser.add_argument('figure', default=0, type=int, nargs='?', help='An optional figure number.')
+    args = parser.parse_args()
+    return args.filename, args.figure
+
+# Typical usage
+file_name, figure = get_program_parameters()
+endsnippet
+
+snippet vtk_PointToGlyph "" b
+def point_to_glyph(points, scale):
+    """
+		Convert points to glyphs.
+    :param points: The points to glyph.
+    :param scale: The scale, used to determine the size of the
+                  glyph representing the point, expressed as a
+                  fraction of the largest side of the bounding
+                  box surrounding the points. e.g. 0.05
+    :return: The actor.
+    """
+
+    bounds = points.GetBounds()
+    max_len = 0.0
+    for i in range(0,3):
+        max_len = max(bounds[i + 1] - bounds[i], max_len)
+
+    sphere_source = vtk.vtkSphereSource()
+    sphere_source.SetRadius(scale * max_len)
+
+    pd = vtk.vtkPolyData()
+    pd.SetPoints(points)
+
+    mapper = vtk.vtkGlyph3DMapper()
+    mapper.SetInputData(pd)
+    mapper.SetSourceConnection(sphere_source.GetOutputPort())
+    mapper.ScalarVisibilityOff()
+    mapper.ScalingOff()
+
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)
+
+    return actor
+
+# Typical usage
+# Map the points to spheres
+sphereActor = point_to_glyph(someFilter.GetOutput().GetPoints(), 0.05)
+# Set the actor color here
+endsnippet
+
+snippet vtk_ReadPolyData "" b
+def ReadPolyData(file_name):
+		"""Given a filename, uses the appropriate vtkPolyData reader to read any vtkPolyData file."""
+    import os
+    path, extension = os.path.splitext(file_name)
+    extension = extension.lower()
+    if extension == ".ply":
+        reader = vtk.vtkPLYReader()
+        reader.SetFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    elif extension == ".vtp":
+        reader = vtk.vtkXMLPolyDataReader()
+        reader.SetFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    elif extension == ".obj":
+        reader = vtk.vtkOBJReader()
+        reader.SetFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    elif extension == ".stl":
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    elif extension == ".vtk":
+        reader = vtk.vtkPolyDataReader()
+        reader.SetFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    elif extension == ".g":
+        reader = vtk.vtkBYUReader()
+        reader.SetGeometryFileName(file_name)
+        reader.Update()
+        poly_data = reader.GetOutput()
+    else:
+        # Return a None if the extension is unknown.
+        poly_data = None
+    return poly_data
+endsnippet
+
+snippet vtk_VTKVersion "" b
+def vtk_check_version(major, minor=0, build=0):
+    """
+    Check the version number of VTK.
+
+    :param major: Major version
+    :param minor: Minor version
+    :param build: Build version
+    :return: True if the version number is the same or greater
+    """
+    ver = vtk.vtkVersion()
+    if major > ver.GetVTKMajorVersion():
+        return True
+    elif major == ver.GetVTKMajorVersion() and minor > ver.GetVTKMinorVersion():
+        return True
+    elif major == ver.GetVTKMajorVersion() and minor == ver.GetVTKMinorVersion() and build >= ver.GetVTKBuildVersion():
+        return True
+    else:
+        return False
+
+# Typical usage
+if vtk_check_version(8, 90):
+		print('Version  8.90.00')
+		# Do 8.90 and greater specific stuff here.
+else:
+		print('Version < 8.90.00')
+		# Do older stuff here that changed in 8.90 and greater.
+endsnippet
+
+snippet vtk_WriteImage "" b
+
+def WriteImage(fileName, renWin, rgba=True):
+    """
+    Write the render window view to an image file.
+
+    Image types supported are:
+     BMP, JPEG, PNM, PNG, PostScript, TIFF.
+    The default parameters are used for all writers, change as needed.
+
+    :param fileName: The file name, if no extension then PNG is assumed.
+    :param renWin: The render window.
+    :param rgba: Used to set the buffer type.
+    :return:
+    """
+
+    import os
+
+    if fileName:
+        # Select the writer to use.
+        path, ext = os.path.splitext(fileName)
+        ext = ext.lower()
+        if not ext:
+            ext = '.png'
+            fileName = fileName + ext
+        if ext == '.bmp':
+            writer = vtk.vtkBMPWriter()
+        elif ext == '.jpg':
+            writer = vtk.vtkJPEGWriter()
+        elif ext == '.pnm':
+            writer = vtk.vtkPNMWriter()
+        elif ext == '.ps':
+            if rgba:
+                rgba = False
+            writer = vtk.vtkPostScriptWriter()
+        elif ext == '.tiff':
+            writer = vtk.vtkTIFFWriter()
+        else:
+            writer = vtk.vtkPNGWriter()
+
+        windowto_image_filter = vtk.vtkWindowToImageFilter()
+        windowto_image_filter.SetInput(renWin)
+        windowto_image_filter.SetScale(1)  # image quality
+        if rgba:
+            windowto_image_filter.SetInputBufferTypeToRGBA()
+        else:
+            windowto_image_filter.SetInputBufferTypeToRGB()
+            # Read from the front buffer.
+            windowto_image_filter.ReadFrontBufferOff()
+            windowto_image_filter.Update()
+
+        writer.SetFileName(fileName)
+        writer.SetInputConnection(windowto_image_filter.GetOutputPort())
+        writer.Write()
+    else:
+        raise RuntimeError('Need a filename.')
+
+# Typical usage
+WriteImage(f, renWin, rgba=False)
+endsnippet
+
+snippet argparse "コマンドラインインターフェース" b
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('integers', metavar='N', type=int, nargs='+',
+                    help='an integer for the accumulator')
+parser.add_argument('--sum', dest='accumulate', action='store_const',
+                    const=sum, default=max,
+                    help='sum the integers (default: find the max)')
+
+args = parser.parse_args()
+print(args.accumulate(args.integers))
+endsnippet
+
+snippet datetime_today "datetime today" b
+from datetime import datetime
+
+today_str = datetime.today().strftime('%Y%m%d')
+endsnippet
+
+snippet datetime_now "datetime now" b
+from datetime import datetime
+
+now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+endsnippet
+
+snippet matplotlib_init "matplotlib init" b
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.use("Agg")
+plt.rcParams["font.family"] = "IPAPGothic"
+endsnippet

@@ -1,0 +1,74 @@
+snippet reveal! "reveal.js のテンプレ" b
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>${1:${VISUAL:Title}}</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>Slide 1</section>
+				<section>Slide 2</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
+endsnippet
+
+snippet reveal-section-markdown "reveal.js markdown セクション" b
+<section data-markdown="${1:${VISUAL:slides.md}}"
+         data-separator="^\r?\n---\r?\n$"
+         data-separator-vertical="^\r?\n===\r?\n$"
+         data-separator-notes="[Nn]otes?:"
+         data-charset="utf-8">
+endsnippet
+
+snippet reveal-pre-code "reveal.js コードブロック" b
+<pre><code data-trim data-noescape data-line-numbers="${1:${VISUAL:1,3-4|5}}"><script type="text/template">
+${2:${VISUAL:Code here!}}
+</script></code></pre>
+endsnippet
+
+snippet reveal-plugin-math "reveal.js math プラグイン" b
+<script src="plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    math: {
+      mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+      config: 'TeX-AMS_HTML-full',
+      // pass other options into `MathJax.Hub.Config()`
+      TeX: { Macros: { RR: "{\\bf R}" } }
+    },
+    plugins: [ RevealMath ]
+  });
+</script>
+endsnippet
+
+# snippet reveal- "" b
+# endsnippet

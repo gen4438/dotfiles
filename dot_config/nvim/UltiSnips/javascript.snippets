@@ -1,0 +1,123 @@
+snippet for "for (...) {...}"
+for (let ${1:i} = 0; $1 < $2; $1++) {
+	${0:${VISUAL}}
+}
+endsnippet
+
+snippet reqop "request options" biw
+{
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({ $1 }),
+}
+endsnippet
+
+snippet rfun "react functional component" b
+const $1 = (${2:props}) => {
+	return (
+		<div>
+			${3:<p>Body</p>}
+		</div>
+	);
+};
+endsnippet
+
+snippet import_chart "imoprt Chart" b
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
+endsnippet
+
+snippet express_hello_world "express.js hello world" b
+const express = require("express");
+const app = express();
+const port = 3000;
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
+endsnippet
+
+snippet mongodb_hello_world "mongodb hello world" b
+const { MongoClient } = require("mongodb");
+
+const username = "root";
+const password = "password";
+const hostname = "localhost";
+const port = "27017";
+const uri = \`mongodb://${username}:${password}@${hostname}:${port}/?authSource=admin\`;
+
+const client = new MongoClient(uri);
+
+async function run() {
+  try {
+    await client.connect();
+    const database = client.db();
+    const collection = database.collection();
+
+    const query = {};
+    const doc = await collection.findOne(query);
+
+    console.log(doc);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    await client.close();
+  }
+}
+run().catch(console.dir);
+endsnippet
+
+snippet mariadb_hello_world "mariadb hello world" b
+const mariadb = require("mariadb");
+
+const host = "localhost";
+const port = 3306;
+const user = "user";
+const password = "password";
+const database = "database";
+
+const pool = mariadb.createPool({
+  host,
+  port,
+  user,
+  password,
+  database,
+  connectionLimit: 5,
+});
+
+async function run(query) {
+  let conn;
+  try {
+    conn = await pool.getConnection();
+    const res = await conn.query(query);
+    return res;
+  } catch (err) {
+    throw err;
+  } finally {
+    if (conn) await conn.end();
+    if (pool) await pool.end();
+  }
+}
+
+const query = "show tables";
+run(query).then((res) => {
+  console.log(res);
+});
+endsnippet
+
+snippet eslint_comment "eslint comment" b
+/* eslint ${1:rule-to-disable}: 0 */
+endsnippet
+
+snippet eslint_disable_next_line "eslint disable next line" b
+// eslint-disable-next-line ${1:rule-to-disable}
+endsnippet
+
+snippet eslint_block_comment "eslint block comment" b
+/* eslint-disable ${1:rule-to-disable} */
+/* eslint-enable $1 */
+endsnippet

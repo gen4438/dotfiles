@@ -1,0 +1,86 @@
+// 参考 https://github.com/neoclide/coc.nvim/wiki/Language-servers
+{
+  // custom language servers
+  "languageserver": {
+    // glsl-language-server
+    "glsl_analyzer": {
+      "command": "glsl_analyzer",
+      "args": [],
+      "filetypes": ["glsl"],
+      "initializationOptions": {},
+      "settings": {}
+    }
+  },
+
+  // 基本設定
+  "extensions.updateCheck": "daily",
+  "coc.preferences.enableMarkdown": false,
+  "coc.preferences.useQuickfixForLocations": true,
+  "suggest.noselect": true,
+  // "suggest.autoTrigger": "trigger"
+  // "suggest.preferCompleteThanJumpPlaceholder": true,
+  "inlayHint.enable": false,
+
+  "codeLens.enable": false,
+  "codeLens.position": "eol",
+
+  "powershell.integratedConsole.showOnStartup": false,
+
+  // ale との連携
+  // "diagnostic.displayByAle": true,
+
+  // スニペット
+  "snippets.ultisnips.directories": ["~/.vim/UltiSnips", "UltiSnips"],
+  "snippets.extends": {
+    "cpp": ["c"],
+    "javascriptreact": ["javascript"],
+    // "typescript": ["javascript"],
+    "typescriptreact": ["typescript"]
+  },
+
+  // python
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": ["--max-line-length=88"],
+  "python.linting.mypyEnabled": true,
+  "python.linting.pydocstyleEnabled": true,
+  "python.formatting.provider": "black",
+  "pydocstring.formatter": "google",
+  "pyright.disableProgressNotifications": true,
+
+  // rust
+  "rust-analyzer.check.command": "clippy",
+
+  // javascript, typescript
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "typescript.format.enable": false,
+
+  // "prettier.formatterPriority": -1,
+  "eslint.format.enable": true,
+  "eslint.lintTask.options": [
+    ".",
+    "--ext",
+    ".js,.ts,.jsx,.tsx",
+    "--ignore-path",
+    ".gitignore"
+  ],
+  "yaml.format.enable": true,
+
+  // markdown
+  "markdownlint.config": {
+    "default": true,
+    "no-bare-urls": false,
+    "line-length": false
+  },
+
+  // その他言語
+  "clangd.path": "",
+  "go.goplsOptions": {
+    "staticcheck": true
+  },
+  "snippets.ultisnips.pythonPrompt": false
+}

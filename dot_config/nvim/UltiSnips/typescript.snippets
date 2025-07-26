@@ -1,0 +1,14 @@
+snippet rfun "react functional component" b
+const $1 = (${2:props}) => {
+	return (
+		<div>
+			${3:<p>Body</p>}
+		</div>
+	);
+};
+endsnippet
+
+snippet import_chart "imoprt Chart" b
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
+endsnippet

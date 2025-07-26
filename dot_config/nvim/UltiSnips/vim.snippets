@@ -1,0 +1,11 @@
+snippet plugin_config "プラグインの存在を確認" b
+if empty(globpath(&rtp, 'autoload/${1:${VISUAL:plugin.vim}}'))
+  finish
+endif
+endsnippet
+
+snippet fs "function!" b
+function! ${1:s:}${2:function_name}($3)
+	${4:" code}
+endfunction
+endsnippet

@@ -1,0 +1,6 @@
+snippet sudo-prompt "" b
+if [ "$EUID" != "0" ]; then
+    exec sudo bash "$0" "$@"
+    exit $?
+fi
+endsnippet

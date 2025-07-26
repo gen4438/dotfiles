@@ -1,0 +1,29 @@
+snippet direnv_pyenv_virtualenv "pyenv + virtualenv" b
+# -*- mode: sh; -*-
+# (rootdir)/.envrc : direnv configuration file
+# see https://direnv.net/
+# pyversion=$(head .python-version)
+# pvenv=$(head     .python-virtualenv)
+pyversion=${1:${VISUAL:3.8.9}}
+pvenv=${2:${VISUAL:projectname}}
+
+use python ${pyversion}
+# Create the virtualenv if not yet done
+layout virtualenv ${pyversion} ${pvenv}
+# activate it
+layout activate ${pvenv}-${pyversion}
+
+unset PS1
+endsnippet
+
+snippet direnv_python_venv "venv" b
+layout python
+endsnippet
+
+snippet direnv_python_pyenv_venv "pyenv + venv" b
+layout pyenv ${1:${VISUAL:pyversion}}
+endsnippet
+
+snippet direnv_nvm "nvm" b
+use nvm ${1:${VISUAL:version}}
+endsnippet
