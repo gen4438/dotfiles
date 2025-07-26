@@ -1,0 +1,16 @@
+# Load user profile
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+# Input method configuration (Linux only)
+if [ "$(uname)" = "Linux" ]; then
+    # Prefer fcitx5, fallback to fcitx
+    if command -v fcitx5 >/dev/null 2>&1; then
+        export GTK_IM_MODULE=fcitx5
+        export QT_IM_MODULE=fcitx5  
+        export XMODIFIERS=@im=fcitx5
+    elif command -v fcitx >/dev/null 2>&1; then
+        export GTK_IM_MODULE=fcitx
+        export QT_IM_MODULE=fcitx
+        export XMODIFIERS=@im=fcitx
+    fi
+fi

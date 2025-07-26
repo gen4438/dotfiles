@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# X Window System initialization
+
+# Load system and user profiles
+[ -f /etc/xprofile ] && . /etc/xprofile  
+[ -f ~/.xprofile ] && . ~/.xprofile
+
+# Start input method (if not already running)
+if command -v fcitx5 >/dev/null 2>&1; then
+    fcitx5 &
+elif command -v fcitx >/dev/null 2>&1; then
+    fcitx &
+fi
