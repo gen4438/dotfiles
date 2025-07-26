@@ -125,6 +125,13 @@ Documents/WindowsPowerShell/
 **/*.pem
 **/*.key
 
+# SSH specific files
+.ssh/id_*
+.ssh/known_hosts*
+.ssh/authorized_keys*
+.ssh/sockets/
+.ssh/config.d/
+
 # ==============================================================================
 # USER DATA DIRECTORIES - Never manage these
 # ==============================================================================

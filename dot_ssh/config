@@ -1,0 +1,16 @@
+Include *.conf
+Include config.d/*.conf
+
+# Host example
+# HostName example.com
+# User example_user
+# Port 22
+# IdentityFile ~/.ssh/id_rsa
+
+Host *
+Port 22
+IdentityFile ~/.ssh/id_ed25519
+Compression yes
+ForwardX11 yes
+IdentitiesOnly yes
+ServerAliveInterval 60
