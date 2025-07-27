@@ -11,6 +11,7 @@ set -e
 echo "🔄 Updating Neovim environment packages..."
 
 # Update Python packages for Neovim
+{{- if ne .chezmoi.os "android" }}
 if command -v pyenv >/dev/null 2>&1; then
     echo "🐍 Updating Python packages for Neovim..."
     
@@ -35,8 +36,17 @@ elif command -v python3 >/dev/null 2>&1; then
     echo "⚠️  Using system Python to update packages..."
     python3 -m pip install --user --upgrade neovim pynvim
 fi
+{{- else }}
+# Android/Termux: Use system packages
+echo "🐍 Android/Termux: Updating Python packages globally..."
+if command -v python3 >/dev/null 2>&1; then
+    python3 -m pip install --user --upgrade neovim pynvim
+    echo "✅ Neovim Python packages updated"
+fi
+{{- end }}
 
 # Update Node.js packages for Neovim
+{{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.nvm" ]]; then
     echo "📦 Updating Node.js packages for Neovim..."
     
@@ -57,6 +67,14 @@ elif command -v npm >/dev/null 2>&1; then
     echo "⚠️  Using system npm to update packages..."
     npm update -g neovim
 fi
+{{- else }}
+# Android/Termux: Use system npm
+echo "📦 Android/Termux: Updating Node.js packages globally..."
+if command -v npm >/dev/null 2>&1; then
+    npm update -g neovim
+    echo "✅ Neovim Node.js package updated"
+fi
+{{- end }}
 
 echo "✅ Neovim environment packages updated successfully!"
 

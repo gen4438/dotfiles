@@ -59,6 +59,11 @@ fi
 [[ -f ~/bin/tmux-xpanes/activate.sh ]] && source ~/bin/tmux-xpanes/activate.sh
 
 # Version Managers Initialization
+{{- if eq .chezmoi.os "android" }}
+# Android/Termux: Use system packages instead of version managers
+# Install: pkg install python nodejs
+# For global packages: npm install -g <package> or pip install <package>
+{{- else }}
 
 # anyenv (any language environment manager)
 if command -v anyenv >/dev/null 2>&1; then
@@ -91,6 +96,7 @@ done
 export NVM_DIR="$HOME/.nvm"
 [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
 [[ -s "$NVM_DIR/bash_completion" ]] && \. "$NVM_DIR/bash_completion"
+{{- end }}
 
 # Tool-Specific Configuration
 

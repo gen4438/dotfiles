@@ -15,6 +15,7 @@ echo "🔄 Updating development tools..."
 echo "External tools are managed by chezmoi and updated automatically"
 
 # Update pyenv and install latest Python
+{{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.pyenv" ]]; then
     echo "🐍 Updating pyenv and Python..."
     
@@ -53,12 +54,15 @@ if [[ -d "$HOME/.pyenv" ]]; then
         
         # Always check and update neovim3 environment if needed
         if pyenv versions | grep -q "neovim3"; then
-            # Get current neovim3 Python version by checking the symlink target
-            NEOVIM_ENV_PATH=$(pyenv versions | grep "neovim3 -->" | sed 's/.*--> //')
-            if [[ -n "$NEOVIM_ENV_PATH" ]]; then
-                NEOVIM_PYTHON=$(basename "$(dirname "$NEOVIM_ENV_PATH")")
+            # Get current neovim3 Python base version
+            # Check if virtualenv is based on current latest Python
+            if [[ -d "$PYENV_ROOT/versions/$LATEST_PYTHON/envs/neovim3" ]]; then
+                echo "✅ neovim3 already using Python $LATEST_PYTHON"
+            else
+                # Find which Python version neovim3 is currently using
+                NEOVIM_PYTHON=$(find "$PYENV_ROOT/versions" -name "neovim3" -type d 2>/dev/null | head -1 | sed 's|.*/versions/||' | sed 's|/.*||')
                 
-                if [[ "$NEOVIM_PYTHON" != "$LATEST_PYTHON" ]]; then
+                if [[ -n "$NEOVIM_PYTHON" && "$NEOVIM_PYTHON" != "$LATEST_PYTHON" ]]; then
                     echo "🔄 Recreating neovim3 virtual environment (current: $NEOVIM_PYTHON, latest: $LATEST_PYTHON)..."
                     
                     # Delete old virtual environment
@@ -75,17 +79,15 @@ if [[ -d "$HOME/.pyenv" ]]; then
                     
                     echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
                 else
-                    echo "✅ neovim3 already using Python $LATEST_PYTHON"
+                    echo "⚠️ Could not determine neovim3 Python version, recreating..."
+                    pyenv uninstall -f neovim3
+                    pyenv virtualenv "$LATEST_PYTHON" neovim3
+                    pyenv activate neovim3
+                    pip install --upgrade pip
+                    pip install --upgrade neovim coverage pynvim
+                    pyenv deactivate
+                    echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
                 fi
-            else
-                echo "⚠️ Could not determine neovim3 Python version, recreating..."
-                pyenv uninstall -f neovim3
-                pyenv virtualenv "$LATEST_PYTHON" neovim3
-                pyenv activate neovim3
-                pip install --upgrade pip
-                pip install --upgrade neovim coverage pynvim
-                pyenv deactivate
-                echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
             fi
         else
             echo "📝 Creating neovim3 virtual environment with Python $LATEST_PYTHON..."
@@ -98,8 +100,26 @@ if [[ -d "$HOME/.pyenv" ]]; then
         fi
     fi
 fi
+{{- else }}
+echo "🐍 Android/Termux: Using system Python (pkg install python)"
+echo "📦 Android/Termux: Using system Node.js (pkg install nodejs)"
+echo "📝 Installing Neovim packages globally..."
+
+# Install Neovim Python packages globally
+if command -v python3 >/dev/null 2>&1; then
+    python3 -m pip install --user --upgrade neovim pynvim
+    echo "✅ Neovim Python packages installed/updated"
+fi
+
+# Install Neovim Node.js packages globally
+if command -v npm >/dev/null 2>&1; then
+    npm install -g neovim
+    echo "✅ Neovim Node.js package installed/updated"
+fi
+{{- end }}
 
 # Update nvm and install latest Node.js LTS
+{{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.nvm" ]]; then
     echo "📦 Updating nvm and Node.js..."
     
@@ -146,6 +166,7 @@ if [[ -d "$HOME/.nvm" ]]; then
         fi
     fi
 fi
+{{- end }}
 
 # Update fzf
 if [[ -d "$HOME/.fzf" ]]; then
@@ -182,6 +203,7 @@ if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
 fi
 
 # Update anyenv
+{{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.anyenv" ]]; then
     echo "🔧 Updating anyenv..."
     cd "$HOME/.anyenv" && git pull
@@ -192,6 +214,7 @@ if [[ -d "$HOME/.anyenv" ]]; then
     
     echo "✅ anyenv updated"
 fi
+{{- end }}
 
 # Update zplug plugins
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}

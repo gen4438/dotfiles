@@ -112,6 +112,10 @@ if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
 fi
 
+{{- if eq .chezmoi.os "android" }}
+# Android/Termux: Use system packages (pkg install python nodejs)
+# Global npm/pip packages will be installed via system package manager
+{{- else }}
 # Node.js (nvm)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -123,9 +127,12 @@ if command -v pyenv &> /dev/null; then
     eval "$(pyenv init -)"
 fi
 
-# Development Tools
-# anyenv (any language version manager)
+# Development Tools  
+# anyenv (any language version manager) - skipped on Android
+{{- if ne .chezmoi.os "android" }}
 add_to_path "$HOME/.anyenv/bin"
+{{- end }}
+{{- end }}
 
 # Poetry (Python package manager)
 add_to_path "$HOME/.poetry/bin"
