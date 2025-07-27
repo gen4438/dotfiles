@@ -197,6 +197,8 @@ if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
     
     # Update all plugins
     if command -v tmux >/dev/null 2>&1; then
+        # Set TMUX_PLUGIN_MANAGER_PATH for the update script
+        export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
         "$HOME/.tmux/plugins/tpm/bin/update_plugins" all
         echo "✅ tmux plugins updated"
     fi
