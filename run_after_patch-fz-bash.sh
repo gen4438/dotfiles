@@ -1,0 +1,32 @@
+#!/bin/bash
+# Create bash-compatible version of fz.sh after external updates
+
+FZ_DIR="$HOME/bin/fz"
+FZ_SH_FILE="$FZ_DIR/fz.sh"
+FZ_BASH_FILE="$FZ_DIR/fz.bash"
+
+if [[ -f "$FZ_SH_FILE" ]]; then
+    # Check if update is needed
+    if [[ ! -f "$FZ_BASH_FILE" ]] || [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
+        # Remove existing symlink if it exists
+        if [[ -L "$FZ_BASH_FILE" ]]; then
+            echo "Removing fz.bash symlink to create bash-compatible copy..."
+            rm "$FZ_BASH_FILE"
+        fi
+        
+        # Create bash-compatible copy
+        echo "Creating bash-compatible copy of fz.sh..."
+        
+        # Copy and patch for bash compatibility
+        cp "$FZ_SH_FILE" "$FZ_BASH_FILE"
+        
+        # Fix zsh-specific syntax for bash
+        sed -i 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE"
+        
+        echo "fz.bash created with bash compatibility fixes"
+    else
+        echo "fz.bash is up to date"
+    fi
+else
+    echo "fz.sh not found at $FZ_SH_FILE"
+fi
