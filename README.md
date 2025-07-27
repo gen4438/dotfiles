@@ -215,6 +215,7 @@ chmod 600 ~/.config/chezmoi/key.txt
 
 # Configure chezmoi for encryption
 cat >> ~/.config/chezmoi/chezmoi.toml << EOF
+
 encryption = "age"
 [age]
     identity = "~/.config/chezmoi/key.txt"
