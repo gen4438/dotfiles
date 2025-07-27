@@ -129,5 +129,8 @@ if [ -f "$HOME/.zshrc_local" ]; then
     source "$HOME/.zshrc_local"
 fi
 
-# Simple single-line prompt
-PS1='%n@%m:%~$ '
+# Prompt configuration handled by byobu when in tmux session
+# See ~/.config/byobu/prompt for byobu-specific prompt settings
+
+# Load byobu prompt if available
+[ -r "$BYOBU_CONFIG_DIR/prompt" ] && . "$BYOBU_CONFIG_DIR/prompt"
