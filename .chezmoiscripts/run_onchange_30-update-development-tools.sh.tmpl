@@ -1,0 +1,238 @@
+#!/bin/bash
+# Update development tools and runtimes
+# This script runs when the content changes
+
+set -e
+
+echo "🔄 Updating development tools..."
+
+# Note: External tools are automatically updated by chezmoi
+# No need to call chezmoi apply here as we're already in an apply process
+echo "External tools are managed by chezmoi and updated automatically"
+
+# Update pyenv and install latest Python
+if [[ -d "$HOME/.pyenv" ]]; then
+    echo "🐍 Updating pyenv and Python..."
+    
+    # Update pyenv itself
+    cd "$HOME/.pyenv" && git pull
+    if [[ -d "$HOME/.pyenv/plugins/pyenv-virtualenv" ]]; then
+        cd "$HOME/.pyenv/plugins/pyenv-virtualenv" && git pull
+    fi
+    
+    # Initialize pyenv in current session
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init -)"
+        
+        # Get latest stable Python version
+        LATEST_PYTHON=$(pyenv install --list | grep -E "^\s*3\.[0-9]+\.[0-9]+$" | tail -1 | xargs)
+        CURRENT_PYTHON=$(pyenv global)
+        
+        # Install latest Python if not already installed
+        if [[ -n "$LATEST_PYTHON" ]] && [[ "$LATEST_PYTHON" != "$CURRENT_PYTHON" ]]; then
+            echo "Installing Python $LATEST_PYTHON (current: $CURRENT_PYTHON)..."
+            pyenv install -s "$LATEST_PYTHON"
+            pyenv global "$LATEST_PYTHON"
+            echo "✅ Python updated to $LATEST_PYTHON"
+            
+            # Update pip
+            pip install --upgrade pip
+        else
+            echo "✅ Python is up to date ($CURRENT_PYTHON)"
+        fi
+        
+        # Always check and update neovim3 environment if needed
+        if pyenv versions | grep -q "neovim3"; then
+            # Get current neovim3 Python version by checking the symlink target
+            NEOVIM_ENV_PATH=$(pyenv versions | grep "neovim3 -->" | sed 's/.*--> //')
+            if [[ -n "$NEOVIM_ENV_PATH" ]]; then
+                NEOVIM_PYTHON=$(basename "$(dirname "$NEOVIM_ENV_PATH")")
+                
+                if [[ "$NEOVIM_PYTHON" != "$LATEST_PYTHON" ]]; then
+                    echo "🔄 Recreating neovim3 virtual environment (current: $NEOVIM_PYTHON, latest: $LATEST_PYTHON)..."
+                    
+                    # Delete old virtual environment
+                    pyenv uninstall -f neovim3
+                    
+                    # Create new virtual environment with latest Python
+                    pyenv virtualenv "$LATEST_PYTHON" neovim3
+                    
+                    # Install Neovim Python packages
+                    pyenv activate neovim3
+                    pip install --upgrade pip
+                    pip install --upgrade neovim coverage pynvim
+                    pyenv deactivate
+                    
+                    echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
+                else
+                    echo "✅ neovim3 already using Python $LATEST_PYTHON"
+                fi
+            else
+                echo "⚠️ Could not determine neovim3 Python version, recreating..."
+                pyenv uninstall -f neovim3
+                pyenv virtualenv "$LATEST_PYTHON" neovim3
+                pyenv activate neovim3
+                pip install --upgrade pip
+                pip install --upgrade neovim coverage pynvim
+                pyenv deactivate
+                echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
+            fi
+        else
+            echo "📝 Creating neovim3 virtual environment with Python $LATEST_PYTHON..."
+            pyenv virtualenv "$LATEST_PYTHON" neovim3
+            pyenv activate neovim3
+            pip install --upgrade pip
+            pip install --upgrade neovim coverage pynvim
+            pyenv deactivate
+            echo "✅ neovim3 environment created with Python $LATEST_PYTHON"
+        fi
+    fi
+fi
+
+# Update nvm and install latest Node.js LTS
+if [[ -d "$HOME/.nvm" ]]; then
+    echo "📦 Updating nvm and Node.js..."
+    
+    # Update nvm itself
+    cd "$HOME/.nvm" && git pull
+    
+    # Source nvm in current session
+    export NVM_DIR="$HOME/.nvm"
+    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+    
+    if command -v nvm >/dev/null 2>&1; then
+        # Install latest LTS and reinstall packages from current default
+        CURRENT_NODE=$(nvm version default 2>/dev/null || echo "none")
+        
+        echo "Installing latest LTS Node.js (current: $CURRENT_NODE)..."
+        if [[ "$CURRENT_NODE" != "none" ]]; then
+            nvm install --lts --reinstall-packages-from=default
+        else
+            nvm install --lts
+        fi
+        
+        nvm use --lts
+        nvm alias default lts/*
+        
+        NEW_NODE=$(nvm current)
+        echo "✅ Node.js updated to $NEW_NODE"
+        
+        # Update npm
+        npm install -g npm@latest
+        
+        # Ensure neovim package is installed/updated
+        echo "📝 Checking Neovim Node.js package..."
+        if npm list -g neovim --depth=0 >/dev/null 2>&1; then
+            echo "Updating neovim package..."
+            npm update -g neovim
+            echo "✅ Neovim Node.js package updated"
+        else
+            echo "Installing neovim package..."
+            npm install -g neovim
+            echo "✅ Neovim Node.js package installed"
+        fi
+    fi
+fi
+
+# Update fzf
+if [[ -d "$HOME/.fzf" ]]; then
+    echo "🔍 Updating fzf..."
+    cd "$HOME/.fzf" && git pull
+    ./install --all
+    echo "✅ fzf updated"
+fi
+
+# Update z
+if [[ -d "$HOME/bin/z" ]]; then
+    echo "📁 Updating z..."
+    cd "$HOME/bin/z" && git pull
+    echo "✅ z updated"
+fi
+
+# Update fz
+if [[ -d "$HOME/bin/fz" ]]; then
+    echo "📁 Updating fz..."
+    cd "$HOME/bin/fz" && git pull
+    echo "✅ fz updated"
+fi
+
+# Update tmux plugin manager and plugins
+if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
+    echo "🖥️  Updating tmux plugins..."
+    cd "$HOME/.tmux/plugins/tpm" && git pull
+    
+    # Update all plugins
+    if command -v tmux >/dev/null 2>&1; then
+        "$HOME/.tmux/plugins/tpm/bin/update_plugins" all
+        echo "✅ tmux plugins updated"
+    fi
+fi
+
+# Update anyenv
+if [[ -d "$HOME/.anyenv" ]]; then
+    echo "🔧 Updating anyenv..."
+    cd "$HOME/.anyenv" && git pull
+    
+    if [[ -d "$HOME/.anyenv/plugins/anyenv-update" ]]; then
+        cd "$HOME/.anyenv/plugins/anyenv-update" && git pull
+    fi
+    
+    echo "✅ anyenv updated"
+fi
+
+# Update zplug plugins
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
+if command -v zsh >/dev/null 2>&1; then
+    echo "🔌 Updating zplug plugins..."
+    
+    # Find zplug home
+    ZPLUG_HOME=""
+    {{- if eq .chezmoi.os "darwin" }}
+    for dir in /opt/homebrew/opt/zplug /usr/local/opt/zplug /opt/homebrew/share/zplug /usr/local/share/zplug ~/.zplug; do
+        if [[ -f "$dir/init.zsh" ]]; then
+            ZPLUG_HOME="$dir"
+            break
+        fi
+    done
+    {{- else if eq .chezmoi.os "linux" }}
+    for dir in /usr/share/zplug ~/.zplug; do
+        if [[ -f "$dir/init.zsh" ]]; then
+            ZPLUG_HOME="$dir"
+            break
+        fi
+    done
+    {{- end }}
+    
+    if [[ -n "$ZPLUG_HOME" ]]; then
+        zsh -c "
+            export ZPLUG_HOME='$ZPLUG_HOME'
+            source '$ZPLUG_HOME/init.zsh'
+            zplug update
+        "
+        echo "✅ zplug plugins updated"
+    fi
+fi
+{{- end }}
+
+# Update Neovim plugins
+if command -v nvim >/dev/null 2>&1; then
+    echo "📝 Updating Neovim plugins..."
+    
+    # Update Lazy.nvim plugins, TreeSitter parsers, and CoC extensions
+    nvim --headless "+Lazy! sync" "+TSUpdateSync" "+CocUpdateSync" +qa
+    
+    echo "✅ Neovim plugins updated"
+fi
+
+# Update shell completions
+echo "🔧 Updating shell completions..."
+# Note: Shell completions are managed by separate scripts if they exist
+# This is a placeholder for future completion update functionality
+
+echo "✅ All development tools updated successfully!"
+
+# Hash to trigger updates when script changes
+# Script hash: {{ include ".chezmoiscripts/run_onchange_30-update-development-tools.sh.tmpl" | sha256sum }}

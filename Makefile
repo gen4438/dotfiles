@@ -35,21 +35,39 @@ status:
 	@echo "=== Git Status ==="
 	@cd $$(chezmoi source-path) && git status
 
+.PHONY: update
+## Update everything (dotfiles, tools, completions, nvim)
+update:
+	@echo "🔄 Updating everything..."
+	chezmoi update
+	@echo "✅ Update complete!"
+
+.PHONY: update-tools
+## Update development tools (pyenv, nvm, fzf, etc.)
+update-tools:
+	@echo "🔧 Updating development tools..."
+	@bash ~/.chezmoiscripts/run_onchange_30-update-development-tools.sh
+	@echo "✅ Tools updated!"
+
+.PHONY: update-nvim
+## Update Neovim plugins and packages
+update-nvim:
+	@echo "📝 Updating Neovim..."
+	@nvim --headless "+Lazy! sync" "+TSUpdateSync" "+CocUpdateSync" +qa
+	@bash ~/.chezmoiscripts/run_onchange_35-update-neovim-environment.sh
+	@echo "✅ Neovim updated!"
+
 .PHONY: update-completions
 ## Update shell completions for various tools  
 update-completions:
-	@echo "Updating shell completions..."
-	@if [ -f ~/.chezmoiscripts/run_onchange_30-update-completions.sh.tmpl ]; then \
-		bash ~/.chezmoiscripts/run_onchange_30-update-completions.sh.tmpl; \
-	else \
-		echo "Completion update script not found"; \
-	fi
+	@echo "🔧 Shell completions are managed through the respective shell configuration files"
+	@echo "✅ Run 'exec $$SHELL' to reload completions"
 
 .PHONY: external-update
 ## Update external tools managed by chezmoi
 external-update:
 	@echo "Updating external tools..."
-	@chezmoi apply --force ~/.fzf ~/.nvm ~/.pyenv ~/.anyenv
+	@chezmoi apply --refresh-externals
 
 .PHONY: tools-status
 ## Show status of development tools

@@ -1,0 +1,60 @@
+#!/bin/bash
+# Update Neovim Python and Node.js packages
+# This script runs when its content changes to update Neovim dependencies
+
+set -e
+
+echo "🔄 Updating Neovim environment packages..."
+
+# Update Python packages for Neovim
+if command -v pyenv >/dev/null 2>&1; then
+    echo "🐍 Updating Python packages for Neovim..."
+    
+    # Initialize pyenv
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+    
+    # Check if neovim3 virtualenv exists
+    if pyenv versions | grep -q "neovim3"; then
+        # Update packages in Neovim virtual environment
+        pyenv activate neovim3
+        pip install --upgrade pip
+        pip install --upgrade neovim coverage pynvim
+        echo "✅ Neovim Python packages updated"
+        pyenv deactivate
+    else
+        echo "⚠️  Neovim Python environment not found. Run initial setup first."
+    fi
+elif command -v python3 >/dev/null 2>&1; then
+    # Fallback to system Python
+    echo "⚠️  Using system Python to update packages..."
+    python3 -m pip install --user --upgrade neovim pynvim
+fi
+
+# Update Node.js packages for Neovim
+if [[ -d "$HOME/.nvm" ]]; then
+    echo "📦 Updating Node.js packages for Neovim..."
+    
+    # Initialize nvm
+    export NVM_DIR="$HOME/.nvm"
+    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+    
+    if command -v nvm >/dev/null 2>&1; then
+        # Use LTS version
+        nvm use --lts
+        
+        # Update Neovim Node.js package
+        npm update -g neovim
+        echo "✅ Neovim Node.js package updated"
+    fi
+elif command -v npm >/dev/null 2>&1; then
+    # Fallback to system npm
+    echo "⚠️  Using system npm to update packages..."
+    npm update -g neovim
+fi
+
+echo "✅ Neovim environment packages updated successfully!"
+
+# Hash to trigger updates when script changes
+# Script hash: {{ include ".chezmoiscripts/run_onchange_35-update-neovim-environment.sh.tmpl" | sha256sum }}

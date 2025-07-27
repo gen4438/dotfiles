@@ -66,6 +66,42 @@ chezmoi apply
 chezmoi edit ~/.bashrc
 ```
 
+### Updating Tools and Dependencies
+
+The repository uses two complementary update mechanisms:
+
+#### 1. Automatic Updates via chezmoi
+- **External tools** (fzf, pyenv, nvm, etc.) are managed by `.chezmoiexternal.toml`
+- Updates happen automatically every 7 days when running `chezmoi apply`
+- Force immediate update: `chezmoi apply --refresh-externals`
+
+#### 2. Development Tool Updates
+Use the included Makefile for comprehensive updates:
+
+```bash
+# Update everything (recommended)
+make update
+
+# Update only development tools (pyenv, nvm, fzf, tmux plugins)
+make update-tools
+
+# Update only Neovim plugins and Python/Node packages
+make update-nvim
+
+# Update only shell completions
+make update-completions
+```
+
+**Important**: While `chezmoi apply` updates the tool repositories, it doesn't:
+- Install new Python/Node.js versions
+- Update pip/npm packages
+- Update Neovim plugins
+- Update tmux plugins
+
+Use `make update` periodically to keep everything current.
+
+**Note**: When a new Python version is installed, the Neovim Python virtual environment (`neovim3`) is automatically recreated with the latest Python version to ensure compatibility and security.
+
 ## What Gets Installed
 
 ### Packages (OS-specific)
