@@ -119,7 +119,6 @@ Documents/WindowsPowerShell/
 # ==============================================================================
 
 # SSH specific files (should be manually managed)
-.ssh/id_*
 .ssh/known_hosts*
 .ssh/authorized_keys*
 .ssh/sockets/
