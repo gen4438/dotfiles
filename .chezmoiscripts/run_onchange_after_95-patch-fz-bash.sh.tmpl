@@ -1,5 +1,6 @@
 #!/bin/bash
 # Create bash-compatible version of fz.sh after external updates
+# fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir "bin/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir "bin/fz/fz.sh") | sha256sum }}{{ end }}
 
 FZ_DIR="$HOME/bin/fz"
 FZ_SH_FILE="$FZ_DIR/fz.sh"

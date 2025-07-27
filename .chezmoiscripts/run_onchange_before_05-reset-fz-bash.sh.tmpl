@@ -1,5 +1,6 @@
 #!/bin/bash
 # Reset fz.bash before external repository updates to prevent git conflicts
+# fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir "bin/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir "bin/fz/fz.sh") | sha256sum }}{{ end }}
 
 FZ_DIR="$HOME/bin/fz"
 FZ_BASH_FILE="$FZ_DIR/fz.bash"
