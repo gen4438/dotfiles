@@ -1,5 +1,8 @@
-{{- if ne .chezmoi.os "android" -}}
+{{- if eq .chezmoi.os "android" -}}
+#!/data/data/com.termux/files/usr/bin/bash
+{{- else -}}
 #!/bin/bash
+{{- end -}}
 # Setup Neovim Python and Node.js environments
 # This script runs once to set up Neovim-specific dependencies
 
@@ -87,4 +90,3 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 
 echo "✅ Neovim environment setup completed"
-{{- end -}}

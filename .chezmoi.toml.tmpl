@@ -4,6 +4,11 @@
 {{- $age_identity := promptStringOnce . "age.identity" "Age identity file path" "~/.config/chezmoi/key.txt" -}}
 {{- $age_recipient := promptStringOnce . "age.recipient" "Age recipient (public key)" "age1lnt3hvd436d02uaen8nelcn6aywephrx7lx6ctxjyeyqwv82x59s8kk7dx" -}}
 
+{{- if eq .chezmoi.os "android" }}
+# Android/Termux specific configuration
+tempDir = "{{ .chezmoi.homeDir }}/tmp"
+{{- end }}
+
 encryption = "age"
 [age]
     identity = {{ $age_identity | quote }}

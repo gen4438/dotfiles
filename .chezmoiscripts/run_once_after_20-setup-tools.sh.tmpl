@@ -1,5 +1,8 @@
-{{- if ne .chezmoi.os "android" -}}
+{{- if eq .chezmoi.os "android" -}}
+#!/data/data/com.termux/files/usr/bin/bash
+{{- else -}}
 #!/bin/bash
+{{- end -}}
 # Setup development tools after package installation
 
 set -e
@@ -178,4 +181,3 @@ echo "Setting up Windows specific tools..."
 {{- end }}
 
 echo "✅ Development tools setup completed"
-{{- end -}}
