@@ -1,44 +1,37 @@
 # Zsh-specific key bindings
+# Note: vi mode is handled by oh-my-zsh vi-mode plugin
 
-# Use emacs-style key bindings
-bindkey -e
+# Unified vi mode indicator function (works with and without byobu)
+vi_mode_prompt_info() {
+  echo "${${KEYMAP/vicmd/\e[31m(cmd)\e[0m}/(main|viins)/\e[34m(ins)\e[0m}"
+}
 
-# Enhanced history search
-bindkey '^R' history-incremental-search-backward
-bindkey '^S' history-incremental-search-forward
+# Update prompt when keymap changes
+function zle-keymap-select() {
+  zle reset-prompt
+}
+zle -N zle-keymap-select
 
-# Word movement (Alt + arrow keys)
-bindkey '^[[1;3C' forward-word     # Alt + Right
-bindkey '^[[1;3D' backward-word    # Alt + Left
+# Initialize with insert mode
+KEYMAP=viins
 
-# Line editing shortcuts
-bindkey '^A' beginning-of-line     # Ctrl + A
-bindkey '^E' end-of-line          # Ctrl + E
-bindkey '^K' kill-line            # Ctrl + K
-bindkey '^U' backward-kill-line   # Ctrl + U
-bindkey '^W' backward-kill-word   # Ctrl + W
+# Only add bindings that are not provided by default
+bindkey -M viins '^K' kill-line  # Ctrl+K: delete from cursor to end of line
+bindkey -M viins '^U' backward-kill-line  # Ctrl+U: delete from beginning to cursor
 
-# Delete key
-bindkey '^[[3~' delete-char       # Delete
+# Enable ctrl-k and ctrl-u in command mode as well
+bindkey -M vicmd '^K' kill-line  # Ctrl+K in command mode
+bindkey -M vicmd '^U' backward-kill-line  # Ctrl+U in command mode
 
-# Home and End keys
-bindkey '^[[H' beginning-of-line  # Home
-bindkey '^[[F' end-of-line        # End
+# TAB completion - first tab shows list, second tab starts menu completion
+# Remove menu-complete binding to allow default completion behavior
+# bindkey '^I' menu-complete          # Commented out to use default tab behavior
+bindkey '^[[Z' reverse-menu-complete # Shift-TAB: menu-complete-backward
 
-# Page Up / Page Down for history
-bindkey '^[[5~' up-line-or-history     # Page Up
-bindkey '^[[6~' down-line-or-history   # Page Down
-
-# Ctrl + left/right for word movement
-bindkey '^[[1;5C' forward-word    # Ctrl + Right
-bindkey '^[[1;5D' backward-word   # Ctrl + Left
-
-# Alt + Backspace to delete word
-bindkey '^[^?' backward-kill-word
-
-# Ctrl + Delete to delete word forward
-bindkey '^[[3;5~' kill-word
-
-# Quick directory navigation
-bindkey '^[u' up-line-or-beginning-search    # Alt + U
-bindkey '^[d' down-line-or-beginning-search  # Alt + D
+# Menu completion navigation keys  
+bindkey -M menuselect '^I' menu-complete           # TAB: next (alphabetical)
+bindkey -M menuselect '^[[Z' reverse-menu-complete # Shift-TAB: previous (alphabetical)
+bindkey -M menuselect '^[[C' menu-complete         # Right arrow: next 
+bindkey -M menuselect '^[[D' reverse-menu-complete # Left arrow: previous  
+bindkey -M menuselect '^[[B' down-line-or-history  # Down arrow: next row
+bindkey -M menuselect '^[[A' up-line-or-history    # Up arrow: previous row

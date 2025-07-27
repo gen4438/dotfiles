@@ -101,9 +101,6 @@ setopt AUTO_MENU            # Show completion menu on a successive tab press
 setopt AUTO_LIST            # Automatically list choices on ambiguous completion
 setopt AUTO_PARAM_SLASH     # If completed parameter is a directory, add a trailing slash
 
-# Key bindings
-bindkey -v  # Use vi key bindings (as in working dotfiles)
-
 # History search
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
@@ -134,3 +131,15 @@ fi
 
 # Load byobu prompt if available
 [ -r "$BYOBU_CONFIG_DIR/prompt" ] && . "$BYOBU_CONFIG_DIR/prompt"
+
+# Override oh-my-zsh completion settings (must be at end)
+setopt GLOB_DOTS
+zstyle ':completion:*' menu select=0  # Show list on first tab, select on second tab
+zstyle ':completion:*' special-dirs false
+zstyle ':completion:*:*:*:*:*' file-patterns '*:all-files' '.*:hidden-files'
+
+# Add vi mode to existing prompt when not using byobu
+if [[ -z "$BYOBU_BACKEND" ]]; then
+  # Remove newlines from existing prompt and prepend vi mode indicator  
+  export PROMPT='$(vi_mode_prompt_info)'"${PROMPT//$'\n'/}"
+fi

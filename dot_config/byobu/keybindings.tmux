@@ -7,4 +7,3 @@ bind-key -n C-F3 display-panes \; swap-pane -s :. -t :.- \; select-pane -t :.
 bind-key -n C-F4 display-panes \; swap-pane -s :. -t :.+ \; select-pane -t :.
 
 set -g prefix F12
-unbind-key -n C-a
