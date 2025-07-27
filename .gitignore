@@ -18,12 +18,30 @@
 **/*.cert
 **/*.cer
 
+# SSH directory specific protection (chezmoi naming convention)
+dot_ssh/id_rsa*
+dot_ssh/id_dsa*
+dot_ssh/id_ecdsa*
+dot_ssh/id_ed25519*
+dot_ssh/*_rsa*
+dot_ssh/*_dsa*
+dot_ssh/*_ecdsa*
+dot_ssh/*_ed25519*
+
+# Also protect original paths (in case of manual copies)
+.ssh/id_rsa*
+.ssh/id_dsa*
+.ssh/id_ecdsa*
+.ssh/id_ed25519*
+
 # GPG/PGP Keys
 **/*.gpg
-**/*.asc
 **/*.pgp
 private_**/gnupg/
 private_**/gpg/
+
+# Note: *.asc files are excluded above but we allow encrypted dotfiles
+# Encrypted dotfiles will be handled by chezmoi naming convention
 
 # API Keys and Tokens
 **/*token*
@@ -117,6 +135,11 @@ Thumbs.db
 !dot_gitignore_global
 !dot_gitconfig*
 !dot_gitattributes
+
+# Allow encrypted SSH keys and sensitive files
+!**/*.asc
+!**/encrypted_*
+!private_**/id_*.asc
 
 # Configuration files
 !**/*.conf
