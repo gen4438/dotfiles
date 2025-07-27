@@ -22,6 +22,12 @@
     refreshPeriod = "168h"
 
 {{- if ne .chezmoi.os "darwin" }}
+# zplug (zsh plugin manager)
+[".zplug"]
+    type = "git-repo"
+    url = "https://github.com/zplug/zplug.git"
+    refreshPeriod = "168h"
+
 # tmux plugin manager
 [".tmux/plugins/tpm"]
     type = "git-repo"

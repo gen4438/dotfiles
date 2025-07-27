@@ -10,21 +10,28 @@ fi
 {{- if eq .chezmoi.os "linux" }}
 # Linux - check common zplug locations
 if [[ -f /usr/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/share/zplug
     source /usr/share/zplug/init.zsh
 elif [[ -f ~/.zplug/init.zsh ]]; then
+    export ZPLUG_HOME=~/.zplug
     source ~/.zplug/init.zsh
 fi
 {{- else if eq .chezmoi.os "darwin" }}
 # macOS - check brew zplug location
 if [[ -f /opt/homebrew/opt/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/opt/homebrew/opt/zplug
     source /opt/homebrew/opt/zplug/init.zsh
 elif [[ -f /usr/local/opt/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/local/opt/zplug
     source /usr/local/opt/zplug/init.zsh
 elif [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/opt/homebrew/share/zplug
     source /opt/homebrew/share/zplug/init.zsh
 elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
+    export ZPLUG_HOME=/usr/local/share/zplug
     source /usr/local/share/zplug/init.zsh
 elif [[ -f ~/.zplug/init.zsh ]]; then
+    export ZPLUG_HOME=~/.zplug
     source ~/.zplug/init.zsh
 fi
 {{- end }}
@@ -57,6 +64,16 @@ if command -v zplug &> /dev/null; then
     zplug "greymd/tmux-xpanes"
     zplug "qoomon/zsh-lazyload"
 
+    # Completion - initialize BEFORE loading plugins to prevent conflicts
+    fpath+=~/.zfunc
+    autoload -Uz compinit && compinit -C
+    
+    # Load local configuration modules via zplug
+    zplug "$CONFIG_DIR/completion.d", from:local, if:"[ -d $CONFIG_DIR/completion.d ]"
+    zplug "$CONFIG_DIR/functions.d", from:local, if:"[ -d $CONFIG_DIR/functions.d ]"
+    zplug "$CONFIG_DIR/aliases.d", from:local, if:"[ -d $CONFIG_DIR/aliases.d ]"
+    zplug "$CONFIG_DIR/keybindings.d", from:local, if:"[ -d $CONFIG_DIR/keybindings.d ]"
+
     # Install plugins if there are plugins that have not been installed
     if ! zplug check --verbose; then
         printf "Install? [y/N]: "
@@ -68,10 +85,6 @@ if command -v zplug &> /dev/null; then
     # Load plugins
     zplug load
 fi
-
-# Completion
-fpath+=~/.zfunc
-autoload -Uz compinit && compinit -C
 
 # Load common shell configuration (shared with bash)
 # This includes modular loading of aliases, functions, completions, and keybindings
@@ -100,7 +113,7 @@ setopt AUTO_LIST            # Automatically list choices on ambiguous completion
 setopt AUTO_PARAM_SLASH     # If completed parameter is a directory, add a trailing slash
 
 # Key bindings
-bindkey -e  # Use emacs key bindings
+bindkey -v  # Use vi key bindings (as in working dotfiles)
 
 # History search
 bindkey '^[[A' history-substring-search-up
@@ -114,6 +127,13 @@ alias zshconfig='${EDITOR:-vim} ~/.zshrc'
 
 # fzf integration for zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Custom fzf options
+if type "rg" > /dev/null 2>&1; then
+  export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-y:toggle-all,ctrl-s:toggle-sort'
+  export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git/*'"
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
 
 # Load local zsh configuration if exists
 if [ -f "$HOME/.zshrc_local" ]; then
