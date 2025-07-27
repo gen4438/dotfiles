@@ -4,6 +4,7 @@
 #!/bin/bash
 {{- end }}
 # Setup development tools after package installation
+# script hash: {{ include ".chezmoiscripts/run_once_after_20-setup-tools.sh.tmpl" | sha256sum }}
 
 set -e
 
@@ -11,10 +12,16 @@ echo "Setting up development tools..."
 
 # Setup fzf
 if [[ -d "$HOME/.fzf" ]]; then
-    echo "Setting up fzf..."
-    cd "$HOME/.fzf"
-    ./install --all
-    echo "✅ fzf setup completed"
+    echo "Checking fzf setup..."
+    # Check if fzf is already properly installed
+    if [[ ! -f "$HOME/.fzf.bash" ]] || [[ ! -f "$HOME/.fzf.zsh" ]]; then
+        echo "Setting up fzf..."
+        cd "$HOME/.fzf"
+        ./install --all --no-update-rc
+        echo "✅ fzf setup completed"
+    else
+        echo "✅ fzf already configured"
+    fi
 fi
 
 # Setup pyenv
@@ -104,39 +111,46 @@ fi
 {{- end }}
 
 if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
-    echo "Installing zplug plugins..."
+    echo "Checking zplug plugins..."
     
     # zplug requires zsh, so we run it in a zsh subshell
     if command -v zsh >/dev/null 2>&1; then
-        zsh -c "
-            export ZPLUG_HOME='$ZPLUG_HOME'
-            source '$ZPLUG_HOME/init.zsh'
-            zstyle ':zplug:tag' depth 1
-            
-            # Define plugins (matching .zshrc.tmpl)
-            zplug 'lib/completion', from:oh-my-zsh
-            zplug 'lib/directories', from:oh-my-zsh
-            zplug 'lib/functions', from:oh-my-zsh
-            zplug 'lib/history', from:oh-my-zsh
-            zplug 'plugins/git', from:oh-my-zsh
-            zplug 'plugins/dotenv', from:oh-my-zsh
-            zplug 'plugins/poetry', from:oh-my-zsh
-            zplug 'plugins/npm', from:oh-my-zsh
-            zplug 'plugins/kubectl', from:oh-my-zsh
-            zplug 'plugins/gh', from:oh-my-zsh
-            zplug 'plugins/vi-mode', from:oh-my-zsh
-            zplug 'sindresorhus/pure', use:pure.zsh, from:github, as:theme
-            zplug 'mafredri/zsh-async', from:github
-            zplug 'zsh-users/zsh-history-substring-search', defer:2
-            zplug 'changyuheng/fz', defer:1
-            zplug 'rupa/z', use:z.sh
-            zplug 'greymd/tmux-xpanes'
-            zplug 'qoomon/zsh-lazyload'
-            
-            # Install plugins
-            zplug install
-        "
-        echo "✅ zplug plugins installed"
+        # Check if plugins are already installed by checking for a key plugin directory
+        ZPLUG_REPOS_DIR="$HOME/.zplug/repos"
+        if [[ ! -d "$ZPLUG_REPOS_DIR/sindresorhus/pure" ]] || [[ ! -d "$ZPLUG_REPOS_DIR/robbyrussell/oh-my-zsh" ]]; then
+            echo "Installing zplug plugins..."
+            zsh -c "
+                export ZPLUG_HOME='$ZPLUG_HOME'
+                source '$ZPLUG_HOME/init.zsh'
+                zstyle ':zplug:tag' depth 1
+                
+                # Define plugins (matching .zshrc.tmpl)
+                zplug 'lib/completion', from:oh-my-zsh
+                zplug 'lib/directories', from:oh-my-zsh
+                zplug 'lib/functions', from:oh-my-zsh
+                zplug 'lib/history', from:oh-my-zsh
+                zplug 'plugins/git', from:oh-my-zsh
+                zplug 'plugins/dotenv', from:oh-my-zsh
+                zplug 'plugins/poetry', from:oh-my-zsh
+                zplug 'plugins/npm', from:oh-my-zsh
+                zplug 'plugins/kubectl', from:oh-my-zsh
+                zplug 'plugins/gh', from:oh-my-zsh
+                zplug 'plugins/vi-mode', from:oh-my-zsh
+                zplug 'sindresorhus/pure', use:pure.zsh, from:github, as:theme
+                zplug 'mafredri/zsh-async', from:github
+                zplug 'zsh-users/zsh-history-substring-search', defer:2
+                zplug 'changyuheng/fz', defer:1
+                zplug 'rupa/z', use:z.sh
+                zplug 'greymd/tmux-xpanes'
+                zplug 'qoomon/zsh-lazyload'
+                
+                # Install plugins (ignore "no packages to install" error)
+                zplug install || [[ \$? -eq 1 && \$(zplug list | wc -l) -gt 0 ]]
+            "
+            echo "✅ zplug plugins installed"
+        else
+            echo "✅ zplug plugins already installed"
+        fi
     else
         echo "⚠️ zsh not available, skipping zplug plugin installation"
     fi
@@ -146,13 +160,19 @@ fi
 
 # Setup tmux plugin manager
 if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
-    echo "Setting up tmux plugin manager..."
+    echo "Checking tmux plugin manager..."
     
     # Install tmux plugins if tmux is available
     if command -v tmux >/dev/null 2>&1; then
-        # Run TPM install script
-        "$HOME/.tmux/plugins/tpm/bin/install_plugins"
-        echo "✅ tmux plugins installed"
+        # Check if plugins are already installed by looking for common plugin directories
+        if [[ ! -d "$HOME/.tmux/plugins/tmux-sensible" ]] && [[ ! -d "$HOME/.tmux/plugins/tmux-yank" ]]; then
+            echo "Installing tmux plugins..."
+            # Run TPM install script
+            "$HOME/.tmux/plugins/tpm/bin/install_plugins"
+            echo "✅ tmux plugins installed"
+        else
+            echo "✅ tmux plugins already installed"
+        fi
     fi
 fi
 

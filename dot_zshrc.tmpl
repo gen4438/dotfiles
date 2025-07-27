@@ -1,10 +1,6 @@
 # Zsh configuration
 # Managed by chezmoi - see dot_zshrc.tmpl
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
 
 # Plugin management
 {{- if eq .chezmoi.os "linux" }}
@@ -53,8 +49,6 @@ if command -v zplug &> /dev/null; then
     zplug "plugins/gh", from:oh-my-zsh
     zplug "plugins/vi-mode", from:oh-my-zsh
 
-    # Theme
-    zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
 
     # Other plugins
     zplug "mafredri/zsh-async", from:github
@@ -135,5 +129,5 @@ if [ -f "$HOME/.zshrc_local" ]; then
     source "$HOME/.zshrc_local"
 fi
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Simple single-line prompt
+PS1='%n@%m:%~$ '

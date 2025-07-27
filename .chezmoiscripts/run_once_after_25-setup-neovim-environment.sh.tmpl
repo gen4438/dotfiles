@@ -5,6 +5,7 @@
 {{- end }}
 # Setup Neovim Python and Node.js environments
 # This script runs once to set up Neovim-specific dependencies
+# script hash: {{ include ".chezmoiscripts/run_once_after_25-setup-neovim-environment.sh.tmpl" | sha256sum }}
 
 set -e
 
@@ -33,10 +34,17 @@ if command -v pyenv >/dev/null 2>&1; then
         fi
         
         # Install Neovim Python packages
-        echo "Installing Python packages for Neovim..."
+        echo "Checking Python packages for Neovim..."
         pyenv activate neovim3
-        pip install --upgrade pip
-        pip install --upgrade neovim coverage pynvim
+        
+        # Check if packages are already installed
+        if ! python -c "import pynvim, neovim" 2>/dev/null; then
+            echo "Installing Python packages for Neovim..."
+            pip install --upgrade pip
+            pip install --upgrade neovim coverage pynvim
+        else
+            echo "✅ Python packages for Neovim already installed"
+        fi
         
         # Get Python path for Neovim config
         PYTHON_PATH=$(pyenv which python)
@@ -64,15 +72,26 @@ if [[ -d "$HOME/.nvm" ]]; then
         nvm use --lts
         
         # Install Neovim Node.js package
-        echo "Installing Node.js packages for Neovim..."
-        npm install -g neovim
+        echo "Checking Node.js packages for Neovim..."
         
-        echo "✅ Neovim Node.js package installed"
+        # Check if neovim package is already installed
+        if ! npm list -g neovim >/dev/null 2>&1; then
+            echo "Installing Node.js packages for Neovim..."
+            npm install -g neovim
+            echo "✅ Neovim Node.js package installed"
+        else
+            echo "✅ Neovim Node.js package already installed"
+        fi
     fi
 elif command -v npm >/dev/null 2>&1; then
     echo "⚠️  nvm not found, using system npm..."
-    # Install globally with system npm
-    npm install -g neovim
+    # Check if neovim package is already installed
+    if ! npm list -g neovim >/dev/null 2>&1; then
+        echo "Installing Node.js packages for Neovim..."
+        npm install -g neovim
+    else
+        echo "✅ Neovim Node.js package already installed"
+    fi
 fi
 
 # Install Neovim providers health check
