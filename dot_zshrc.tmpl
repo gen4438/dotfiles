@@ -68,11 +68,6 @@ if command -v zplug &> /dev/null; then
     fpath+=~/.zfunc
     autoload -Uz compinit && compinit -C
     
-    # Load local configuration modules via zplug
-    zplug "$CONFIG_DIR/completion.d", from:local, if:"[ -d $CONFIG_DIR/completion.d ]"
-    zplug "$CONFIG_DIR/functions.d", from:local, if:"[ -d $CONFIG_DIR/functions.d ]"
-    zplug "$CONFIG_DIR/aliases.d", from:local, if:"[ -d $CONFIG_DIR/aliases.d ]"
-    zplug "$CONFIG_DIR/keybindings.d", from:local, if:"[ -d $CONFIG_DIR/keybindings.d ]"
 
     # Install plugins if there are plugins that have not been installed
     if ! zplug check --verbose; then
