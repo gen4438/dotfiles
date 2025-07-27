@@ -214,14 +214,17 @@ age-keygen -o ~/.config/chezmoi/key.txt
 chmod 600 ~/.config/chezmoi/key.txt
 
 # Configure chezmoi for encryption
-cat >> ~/.config/chezmoi/chezmoi.toml << EOF
+# Edit ~/.config/chezmoi/chezmoi.toml and add at the beginning:
+chezmoi edit-config
 
+# Add the following configuration (replace recipient with your age public key):
 encryption = "age"
 [age]
     identity = "~/.config/chezmoi/key.txt"
-    recipient = "$(age-keygen -y ~/.config/chezmoi/key.txt)"
-EOF
+    recipient = "your-age-public-key"
 ```
+
+Note: Get your public key with: `age-keygen -y ~/.config/chezmoi/key.txt`
 
 ### Encrypted Files
 

@@ -27,6 +27,15 @@ dot_ssh/*_rsa*
 dot_ssh/*_dsa*
 dot_ssh/*_ecdsa*
 dot_ssh/*_ed25519*
+# Allow public keys to be included
+!dot_ssh/id_rsa*.pub
+!dot_ssh/id_dsa*.pub
+!dot_ssh/id_ecdsa*.pub
+!dot_ssh/id_ed25519*.pub
+!dot_ssh/*_rsa*.pub
+!dot_ssh/*_dsa*.pub
+!dot_ssh/*_ecdsa*.pub
+!dot_ssh/*_ed25519*.pub
 
 # Also protect original paths (in case of manual copies)
 .ssh/id_rsa*

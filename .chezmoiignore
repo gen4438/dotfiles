@@ -36,6 +36,7 @@ manual-configs/
 # SSH agent sockets and session data
 .config/byobu/.ssh-agent
 .config/byobu/.tmux/resurrect/
+.ssh/sockets/
 .ssh/ssh_auth_sock*
 .ssh/agent.*
 
@@ -121,7 +122,6 @@ Documents/WindowsPowerShell/
 # SSH specific files (should be manually managed)
 .ssh/known_hosts*
 .ssh/authorized_keys*
-.ssh/sockets/
 
 # ==============================================================================
 # USER DATA DIRECTORIES - Never manage these
