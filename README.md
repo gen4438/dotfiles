@@ -4,8 +4,8 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), featuring 
 
 ## Features
 
-- **Cross-platform support**: Linux, macOS, and Windows (WSL)
-- **Automatic package installation**: OS-specific package managers (apt, brew, winget)
+- **Cross-platform support**: Linux (Ubuntu/Debian, RHEL/Fedora, Arch), macOS, Windows, and Termux
+- **Automatic package installation**: OS-specific package managers (apt, dnf, pacman, brew, winget, pkg)
 - **External tool management**: Automatic download and setup of development tools
 - **Template-based configuration**: OS-specific settings using Go templates
 - **Comprehensive shell setup**: Unified bash and zsh configurations
@@ -14,16 +14,32 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/), featuring 
 
 ## Quick Start
 
+### Installing chezmoi
+
+#### Ubuntu
+```bash
+sudo snap install chezmoi --classic
+```
+
+#### macOS
+```bash
+brew install chezmoi
+```
+
+#### Windows
+```powershell
+winget install twpayne.chezmoi
+```
+
+#### Termux
+```bash
+pkg install chezmoi
+```
+
 ### First-time Setup
 
 ```bash
-# Install chezmoi (if not already installed)
-sh -c "$(curl -fsLS get.chezmoi.io)"
-
-# Initialize chezmoi with my dotfiles repository
-chezmoi init gen4438
-
-# Clone and apply dotfiles
+# Clone and apply dotfiles in one command
 chezmoi init --apply gen4438
 ```
 
@@ -53,15 +69,18 @@ chezmoi edit ~/.bashrc
 ## What Gets Installed
 
 ### Packages (OS-specific)
-- **Linux (apt)**: build-essential, ripgrep, fd-find, bat, direnv, xclip, jq
-- **macOS (brew)**: Essential development tools and utilities
-- **Windows (winget)**: Git, Python, Node.js, VSCode, PowerToys, etc.
+- **Linux**: build-essential, ripgrep, fd-find, bat, git-delta, direnv, neovim, gh, etckeeper
+  - Ubuntu/Debian: Uses apt with PPA for latest versions
+  - RHEL/Fedora: Uses dnf with EPEL repository
+  - Arch/Manjaro: Uses pacman with AUR support
+- **macOS**: Core utils, modern CLI tools, development environment via Homebrew
+- **Windows**: Git, Python, Node.js, VSCode, PowerToys via winget
+- **Termux**: Mobile development environment with adapted packages
 
 ### Development Tools (automatically managed)
 - **fzf**: Fuzzy finder for command line
 - **pyenv**: Python version manager
 - **nvm**: Node.js version manager  
-- **anyenv**: Multi-language environment manager
 - **tmux**: Terminal multiplexer with plugin manager
 - **z**: Smart directory navigation
 
@@ -77,9 +96,8 @@ chezmoi edit ~/.bashrc
   - Shared Lua configuration with 30+ plugins
   - Cross-platform snippet support
 - **Windows-Specific Setup**: Automatic system configuration
-  - Keyboard repeat rate optimization (faster key response)
-  - User/local bin directories creation and PATH setup
-  - PowerShell profile directory initialization
+  - Neovim configuration junction creation
+  - Git and development environment setup
 
 ## Convenience Commands
 
@@ -121,7 +139,8 @@ make doctor            # Run system diagnostics
 ### Adding Packages
 - **Linux**: Edit `.chezmoiscripts/run_once_before_10-install-packages-linux.sh.tmpl`
 - **macOS**: Edit `.chezmoiscripts/run_once_before_10-install-packages-darwin.sh.tmpl`  
-- **Windows**: Edit `scripts/packages/winget.json`
+- **Windows**: Edit `.chezmoiscripts/run_once_before_20-install-packages-windows.ps1.tmpl`
+- **Termux**: Edit `.chezmoiscripts/run_once_before_10-install-packages-termux.sh.tmpl`
 
 ### Adding External Tools
 Edit `.chezmoiexternal.toml` to add new tools:
@@ -141,26 +160,14 @@ Edit `.chezmoiexternal.toml` to add new tools:
 ## Useful Commands
 
 ```bash
-# Check what files would be changed
-chezmoi status
-
-# Show differences
-chezmoi diff
-
-# Edit a file in chezmoi
-chezmoi edit ~/.bashrc
+# Enter the source directory
+chezmoi cd
 
 # Re-add a file after modifying it outside chezmoi
 chezmoi re-add ~/.bashrc
 
-# Enter the source directory
-chezmoi cd
-
 # Force refresh external tools
 chezmoi apply --refresh-externals
-
-# Update from repository
-chezmoi update
 ```
 
 ## Configuration Updates
