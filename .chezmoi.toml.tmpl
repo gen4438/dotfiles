@@ -1,6 +1,10 @@
 {{- $name := promptStringOnce . "git.name" "Git user name" -}}
 {{- $email := promptStringOnce . "git.email" "Git email address" -}}
+{{- $ssh_identity_file := promptStringOnce . "ssh_identity_file" "SSH identity file path (leave empty for default)" -}}
 
 [data.git]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
+
+[data]
+    ssh_identity_file = {{ $ssh_identity_file | quote }}
