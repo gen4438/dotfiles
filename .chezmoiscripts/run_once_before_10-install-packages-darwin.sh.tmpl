@@ -26,36 +26,58 @@ brew update
 
 # Install essential packages using Homebrew Bundle
 brew bundle --file=/dev/stdin <<EOF
-# Essential development tools
-brew "git"
+# Core utilities
+brew "coreutils"
 brew "curl"
 brew "wget"
-brew "vim"
-brew "neovim"
-brew "ripgrep"
-brew "fd"
-brew "bat"
+brew "rsync"
+brew "unzip"
+brew "tree"
+brew "pwgen"
+
+# Development tools
+brew "git"
 brew "git-delta"
-brew "direnv"
-brew "jq"
-brew "ctags"
+brew "gh"
 brew "cmake"
+brew "ninja"
+brew "ctags"
 brew "pkg-config"
+
+# Programming languages and build dependencies
 brew "python"
+brew "node"
+brew "lua"
+brew "luajit"
+brew "lua-language-server"
+brew "readline"
+brew "sqlite"
 brew "xz"
 brew "zlib"
-brew "node"
-brew "tree"
-brew "tmux"
-brew "fzf"
-brew "unzip"
 
 # Version managers
 brew "nvm"
 brew "pyenv"
 brew "pyenv-virtualenv"
 
-# Shell plugins
+# Text editors and terminal tools
+brew "neovim"
+brew "vim"
+brew "tmux"
+brew "byobu"
+
+# Modern CLI tools
+brew "bat"
+brew "fd"
+brew "fzf"
+brew "ripgrep"
+brew "jq"
+brew "direnv"
+brew "emojify"
+
+# Shell enhancements
+brew "bash-completion"
+brew "zsh-completions"
 brew "zplug"
 
 # macOS specific tools

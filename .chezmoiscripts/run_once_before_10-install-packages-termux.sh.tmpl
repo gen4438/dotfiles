@@ -1,0 +1,47 @@
+{{- if eq .chezmoi.os "android" -}}
+#!/data/data/com.termux/files/usr/bin/bash
+# Install essential packages for Termux
+
+set -e
+
+echo "Installing essential packages for Termux..."
+
+# Update package lists
+pkg update -y
+
+# Install essential packages
+pkg install -y \
+    build-essential \
+    curl \
+    wget \
+    git \
+    vim \
+    ripgrep \
+    fd \
+    bat \
+    git-delta \
+    direnv \
+    termux-api \
+    jq \
+    python \
+    neovim \
+    gh
+
+# Install additional development tools
+pkg install -y \
+    clang \
+    make \
+    pkg-config \
+    libffi \
+    openssl \
+    zlib \
+    readline \
+    sqlite \
+    libxml2 \
+    libxslt
+
+# Setup storage access
+termux-setup-storage
+
+echo "✅ Essential packages installed successfully for Termux"
+{{- end }}
