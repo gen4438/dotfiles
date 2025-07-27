@@ -16,10 +16,13 @@ if [[ -d "$HOME/.pyenv" ]]; then
     echo "🐍 Updating pyenv and Python..."
     
     # Update pyenv itself
+    # On darwin, pyenv is managed by Homebrew, so skip git pull to avoid conflicts
+    {{- if ne .chezmoi.os "darwin" }}
     cd "$HOME/.pyenv" && git pull
     if [[ -d "$HOME/.pyenv/plugins/pyenv-virtualenv" ]]; then
         cd "$HOME/.pyenv/plugins/pyenv-virtualenv" && git pull
     fi
+    {{- end }}
     
     # Initialize pyenv in current session
     export PYENV_ROOT="$HOME/.pyenv"
@@ -98,8 +101,11 @@ if [[ -d "$HOME/.nvm" ]]; then
     echo "📦 Updating nvm and Node.js..."
     
     # Update nvm itself
+    # Update nvm itself
+    # On darwin, nvm is managed by Homebrew, so skip git pull to avoid conflicts
+    {{- if ne .chezmoi.os "darwin" }}
     cd "$HOME/.nvm" && git pull
-    
+    {{- end }}
     # Source nvm in current session
     export NVM_DIR="$HOME/.nvm"
     [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
