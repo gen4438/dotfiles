@@ -128,6 +128,7 @@ make doctor            # Run system diagnostics
   - `git/` - Git global configuration
 - `.chezmoiexternal.toml` - External tool management
 - `.chezmoiscripts/` - Automatic setup scripts
+- `manual-configs/` - Manual configurations and encrypted personal files
 
 ## Customization
 
@@ -197,6 +198,78 @@ zsh -c "source ~/.zshrc && echo 'Zsh test: EDITOR=' \$EDITOR"
 ```
 
 See `docs/shell-testing-guide.md` for comprehensive testing procedures.
+
+## Encryption
+
+This repository uses Age encryption to protect personal configuration files containing sensitive information.
+
+### Setup Encryption
+
+Age encryption is automatically configured during the initial setup. If you need to set it up manually:
+
+```bash
+# Generate Age key pair
+mkdir -p ~/.config/chezmoi
+age-keygen -o ~/.config/chezmoi/key.txt
+chmod 600 ~/.config/chezmoi/key.txt
+
+# Configure chezmoi for encryption
+cat >> ~/.config/chezmoi/chezmoi.toml << EOF
+encryption = "age"
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "$(age-keygen -y ~/.config/chezmoi/key.txt)"
+EOF
+```
+
+### Encrypted Files
+
+Personal configuration files are stored encrypted:
+- Location: `manual-configs/` directory
+- Format: Files with `.age` extension
+- Examples: dconf settings, personal keymaps, etc.
+
+### Working with Encrypted Files
+
+#### Using chezmoi encryption (for dotfiles)
+
+```bash
+# Add encrypted file to chezmoi
+chezmoi add --encrypt ~/.ssh/id_rsa
+
+# Edit encrypted file
+chezmoi edit ~/.ssh/id_rsa
+
+# View decrypted content
+chezmoi cat ~/.ssh/id_rsa
+
+# Apply encrypted files
+chezmoi apply
+```
+
+#### Manual encryption (for manual-configs)
+
+For files in `manual-configs/` directory that are not managed by chezmoi:
+
+```bash
+# Decrypt and view file
+age -d -i ~/.config/chezmoi/key.txt encrypt_{FILENAME}.ini.age
+
+# Create new encrypted file
+FILENAME="your-config-file"
+age -r $(age-keygen -y ~/.config/chezmoi/key.txt) -o encrypt_${FILENAME}.ini.age ${FILENAME}.ini
+rm ${FILENAME}.ini  # Remove plaintext
+
+# Backup your private key (IMPORTANT!)
+cp ~/.config/chezmoi/key.txt /secure/backup/location/
+```
+
+### Security Notes
+
+- **Never commit the private key** (`~/.config/chezmoi/key.txt`) to the repository
+- **Backup your private key** to multiple secure locations
+- **Lost keys mean permanently encrypted files** - recovery is impossible
+- The `age` package is automatically installed during setup
 
 ## Troubleshooting
 
