@@ -76,6 +76,7 @@ brew "direnv"
 brew "emojify"
 
 # Shell enhancements
+brew "zsh"
 brew "bash-completion"
 brew "zsh-completions"
 brew "zplug"
@@ -99,6 +100,12 @@ EOF
 
 # Install fzf key bindings and fuzzy completion
 $(brew --prefix)/opt/fzf/install --all
+
+# Install oh-my-zsh
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 echo "✅ Essential packages installed successfully"
 {{- end }}

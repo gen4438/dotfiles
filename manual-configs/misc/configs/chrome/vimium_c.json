@@ -1,0 +1,24 @@
+{
+	"name": "Vimium C",
+	"@time": "2024/6/25 23:22:55",
+	"time": 1719325375686,
+	"environment": {
+		"extension": "1.99.994",
+		"platform": "mac",
+		"chromium": 126
+	},
+	"keyLayout": 2,
+	"keyMappings": [
+		"#!no-check",
+		"map J goForward",
+		"map K goBack",
+		"map H previousTab",
+		"map L nextTab",
+		""
+	],
+	"newTabUrl": "pages/blank.html",
+	"nextPatterns": "next,more,newer,>,›,→,»,≫,>>,次ページ,次へ,次,▶,▷",
+	"previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<,前ページ,前へ,前,◀,◁",
+	"regexFindMode": true,
+	"vimSync": true
+}

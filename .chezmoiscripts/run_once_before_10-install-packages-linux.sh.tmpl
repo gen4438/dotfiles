@@ -20,6 +20,7 @@ sudo apt install -y \
     wget \
     git \
     vim \
+    zsh \
     ripgrep \
     fd-find \
     bat \
@@ -72,6 +73,7 @@ sudo dnf install -y \
     wget \
     git \
     vim \
+    zsh \
     ripgrep \
     fd-find \
     bat \
@@ -111,6 +113,7 @@ sudo pacman -S --noconfirm \
     wget \
     git \
     vim \
+    zsh \
     ripgrep \
     fd \
     bat \
@@ -142,6 +145,12 @@ echo "Warning: Unsupported distribution '{{ $distro }}'. Skipping package instal
 echo "Please install packages manually."
 exit 0
 {{- end }}
+
+# Install oh-my-zsh
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 echo "✅ Essential packages installed successfully"
 {{- end -}}

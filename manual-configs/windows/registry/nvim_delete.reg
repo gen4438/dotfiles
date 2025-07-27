@@ -1,0 +1,25 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\nvim]
+"Icon"=-
+
+[HKEY_CLASSES_ROOT\*\shell\nvim\command]
+@=-
+
+[HKEY_CLASSES_ROOT\directory\shell\nvim]
+"Icon"=-
+
+[HKEY_CLASSES_ROOT\directory\shell\nvim\command]
+@=-
+
+[HKEY_CLASSES_ROOT\directory\background\shell\nvim]
+"Icon"=-
+
+[HKEY_CLASSES_ROOT\directory\background\shell\nvim\command]
+@=-
+
+[-HKEY_CLASSES_ROOT\*\shell\nvim]
+
+[-HKEY_CLASSES_ROOT\directory\shell\nvim]
+
+[-HKEY_CLASSES_ROOT\directory\background\shell\nvim]

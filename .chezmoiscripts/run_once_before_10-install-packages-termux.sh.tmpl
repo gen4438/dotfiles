@@ -16,6 +16,7 @@ pkg install -y \
     wget \
     git \
     vim \
+    zsh \
     ripgrep \
     fd \
     bat \
@@ -42,6 +43,12 @@ pkg install -y \
 
 # Setup storage access
 termux-setup-storage
+
+# Install oh-my-zsh
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 echo "✅ Essential packages installed successfully for Termux"
 {{- end }}

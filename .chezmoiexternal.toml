@@ -55,3 +55,22 @@
     url = "https://github.com/znz/anyenv-update.git"
     refreshPeriod = "168h"
 {{- end }}
+
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+# Development repositories for reference and contribution
+["Sources/github-markdown-css"]
+    type = "git-repo"
+    url = "https://github.com/sindresorhus/github-markdown-css.git"
+    refreshPeriod = "168h"
+
+["Sources/Gogh"]
+    type = "git-repo"
+    url = "https://github.com/Mayccoll/Gogh.git"
+    refreshPeriod = "168h"
+
+["Sources/gitignore"]
+    type = "git-repo"
+    url = "https://github.com/github/gitignore.git"
+    refreshPeriod = "168h"
+
+{{- end }}
