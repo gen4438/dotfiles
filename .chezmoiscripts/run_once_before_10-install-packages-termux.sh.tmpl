@@ -41,8 +41,10 @@ pkg install -y \
     libxml2 \
     libxslt
 
-# Setup storage access
-termux-setup-storage
+# Setup storage access (only if not already configured)
+if [ ! -d "$HOME/storage" ]; then
+    termux-setup-storage
+fi
 
 # Install oh-my-zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

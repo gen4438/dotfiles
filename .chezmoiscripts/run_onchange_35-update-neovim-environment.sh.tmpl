@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "android" -}}
 #!/bin/bash
 # Update Neovim Python and Node.js packages
 # This script runs when its content changes to update Neovim dependencies
@@ -58,3 +59,4 @@ echo "✅ Neovim environment packages updated successfully!"
 
 # Hash to trigger updates when script changes
 # Script hash: {{ include ".chezmoiscripts/run_onchange_35-update-neovim-environment.sh.tmpl" | sha256sum }}
+{{- end -}}

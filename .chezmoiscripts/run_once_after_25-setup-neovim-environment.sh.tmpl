@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "android" -}}
 #!/bin/bash
 # Setup Neovim Python and Node.js environments
 # This script runs once to set up Neovim-specific dependencies
@@ -86,3 +87,4 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 
 echo "✅ Neovim environment setup completed"
+{{- end -}}

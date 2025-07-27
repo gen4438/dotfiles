@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "android" -}}
 #!/bin/bash
 # Update development tools and runtimes
 # This script runs when the content changes
@@ -236,3 +237,4 @@ echo "✅ All development tools updated successfully!"
 
 # Hash to trigger updates when script changes
 # Script hash: {{ include ".chezmoiscripts/run_onchange_30-update-development-tools.sh.tmpl" | sha256sum }}
+{{- end -}}

@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "android" -}}
 #!/bin/bash
 # Update shell completions for various tools
 # This script runs when this file changes (indicated by hash comment below)
@@ -83,3 +84,4 @@ chmod +x "$HOME"/.bash/completion.d/*.bash 2>/dev/null || true
 chmod +x "$HOME"/.zsh/completion.d/_* 2>/dev/null || true
 
 echo "✅ Shell completions update completed"
+{{- end -}}
