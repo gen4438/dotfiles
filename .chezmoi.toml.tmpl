@@ -1,6 +1,13 @@
 {{- $name := promptStringOnce . "git.name" "Git user name" -}}
 {{- $email := promptStringOnce . "git.email" "Git email address" -}}
 {{- $ssh_identity_file := promptStringOnce . "ssh_identity_file" "SSH identity file path (leave empty for default)" -}}
+{{- $age_identity := promptStringOnce . "age.identity" "Age identity file path" "~/.config/chezmoi/key.txt" -}}
+{{- $age_recipient := promptStringOnce . "age.recipient" "Age recipient (public key)" "age1lnt3hvd436d02uaen8nelcn6aywephrx7lx6ctxjyeyqwv82x59s8kk7dx" -}}
+
+encryption = "age"
+[age]
+    identity = {{ $age_identity | quote }}
+    recipient = {{ $age_recipient | quote }}
 
 [data.git]
     name = {{ $name | quote }}
