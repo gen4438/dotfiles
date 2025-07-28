@@ -128,7 +128,12 @@ add_to_path "/snap/bin"
 alias ls='ls -G'
 {{- end }}
 
-# Priority PATH setup - version managers and development tools first
+# PATH Priority Order Policy:
+# 1. Version manager shims (pyenv, nvm) - highest priority for language switching
+# 2. User binaries (~/.local/bin, ~/bin) - personal scripts and tools
+# 3. Language-specific paths (GOPATH/bin, cargo/bin) - compiled binaries
+# 4. Development tools (fzf, etc.) - frequently used utilities
+# 5. System binaries (/usr/local/bin, /usr/bin) - OS provided tools (added by system)
 
 # Add user's private bin to PATH if it exists
 add_to_path "$HOME/.local/bin"
