@@ -97,8 +97,8 @@ elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
 elif [[ -f ~/.zplug/init.zsh ]]; then
     export ZPLUG_HOME=~/.zplug
 fi
-{{- else if eq .chezmoi.os "linux" }}
-# Linux - check common zplug locations
+{{- else if or (eq .chezmoi.os "linux") (eq .chezmoi.os "android") }}
+# Linux/Android - check common zplug locations
 if [[ -f /usr/share/zplug/init.zsh ]]; then
     export ZPLUG_HOME=/usr/share/zplug
 elif [[ -f ~/.zplug/init.zsh ]]; then
@@ -163,6 +163,8 @@ if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
         # Check if plugins are already installed by looking for common plugin directories
         if [[ ! -d "$HOME/.tmux/plugins/tmux-sensible" ]] && [[ ! -d "$HOME/.tmux/plugins/tmux-yank" ]]; then
             echo "Installing tmux plugins..."
+            # Set TMUX_PLUGIN_MANAGER_PATH for the install script
+            export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
             # Run TPM install script
             "$HOME/.tmux/plugins/tpm/bin/install_plugins"
             echo "✅ tmux plugins installed"
@@ -187,6 +189,12 @@ echo "Setting up Linux specific tools..."
 if command -v direnv >/dev/null 2>&1; then
     echo "✅ direnv is available"
 fi
+{{- else if eq .chezmoi.os "android" }}
+# Android/Termux specific setup
+echo "Setting up Android/Termux specific tools..."
+
+# Termux-specific configurations can be added here
+echo "✅ Termux environment detected"
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
