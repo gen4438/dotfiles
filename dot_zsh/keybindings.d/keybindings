@@ -3,7 +3,17 @@
 
 # Unified vi mode indicator function (works with and without byobu)
 vi_mode_prompt_info() {
-  echo "${${KEYMAP/vicmd/\e[31m(cmd)\e[0m}/(main|viins)/\e[34m(ins)\e[0m}"
+  case "$KEYMAP" in
+    vicmd)
+      echo "%{%F{red}%}(cmd)%{%f%}"
+      ;;
+    main|viins)
+      echo "%{%F{blue}%}(ins)%{%f%}"
+      ;;
+    *)
+      echo "%{%F{blue}%}(ins)%{%f%}"
+      ;;
+  esac
 }
 
 # Update prompt when keymap changes

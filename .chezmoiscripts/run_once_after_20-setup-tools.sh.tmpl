@@ -114,7 +114,7 @@ if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
     # zplug requires zsh, so we run it in a zsh subshell
     if command -v zsh >/dev/null 2>&1; then
         # Check if plugins are already installed by checking for a key plugin directory
-        ZPLUG_REPOS_DIR="$HOME/.zplug/repos"
+        ZPLUG_REPOS_DIR="$ZPLUG_HOME/repos"
         if [[ ! -d "$ZPLUG_REPOS_DIR/sindresorhus/pure" ]] || [[ ! -d "$ZPLUG_REPOS_DIR/robbyrussell/oh-my-zsh" ]]; then
             echo "Installing zplug plugins..."
             zsh -c "

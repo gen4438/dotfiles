@@ -55,7 +55,14 @@ if command -v zplug &> /dev/null; then
 
     # Completion - initialize BEFORE loading plugins to prevent conflicts
     fpath+=~/.zfunc
-    autoload -Uz compinit && compinit -C
+    # Initialize completion system properly
+    autoload -Uz compinit
+    # Use cached completion if less than 24 hours old, otherwise rebuild
+    if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+        compinit
+    else
+        compinit -C
+    fi
     
 
     # Install plugins if there are plugins that have not been installed

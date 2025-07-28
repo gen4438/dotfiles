@@ -26,7 +26,7 @@ setup_simple_prompt() {
     # Simple two-line prompt
     PROMPT='
 $(venv_info)%F{cyan}%n%f@%F{blue}%m%f:%F{green}%~%f$(git_branch)
-%F{red}❯%f '
+%F{red}%{%G❯%}%f '
     
     # Right prompt with time
     RPROMPT='%F{240}%T%f'

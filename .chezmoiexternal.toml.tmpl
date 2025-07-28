@@ -25,8 +25,8 @@
     refreshPeriod = "168h"
 {{- end }}
 
-{{- if $shells.uses_zsh }}
-# zplug (zsh plugin manager) - install for zsh users on any OS
+{{- if and $shells.uses_zsh (ne .chezmoi.os "darwin") }}
+# zplug (zsh plugin manager) - Linux/Android only (macOS uses Homebrew)
 [".zplug"]
     type = "git-repo"
     url = "https://github.com/zplug/zplug.git"
