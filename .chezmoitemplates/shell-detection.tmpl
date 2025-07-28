@@ -1,0 +1,39 @@
+{{/*
+Shell Detection Helper Template
+Detects which shells are used by the user and provides helper variables
+for downstream templates to use proper shell+OS combinations.
+
+Usage in other templates:
+{{ $shells := fromJson (include "shell-detection.tmpl" .) }}
+{{ if $shells.uses_zsh }}...{{ end }}
+{{ if $shells.uses_bash }}...{{ end }}
+*/}}
+
+{{- $uses_zsh := false }}
+{{- $uses_bash := false }}
+
+{{/* Check if zsh is used */}}
+{{- if stat (joinPath .chezmoi.homeDir ".zshrc") }}
+  {{- $uses_zsh = true }}
+{{- else if contains "zsh" (env "SHELL" | default "") }}
+  {{- $uses_zsh = true }}
+{{- end }}
+
+{{/* Check if bash is used */}}
+{{- if stat (joinPath .chezmoi.homeDir ".bashrc") }}
+  {{- $uses_bash = true }}
+{{- else if contains "bash" (env "SHELL" | default "") }}
+  {{- $uses_bash = true }}
+{{- end }}
+
+{{/* Default to bash if no shells detected (fallback) */}}
+{{- if and (not $uses_zsh) (not $uses_bash) }}
+  {{- $uses_bash = true }}
+{{- end }}
+
+{{/* Return as JSON for easy consumption */}}
+{
+  "uses_zsh": {{ $uses_zsh }},
+  "uses_bash": {{ $uses_bash }},
+  "primary_shell": "{{ if $uses_zsh }}zsh{{ else }}bash{{ end }}"
+}

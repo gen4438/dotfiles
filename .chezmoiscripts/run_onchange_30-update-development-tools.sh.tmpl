@@ -1,27 +1,25 @@
 {{ template "shebang-bash.tmpl" . }}
 # Update development tools and runtimes
-# This script runs when the content changes
+# This script focuses on runtime configuration and plugin updates
+# Git repositories are automatically updated by chezmoi external management
 
 set -e
 
 echo "🔄 Updating development tools..."
 
-# Note: External tools are automatically updated by chezmoi
-# No need to call chezmoi apply here as we're already in an apply process
-echo "External tools are managed by chezmoi and updated automatically"
+# Note: External git repositories (.fzf, .pyenv, .nvm, etc.) are automatically 
+# updated by chezmoi external with refreshPeriod = "168h" (weekly)
+echo "📦 External repositories are managed by chezmoi and updated weekly"
 
 # Update pyenv and install latest Python
 {{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.pyenv" ]]; then
     echo "🐍 Updating pyenv and Python..."
     
-    # Update pyenv itself
-    # On darwin, pyenv is managed by Homebrew, so skip git pull to avoid conflicts
+    # pyenv repositories are updated automatically by chezmoi external (Linux)
+    # On macOS, pyenv is managed by Homebrew
     {{- if ne .chezmoi.os "darwin" }}
-    cd "$HOME/.pyenv" && git pull
-    if [[ -d "$HOME/.pyenv/plugins/pyenv-virtualenv" ]]; then
-        cd "$HOME/.pyenv/plugins/pyenv-virtualenv" && git pull
-    fi
+    echo "🐍 pyenv repositories are managed by chezmoi external with weekly updates"
     {{- end }}
     
     # Initialize pyenv in current session
@@ -119,11 +117,10 @@ fi
 if [[ -d "$HOME/.nvm" ]]; then
     echo "📦 Updating nvm and Node.js..."
     
-    # Update nvm itself
-    # Update nvm itself
-    # On darwin, nvm is managed by Homebrew, so skip git pull to avoid conflicts
+    # nvm repository is updated automatically by chezmoi external (Linux)
+    # On macOS, nvm is managed by Homebrew
     {{- if ne .chezmoi.os "darwin" }}
-    cd "$HOME/.nvm" && git pull
+    echo "📦 nvm repository is managed by chezmoi external with weekly updates"
     {{- end }}
     # Source nvm in current session
     export NVM_DIR="$HOME/.nvm"
@@ -164,41 +161,24 @@ if [[ -d "$HOME/.nvm" ]]; then
 fi
 {{- end }}
 
-# Update fzf
+# Configure fzf (repository updated automatically by chezmoi external)
 if [[ -d "$HOME/.fzf" ]]; then
-    echo "🔍 Updating fzf..."
-    cd "$HOME/.fzf" && git pull
+    echo "🔍 Configuring fzf..."
+    cd "$HOME/.fzf"
     ./install --all
-    echo "✅ fzf updated"
+    echo "✅ fzf configured"
 fi
 
-# Update z, fz, tmux-xpanes (bash: .local/share, zsh: zplug managed)
-{{- if ne .chezmoi.os "darwin" }}
-if [[ -d "$HOME/.local/share/z" ]]; then
-    echo "📁 Updating z (bash)..."
-    cd "$HOME/.local/share/z" && git pull
-    echo "✅ z updated"
-fi
-
-if [[ -d "$HOME/.local/share/fz" ]]; then
-    echo "📁 Updating fz (bash)..."
-    cd "$HOME/.local/share/fz" && git pull
-    echo "✅ fz updated"
-fi
-
-if [[ -d "$HOME/.local/share/tmux-xpanes" ]]; then
-    echo "🖥️ Updating tmux-xpanes (bash)..."
-    cd "$HOME/.local/share/tmux-xpanes" && git pull
-    echo "✅ tmux-xpanes updated"
-fi
-{{- end }}
+# Note: z, fz, tmux-xpanes repositories are updated automatically by chezmoi external
+# For bash users: managed at .local/share/* (chezmoi external)
+# For zsh users: managed via zplug plugins
+echo "📁 External tools (z, fz, tmux-xpanes) are managed by chezmoi external with weekly updates"
 
 # Note: z, fz, tmux-xpanes for zsh are managed by zplug (updated in zplug update section below)
 
-# Update tmux plugin manager and plugins
+# Update tmux plugins (TPM repository updated automatically by chezmoi external)
 if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
     echo "🖥️  Updating tmux plugins..."
-    cd "$HOME/.tmux/plugins/tpm" && git pull
     
     # Update all plugins
     if command -v tmux >/dev/null 2>&1; then
@@ -209,41 +189,39 @@ if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
     fi
 fi
 
-# Update anyenv
+# Update anyenv (repositories updated automatically by chezmoi external)
 {{- if ne .chezmoi.os "android" }}
 if [[ -d "$HOME/.anyenv" ]]; then
-    echo "🔧 Updating anyenv..."
-    cd "$HOME/.anyenv" && git pull
-    
-    if [[ -d "$HOME/.anyenv/plugins/anyenv-update" ]]; then
-        cd "$HOME/.anyenv/plugins/anyenv-update" && git pull
-    fi
-    
-    echo "✅ anyenv updated"
+    echo "🔧 anyenv repositories are managed by chezmoi external with weekly updates"
 fi
 {{- end }}
 
-# Update zplug plugins
-{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
+# Update zplug plugins (only for zsh users)
+{{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
+{{- if $shells.uses_zsh }}
 if command -v zsh >/dev/null 2>&1; then
     echo "🔌 Updating zplug plugins..."
     
-    # Find zplug home
-    ZPLUG_HOME=""
+    # Platform-appropriate zplug detection
     {{- if eq .chezmoi.os "darwin" }}
-    for dir in /opt/homebrew/opt/zplug /usr/local/opt/zplug /opt/homebrew/share/zplug /usr/local/share/zplug ~/.zplug; do
-        if [[ -f "$dir/init.zsh" ]]; then
-            ZPLUG_HOME="$dir"
+    # macOS - check Homebrew locations first, then local (chezmoi external backup)
+    ZPLUG_HOME=""
+    for zplug_path in \
+        "/opt/homebrew/opt/zplug" \
+        "/usr/local/opt/zplug" \
+        "/opt/homebrew/share/zplug" \
+        "/usr/local/share/zplug" \
+        "$HOME/.zplug"; do
+        if [[ -f "$zplug_path/init.zsh" ]]; then
+            ZPLUG_HOME="$zplug_path"
             break
         fi
     done
-    {{- else if eq .chezmoi.os "linux" }}
-    for dir in /usr/share/zplug ~/.zplug; do
-        if [[ -f "$dir/init.zsh" ]]; then
-            ZPLUG_HOME="$dir"
-            break
-        fi
-    done
+    {{- else }}
+    # Linux/Android/other - chezmoi external manages zplug at ~/.zplug
+    if [[ -f "$HOME/.zplug/init.zsh" ]]; then
+        ZPLUG_HOME="$HOME/.zplug"
+    fi
     {{- end }}
     
     if [[ -n "$ZPLUG_HOME" ]]; then
@@ -253,8 +231,14 @@ if command -v zsh >/dev/null 2>&1; then
             zplug update
         "
         echo "✅ zplug plugins updated"
+    else
+        echo "⚠️ zplug not found, skipping plugin updates"
     fi
+else
+    echo "⚠️ zsh not available, skipping zplug plugin updates"
 fi
+{{- else }}
+echo "⚠️ zsh not detected, skipping zplug plugin updates"
 {{- end }}
 
 # Update Neovim plugins

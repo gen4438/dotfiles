@@ -4,33 +4,26 @@
 # Set byobu config directory to XDG compliant location
 export BYOBU_CONFIG_DIR="$HOME/.config/byobu"
 
-# Plugin management
-{{- if eq .chezmoi.os "linux" }}
-# Linux - check common zplug locations
-if [[ -f /usr/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/share/zplug
-    source /usr/share/zplug/init.zsh
-elif [[ -f ~/.zplug/init.zsh ]]; then
-    export ZPLUG_HOME=~/.zplug
-    source ~/.zplug/init.zsh
-fi
-{{- else if eq .chezmoi.os "darwin" }}
-# macOS - check brew zplug location
-if [[ -f /opt/homebrew/opt/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/opt/homebrew/opt/zplug
-    source /opt/homebrew/opt/zplug/init.zsh
-elif [[ -f /usr/local/opt/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/local/opt/zplug
-    source /usr/local/opt/zplug/init.zsh
-elif [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/opt/homebrew/share/zplug
-    source /opt/homebrew/share/zplug/init.zsh
-elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/local/share/zplug
-    source /usr/local/share/zplug/init.zsh
-elif [[ -f ~/.zplug/init.zsh ]]; then
-    export ZPLUG_HOME=~/.zplug
-    source ~/.zplug/init.zsh
+# Plugin management - platform-appropriate zplug detection
+{{- if eq .chezmoi.os "darwin" }}
+# macOS - check Homebrew locations first, then local (chezmoi external backup)
+for zplug_path in \
+    "/opt/homebrew/opt/zplug" \
+    "/usr/local/opt/zplug" \
+    "/opt/homebrew/share/zplug" \
+    "/usr/local/share/zplug" \
+    "$HOME/.zplug"; do
+    if [[ -f "$zplug_path/init.zsh" ]]; then
+        export ZPLUG_HOME="$zplug_path"
+        source "$zplug_path/init.zsh"
+        break
+    fi
+done
+{{- else }}
+# Linux/Android/other - chezmoi external manages zplug at ~/.zplug
+if [[ -f "$HOME/.zplug/init.zsh" ]]; then
+    export ZPLUG_HOME="$HOME/.zplug"
+    source "$HOME/.zplug/init.zsh"
 fi
 {{- end }}
 

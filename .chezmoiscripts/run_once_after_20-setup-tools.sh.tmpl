@@ -81,28 +81,30 @@ if [[ -d "$HOME/.anyenv" ]]; then
     fi
 fi
 
-# Setup zplug and install plugins
+# Setup zplug and install plugins (only for zsh users)
+{{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
+{{- if $shells.uses_zsh }}
 echo "Setting up zplug plugins..."
 
+# Platform-appropriate zplug detection
 {{- if eq .chezmoi.os "darwin" }}
-# macOS - check brew zplug location
-if [[ -f /opt/homebrew/opt/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/opt/homebrew/opt/zplug
-elif [[ -f /usr/local/opt/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/local/opt/zplug
-elif [[ -f /opt/homebrew/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/opt/homebrew/share/zplug
-elif [[ -f /usr/local/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/local/share/zplug
-elif [[ -f ~/.zplug/init.zsh ]]; then
-    export ZPLUG_HOME=~/.zplug
-fi
-{{- else if or (eq .chezmoi.os "linux") (eq .chezmoi.os "android") }}
-# Linux/Android - check common zplug locations
-if [[ -f /usr/share/zplug/init.zsh ]]; then
-    export ZPLUG_HOME=/usr/share/zplug
-elif [[ -f ~/.zplug/init.zsh ]]; then
-    export ZPLUG_HOME=~/.zplug
+# macOS - check Homebrew locations first, then local (chezmoi external backup)
+ZPLUG_HOME=""
+for zplug_path in \
+    "/opt/homebrew/opt/zplug" \
+    "/usr/local/opt/zplug" \
+    "/opt/homebrew/share/zplug" \
+    "/usr/local/share/zplug" \
+    "$HOME/.zplug"; do
+    if [[ -f "$zplug_path/init.zsh" ]]; then
+        export ZPLUG_HOME="$zplug_path"
+        break
+    fi
+done
+{{- else }}
+# Linux/Android/other - chezmoi external manages zplug at ~/.zplug
+if [[ -f "$HOME/.zplug/init.zsh" ]]; then
+    export ZPLUG_HOME="$HOME/.zplug"
 fi
 {{- end }}
 
@@ -153,6 +155,9 @@ if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
 else
     echo "⚠️ zplug not found, skipping plugin installation"
 fi
+{{- else }}
+echo "⚠️ zsh not detected, skipping zplug plugin installation"
+{{- end }}
 
 # Setup tmux plugin manager
 if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
