@@ -31,7 +31,8 @@ sudo apt install -y \
     etckeeper \
     age \
     python3-pip \
-    python3-venv
+    python3-venv \
+    golang-go
 
 # Install build environment for pyenv
 sudo apt install -y make build-essential libssl-dev zlib1g-dev \
@@ -85,7 +86,8 @@ sudo dnf install -y \
     etckeeper \
     age \
     python3-pip \
-    python3-virtualenv
+    python3-virtualenv \
+    golang
 
 # Install build environment for pyenv
 sudo dnf install -y make gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel
@@ -126,7 +128,8 @@ sudo pacman -S --noconfirm \
     etckeeper \
     age \
     python-pip \
-    python-virtualenv
+    python-virtualenv \
+    go
 
 # Install build environment for pyenv
 sudo pacman -S --noconfirm base-devel openssl zlib xz tk

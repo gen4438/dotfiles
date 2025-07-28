@@ -8,6 +8,38 @@
 add_to_path() {
     if [[ -d "$1" ]] && [[ ":$PATH:" != *":$1:"* ]]; then
         export PATH="$1:$PATH"
+        # Debug: uncomment to trace PATH additions
+        # echo "Added to PATH: $1 (from ${BASH_SOURCE[1]:-$0})" >&2
+    fi
+}
+
+# Remove PATH duplicates with forward priority (keep first occurrence)
+remove_path_duplicates() {
+    if [ -n "$PATH" ]; then
+        local new_path=""
+        local old_ifs="$IFS"
+        IFS=':'
+        for dir in $PATH; do
+            # Skip empty directories
+            [ -z "$dir" ] && continue
+            # Add only if not already present
+            case ":$new_path:" in
+                *":$dir:"*) 
+                    # Already exists, skip
+                    ;;  
+                *) 
+                    # New directory, add it
+                    if [ -z "$new_path" ]; then
+                        new_path="$dir"
+                    else
+                        new_path="$new_path:$dir"
+                    fi
+                    ;;
+            esac
+        done
+        IFS="$old_ifs"
+        # Export the cleaned PATH
+        export PATH="$new_path"
     fi
 }
 
@@ -96,6 +128,8 @@ add_to_path "/snap/bin"
 alias ls='ls -G'
 {{- end }}
 
+# Priority PATH setup - version managers and development tools first
+
 # Add user's private bin to PATH if it exists
 add_to_path "$HOME/.local/bin"
 add_to_path "$HOME/bin"
@@ -107,10 +141,13 @@ if command -v go &> /dev/null; then
     add_to_path "$GOPATH/bin"
 fi
 
-# Rust
+# Rust (this sources cargo env which adds ~/.cargo/bin to PATH)
 if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
 fi
+
+# fzf (fuzzy finder) - important development tool
+add_to_path "$HOME/.fzf/bin"
 
 {{- if eq .chezmoi.os "android" }}
 # Android/Termux: Use system packages (pkg install python nodejs)
@@ -120,18 +157,10 @@ fi
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Python (pyenv)
+# Python (pyenv) - only set PYENV_ROOT and add bin, init handled by shell-specific configs
 export PYENV_ROOT="$HOME/.pyenv"
 add_to_path "$PYENV_ROOT/bin"
-if command -v pyenv &> /dev/null; then
-    eval "$(pyenv init -)"
-fi
 
-# Development Tools  
-# anyenv (any language version manager) - skipped on Android
-{{- if ne .chezmoi.os "android" }}
-add_to_path "$HOME/.anyenv/bin"
-{{- end }}
 {{- end }}
 
 # Poetry (Python package manager)
@@ -153,12 +182,6 @@ if [[ -n "$JAVA_HOME" && -d "$JAVA_HOME" ]]; then
     add_to_path "$JAVA_HOME/bin"
 fi
 
-# Go (additional version manager support)
-if [[ -d "$HOME/.goenv" ]]; then
-    export GOENV_ROOT="$HOME/.goenv"
-    add_to_path "$GOENV_ROOT/bin"
-    add_to_path "$GOENV_ROOT/shims"
-fi
 
 # Modular Configuration Loading (bash-style)
 # Load custom configuration from organized directories
@@ -195,3 +218,6 @@ fi
 if [ -f "$HOME/.shell_local" ]; then
     source "$HOME/.shell_local"
 fi
+
+# Clean up PATH duplicates after all configurations are loaded
+remove_path_duplicates

@@ -64,22 +64,6 @@ if [[ -d "$HOME/.nvm" ]]; then
     fi
 fi
 
-# Setup anyenv
-if [[ -d "$HOME/.anyenv" ]]; then
-    echo "Setting up anyenv..."
-    
-    export PATH="$HOME/.anyenv/bin:$PATH"
-    
-    if command -v anyenv >/dev/null 2>&1; then
-        # Initialize anyenv if not already done
-        if [[ ! -d "$HOME/.config/anyenv/anyenv-install" ]]; then
-            anyenv install --init
-            echo "✅ anyenv initialized"
-        fi
-        
-        eval "$(anyenv init -)"
-    fi
-fi
 
 # Setup zplug and install plugins (only for zsh users)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}

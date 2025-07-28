@@ -68,15 +68,7 @@ fi
 # For global packages: npm install -g <package> or pip install <package>
 {{- else }}
 
-# anyenv (any language environment manager)
-if command -v anyenv >/dev/null 2>&1; then
-    eval "$(anyenv init -)"
-fi
-
-# goenv PATH fix (see: https://github.com/go-nv/goenv/issues/247)
-if [[ -n "$GOENV_ROOT" ]]; then
-    add_to_path "$GOENV_ROOT/shims"
-fi
+# Version managers initialization
 
 # pyenv (Python version manager)
 if command -v pyenv >/dev/null 2>&1; then
@@ -177,3 +169,6 @@ stty -ixon
 if [[ -f "$HOME/.cargo/env" ]]; then
     source "$HOME/.cargo/env"
 fi
+
+# Final PATH cleanup to remove any remaining duplicates
+remove_path_duplicates

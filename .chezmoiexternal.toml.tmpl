@@ -59,16 +59,6 @@
     url = "https://github.com/nvm-sh/nvm.git"
     refreshPeriod = "168h"
 
-# Multi-language environment manager
-[".anyenv"]
-    type = "git-repo"
-    url = "https://github.com/anyenv/anyenv.git"
-    refreshPeriod = "168h"
-
-[".anyenv/plugins/anyenv-update"]
-    type = "git-repo"
-    url = "https://github.com/znz/anyenv-update.git"
-    refreshPeriod = "168h"
 {{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}
