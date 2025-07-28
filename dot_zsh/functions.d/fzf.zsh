@@ -1,5 +1,28 @@
 #!/bin/zsh
 
+# FZF functions with lazy loading for performance
+# Heavy functions are loaded only when first used
+
+# Initialize lazy loading helper
+_fzf_lazy_init() {
+    # Mark as initialized to avoid recursive loading
+    export _FZF_FUNCTIONS_LOADED=1
+}
+
+# Check if we should use lazy loading
+if [[ -z "$_FZF_FUNCTIONS_LOADED" ]]; then
+    # Create lazy loading wrappers for heavy functions
+    for func in fssh fpyenv fpyenv-virtualenv fconda fda fds fdrm fdrmi fdrmv fdr fk cdwt fgbr fgco fgco_preview fgcoc; do
+        eval "$func() { 
+            unset -f $func
+            _fzf_lazy_init
+            source \$0
+            $func \"\$@\"
+        }"
+    done
+    return 0
+fi
+
 # v - open files in ~/.viminfo
 v() {
   local files

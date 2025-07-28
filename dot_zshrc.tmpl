@@ -1,85 +1,114 @@
 # Zsh configuration
 # Managed by chezmoi - see dot_zshrc.tmpl
 
+# Performance profiling - uncomment to measure startup time
+# zmodload zsh/zprof
+
+# Oh-My-Zsh performance optimizations - disable unnecessary features
+export DISABLE_AUTO_UPDATE="true"
+export DISABLE_MAGIC_FUNCTIONS="true"
+export DISABLE_COMPFIX="true"
+export DISABLE_UNTRACKED_FILES_DIRTY="true"
+
 # Set byobu config directory to XDG compliant location
 export BYOBU_CONFIG_DIR="$HOME/.config/byobu"
 
-# Plugin management - platform-appropriate zplug detection
+# Fix dotenv plugin cache directory issue
+export ZSH_CACHE_DIR="$HOME/.zsh_cache"
+mkdir -p "$ZSH_CACHE_DIR"
+
+# Completion system - initialize FIRST to support plugins that use compdef
+fpath+=~/.zfunc
+autoload -Uz compinit
+compinit
+
+# Plugin management - Zim (high-performance zsh plugin manager)
+# Platform-specific Zim initialization
 {{- if eq .chezmoi.os "darwin" }}
-# macOS - check Homebrew locations first, then local (chezmoi external backup)
-for zplug_path in \
-    "/opt/homebrew/opt/zplug" \
-    "/usr/local/opt/zplug" \
-    "/opt/homebrew/share/zplug" \
-    "/usr/local/share/zplug" \
-    "$HOME/.zplug"; do
-    if [[ -f "$zplug_path/init.zsh" ]]; then
-        export ZPLUG_HOME="$zplug_path"
-        source "$zplug_path/init.zsh"
-        break
+# macOS: Use Homebrew-installed Zim
+ZIM_HOME=~/.zim
+
+# Determine Homebrew prefix
+if [[ -d "/opt/homebrew" ]]; then
+    # Apple Silicon
+    ZIMFW_PATH="/opt/homebrew/opt/zimfw/share/zimfw.zsh"
+else
+    # Intel
+    ZIMFW_PATH="/usr/local/opt/zimfw/share/zimfw.zsh"
+fi
+
+# Install missing modules and update init.zsh if needed
+if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then 
+    if [[ -f "$ZIMFW_PATH" ]]; then
+        source "$ZIMFW_PATH" init
     fi
-done
+fi
+
+# Initialize modules
+if [[ -f ${ZIM_HOME}/init.zsh ]]; then
+    source ${ZIM_HOME}/init.zsh
+fi
 {{- else }}
-# Linux/Android/other - chezmoi external manages zplug at ~/.zplug
-if [[ -f "$HOME/.zplug/init.zsh" ]]; then
-    export ZPLUG_HOME="$HOME/.zplug"
-    source "$HOME/.zplug/init.zsh"
+# Other platforms: Use git-cloned version
+if [[ -f "$HOME/.zim/zimfw.zsh" ]]; then
+    ZIM_HOME=~/.zim
+    # Install missing modules and update init.zsh if needed
+    if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
+        source "$HOME/.zim/zimfw.zsh" init
+    fi
+    # Initialize modules
+    source ${ZIM_HOME}/init.zsh
 fi
 {{- end }}
 
-# Load zplug plugins if available
-if command -v zplug &> /dev/null; then
-    # Use modern zstyle instead of deprecated ZPLUG_SHALLOW
-    zstyle ':zplug:tag' depth 1
-    # oh-my-zsh plugins
-    zplug "lib/completion", from:oh-my-zsh
-    zplug "lib/directories", from:oh-my-zsh
-    zplug "lib/functions", from:oh-my-zsh
-    zplug "lib/history", from:oh-my-zsh
-    zplug "plugins/git", from:oh-my-zsh
-    zplug "plugins/dotenv", from:oh-my-zsh
-    zplug "plugins/poetry", from:oh-my-zsh
-    zplug "plugins/npm", from:oh-my-zsh
-    zplug "plugins/kubectl", from:oh-my-zsh
-    zplug "plugins/gh", from:oh-my-zsh
-    zplug "plugins/vi-mode", from:oh-my-zsh
+# Optimize autosuggestions performance and usability
+export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+export ZSH_AUTOSUGGEST_USE_ASYNC=true
+export ZSH_AUTOSUGGEST_MANUAL_REBIND=true
 
-
-    # Other plugins
-    zplug "mafredri/zsh-async", from:github
-    zplug "zsh-users/zsh-history-substring-search", defer:2
-    zplug "changyuheng/fz", defer:1
-    zplug "rupa/z", use:z.sh
-    zplug "greymd/tmux-xpanes"
-    zplug "qoomon/zsh-lazyload"
-
-    # Completion - initialize BEFORE loading plugins to prevent conflicts
-    fpath+=~/.zfunc
-    # Initialize completion system properly
-    autoload -Uz compinit
-    # Use cached completion if less than 24 hours old, otherwise rebuild
-    if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
-        compinit
-    else
-        compinit -C
-    fi
-    
-
-    # Install plugins if there are plugins that have not been installed
-    if ! zplug check --verbose; then
-        printf "Install? [y/N]: "
-        if read -q; then
-            echo; zplug install
-        fi
-    fi
-
-    # Load plugins
-    zplug load
-fi
-
-# Load common shell configuration (shared with bash)
-# This includes modular loading of aliases, functions, completions, and keybindings
+# Load common shell configuration (shared with bash) AFTER plugin initialization
+# This ensures plugin widgets are available for custom keybindings
 {{ template "shell_common.tmpl" . }}
+
+
+# Legacy zplug configuration (temporarily disabled for Zim migration)
+# if command -v zplug &> /dev/null; then
+#     # Performance optimizations for zplug
+#     zstyle ':zplug:tag' depth 1           # Shallow clones for faster downloads
+#     export ZPLUG_LOADFILE="$HOME/.zplug_loadfile"  # Cache load order
+#     # oh-my-zsh plugins
+#     zplug "lib/completion", from:oh-my-zsh
+#     zplug "lib/directories", from:oh-my-zsh
+#     zplug "lib/functions", from:oh-my-zsh
+#     zplug "lib/history", from:oh-my-zsh
+#     zplug "plugins/git", from:oh-my-zsh
+#     zplug "plugins/dotenv", from:oh-my-zsh
+#     zplug "plugins/poetry", from:oh-my-zsh
+#     zplug "plugins/npm", from:oh-my-zsh
+#     zplug "plugins/kubectl", from:oh-my-zsh
+#     zplugh "plugins/gh", from:oh-my-zsh
+#     zplug "plugins/vi-mode", from:oh-my-zsh
+# 
+#     # Other plugins with performance optimizations
+#     zplug "mafredri/zsh-async", from:github
+#     zplug "zsh-users/zsh-autosuggestions", defer:2
+#     zplug "zsh-users/zsh-history-substring-search", defer:2
+#     zplug "changyuheng/fz", defer:1
+#     zplug "rupa/z", use:z.sh
+#     zplug "greymd/tmux-xpanes", defer:2
+#     zplug "qoomon/zsh-lazyload"
+# 
+#     # Install plugins if there are plugins that have not been installed
+#     if ! zplug check --verbose; then
+#         printf "Install? [y/N]: "
+#         if read -q; then
+#             echo; zplug install
+#         fi
+#     fi
+# 
+#     # Load plugins
+#     zplug load
+# fi
 
 # Zsh-specific settings
 setopt AUTO_CD              # Change directory by typing directory name
@@ -146,3 +175,9 @@ if [[ -z "$BYOBU_BACKEND" ]]; then
   # Remove newlines from existing prompt and prepend vi mode indicator  
   export PROMPT='$(vi_mode_prompt_info)'"${PROMPT//$'\n'/}"
 fi
+
+# Performance profiling results - uncomment to show profiling data
+# zprof
+
+# Key bindings are handled by dot_zsh/keybindings.d/keybindings
+# This ensures proper loading order and prevents conflicts

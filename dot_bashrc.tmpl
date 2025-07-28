@@ -68,13 +68,7 @@ fi
 # For global packages: npm install -g <package> or pip install <package>
 {{- else }}
 
-# Version managers initialization
-
-# pyenv (Python version manager)
-if command -v pyenv >/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
+# Version managers are initialized in shell_common.tmpl
 
 # pipenv configuration
 export PIPENV_SKIP_LOCK=true
@@ -87,10 +81,6 @@ for cmd in black blackd grip rg gettext envsubst rst2man.py; do
     fi
 done
 
-# Node Version Manager (nvm)
-export NVM_DIR="$HOME/.nvm"
-[[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
-[[ -s "$NVM_DIR/bash_completion" ]] && \. "$NVM_DIR/bash_completion"
 {{- end }}
 
 # Tool-Specific Configuration

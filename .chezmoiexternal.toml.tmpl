@@ -25,8 +25,19 @@
     refreshPeriod = "168h"
 {{- end }}
 
+{{- if $shells.uses_zsh }}
+# Zim will be installed via Homebrew on macOS, git on other platforms
+{{- if ne .chezmoi.os "darwin" }}
+[".zim"]
+    type = "git-repo"
+    url = "https://github.com/zimfw/zimfw.git"
+    refreshPeriod = "168h"
+{{- end }}
+{{- end }}
+
 {{- if and $shells.uses_zsh (ne .chezmoi.os "darwin") }}
-# zplug (zsh plugin manager) - Linux/Android only (macOS uses Homebrew)
+
+# Keep zplug for migration period - will be removed later
 [".zplug"]
     type = "git-repo"
     url = "https://github.com/zplug/zplug.git"

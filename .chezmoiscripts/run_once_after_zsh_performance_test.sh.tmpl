@@ -1,0 +1,34 @@
+{{ template "shebang-bash.tmpl" . }}
+
+# Zsh performance testing script
+# This script helps measure zsh startup time improvements
+
+echo "=== Zsh Performance Test ==="
+
+# Test zsh startup time
+echo "Measuring zsh startup time..."
+echo "Run this command to test: time zsh -i -c exit"
+echo ""
+
+# Create a profiling helper script
+cat > "$HOME/.zsh_profile_test" << 'EOF'
+#!/usr/bin/env zsh
+# Enable profiling
+zmodload zsh/zprof
+
+# Source your normal zshrc
+source ~/.zshrc
+
+# Show profiling results
+zprof
+EOF
+
+chmod +x "$HOME/.zsh_profile_test"
+
+echo "Created ~/.zsh_profile_test for detailed profiling"
+echo "Usage:"
+echo "  1. Uncomment profiling lines in .zshrc"
+echo "  2. Run: time zsh -i -c exit (for overall timing)"
+echo "  3. Run: ~/.zsh_profile_test (for detailed breakdown)"
+echo ""
+echo "Target: Reduce startup time to under 200ms"

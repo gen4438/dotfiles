@@ -158,14 +158,18 @@ add_to_path "$HOME/.fzf/bin"
 # Android/Termux: Use system packages (pkg install python nodejs)
 # Global npm/pip packages will be installed via system package manager
 {{- else }}
-# Node.js (nvm)
+# Node.js (nvm) - standard initialization
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Python (pyenv) - only set PYENV_ROOT and add bin, init handled by shell-specific configs
+# Python (pyenv) - standard initialization
 export PYENV_ROOT="$HOME/.pyenv"
 add_to_path "$PYENV_ROOT/bin"
-
+if command -v pyenv &> /dev/null; then
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+fi
 {{- end }}
 
 # Poetry (Python package manager)
@@ -186,7 +190,6 @@ fi
 if [[ -n "$JAVA_HOME" && -d "$JAVA_HOME" ]]; then
     add_to_path "$JAVA_HOME/bin"
 fi
-
 
 # Modular Configuration Loading (bash-style)
 # Load custom configuration from organized directories

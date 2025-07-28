@@ -1,0 +1,54 @@
+# Zim configuration file
+# Zsh plugin manager configuration - migrated from zplug for better performance
+
+# =============================================================================
+# Oh-My-Zsh modules (essential components)
+# =============================================================================
+zmodule ohmyzsh/ohmyzsh --root lib --source completion.zsh
+zmodule ohmyzsh/ohmyzsh --root lib --source directories.zsh
+zmodule ohmyzsh/ohmyzsh --root lib --source functions.zsh
+zmodule ohmyzsh/ohmyzsh --root lib --source history.zsh
+
+# =============================================================================
+# Oh-My-Zsh plugins (development tools)
+# =============================================================================
+zmodule ohmyzsh/ohmyzsh --root plugins/git --source git.plugin.zsh
+zmodule ohmyzsh/ohmyzsh --root plugins/dotenv --source dotenv.plugin.zsh
+# Poetry plugin disabled due to path issues - use manual poetry completion instead
+# zmodule ohmyzsh/ohmyzsh --root plugins/poetry --source poetry.plugin.zsh
+zmodule ohmyzsh/ohmyzsh --root plugins/npm --source npm.plugin.zsh
+zmodule ohmyzsh/ohmyzsh --root plugins/kubectl --source kubectl.plugin.zsh
+# GitHub CLI plugin disabled due to path issues - use manual gh completion instead  
+# zmodule ohmyzsh/ohmyzsh --root plugins/gh --source gh.plugin.zsh
+zmodule ohmyzsh/ohmyzsh --root plugins/vi-mode --source vi-mode.plugin.zsh
+
+# =============================================================================
+# External plugins (enhanced functionality)
+# =============================================================================
+# Async operations framework
+zmodule mafredri/zsh-async
+
+# Auto-suggestions (with async support)
+zmodule zsh-users/zsh-autosuggestions
+
+# History substring search (enhanced history navigation)  
+zmodule zsh-users/zsh-history-substring-search
+
+# fz - fuzzy finder wrapper
+zmodule changyuheng/fz
+
+# z - directory jumper
+zmodule rupa/z
+
+# tmux-xpanes - multi-pane tmux operations
+zmodule greymd/tmux-xpanes
+
+# =============================================================================
+# Performance and utility modules
+# =============================================================================
+# Note: zsh-lazyload not needed with Zim as it has built-in lazy loading
+
+# =============================================================================
+# Manual completions for tools that had path issues
+# =============================================================================
+# These will be loaded via separate completion scripts
