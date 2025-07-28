@@ -1,11 +1,5 @@
--- 24bit color in TUI
-vim.opt.termguicolors = true
+-- Pre-plugin theme setup
+-- This file sets up the initial fallback theme before plugins load
 
-local colorscheme_name = "industry"
--- local colorscheme_name = "vim"
-
-local ok, _ = pcall(vim.cmd, "colorscheme " .. colorscheme_name)
-if not ok then
-  vim.cmd('colorscheme default')
-  vim.o.background = 'dark'
-end
+local theme = require("config.theme")
+theme.setup_fallback()

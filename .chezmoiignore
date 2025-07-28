@@ -157,3 +157,11 @@ Public/
 # Log files
 *.log
 logs/
+
+# ==============================================================================
+# LOCAL CONFIGURATION FILES - User manages these directly
+# ==============================================================================
+
+# Neovim local configuration files - User manages these directly
+dot_config/nvim/lua/config/*.local.lua
+dot_config/nvim/lua/plugins/*.local.lua

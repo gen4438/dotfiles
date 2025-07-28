@@ -1,0 +1,72 @@
+-- Local UI configuration overrides
+-- This file allows you to override UI settings without being managed by chezmoi
+-- It will be loaded at the end of ui.setup() if it exists
+
+-- Access the ui module to override settings
+local ui = require("config.ui")
+
+-- =============================================================================
+-- FONT CONFIGURATION
+-- =============================================================================
+
+-- Override font settings - uncomment and customize as needed
+ui.font = {
+  -- Choose your preferred font family
+  family = "CaskaydiaCove Nerd Font",
+  
+  -- Font size recommendations:
+  -- Laptop screens (13-15"): 12-14
+  -- Desktop monitors: 14-16  
+  -- High DPI displays: 16-20
+  -- Presentation mode: 20-28
+  default_size = 14,
+  current_size = 14,
+}
+
+-- Popular font options by platform:
+--
+-- macOS:
+-- family = "SF Mono",
+-- family = "Monaco",
+-- family = "Menlo",
+-- family = "JetBrains Mono Nerd Font",
+-- family = "FiraCode Nerd Font",
+--
+-- Windows:
+-- family = "Cascadia Code",
+-- family = "Cascadia Mono", 
+-- family = "Consolas",
+-- family = "JetBrains Mono Nerd Font",
+-- family = "FiraCode Nerd Font",
+--
+-- Linux:
+-- family = "CaskaydiaCove Nerd Font",
+-- family = "JetBrains Mono Nerd Font",
+-- family = "Hack Nerd Font",
+-- family = "Ubuntu Mono",
+-- family = "DejaVu Sans Mono",
+--
+-- Android/Termux:
+-- family = "JetBrains Mono",
+-- family = "Hack",
+-- family = "Ubuntu Mono",
+-- family = "Source Code Pro",
+
+-- Re-apply font settings after override
+if vim.fn.has("gui_running") == 1 then
+  vim.opt.guifont = string.format("%s:h%d", ui.font.family, ui.font.default_size)
+end
+
+-- =============================================================================
+-- OTHER UI OVERRIDES
+-- =============================================================================
+
+-- You can also override other UI settings here
+-- Examples:
+-- vim.opt.relativenumber = true    -- Show relative line numbers
+-- vim.opt.cursorline = true        -- Highlight current line
+-- vim.opt.cursorcolumn = true      -- Highlight current column
+-- vim.opt.wrap = true              -- Enable line wrapping
+-- vim.opt.list = true              -- Show whitespace characters
+-- vim.opt.cmdheight = 1            -- Command line height
+-- vim.opt.pumheight = 15           -- Popup menu height

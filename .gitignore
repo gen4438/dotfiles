@@ -178,3 +178,6 @@ Thumbs.db
 # Local settings that shouldn't be shared
 .claude/settings.local.json
 **/*.local.*
+
+# Allow local configuration examples
+!**/*.local.*.example
