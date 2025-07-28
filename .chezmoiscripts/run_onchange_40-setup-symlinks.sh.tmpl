@@ -1,4 +1,4 @@
-#!/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Create symlinks for executables in .local/share to .local/bin
 # This script runs when the content changes
 
@@ -10,8 +10,8 @@ echo "🔗 Setting up symlinks for external tools..."
 mkdir -p "$HOME/.local/bin"
 
 # Create symlinks for tmux-xpanes (only for bash - zsh uses zplug)
-{{ if ne .chezmoi.shell "zsh" -}}
-if [[ -f "$HOME/.local/share/tmux-xpanes/bin/xpanes" ]]; then
+# Check if not using zsh as the default shell
+if [[ "$SHELL" != *"zsh"* ]] && [[ -f "$HOME/.local/share/tmux-xpanes/bin/xpanes" ]]; then
     echo "Creating symlink: xpanes"
     ln -sf "$HOME/.local/share/tmux-xpanes/bin/xpanes" "$HOME/.local/bin/xpanes"
     
@@ -25,10 +25,11 @@ if [[ -f "$HOME/.local/share/tmux-xpanes/bin/xpanes" ]]; then
     fi
     
     echo "✅ tmux-xpanes symlinks created"
+elif [[ "$SHELL" == *"zsh"* ]]; then
+    echo "⚠️ Using zsh - tmux-xpanes managed by zplug, skipping symlink creation"
 else
     echo "⚠️ tmux-xpanes not found in .local/share, skipping symlink creation"
 fi
-{{ end -}}
 
 echo "✅ Symlink setup completed"
 

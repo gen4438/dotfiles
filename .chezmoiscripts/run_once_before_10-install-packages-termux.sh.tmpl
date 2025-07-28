@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Termux
 
 set -e

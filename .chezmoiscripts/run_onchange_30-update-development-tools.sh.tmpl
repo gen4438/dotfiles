@@ -1,8 +1,4 @@
-{{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
-{{- else -}}
-#!/bin/bash
-{{- end }}
+{{ template "shebang-bash.tmpl" . }}
 # Update development tools and runtimes
 # This script runs when the content changes
 

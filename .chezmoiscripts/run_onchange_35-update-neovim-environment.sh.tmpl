@@ -1,8 +1,4 @@
-{{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
-{{- else -}}
-#!/bin/bash
-{{- end }}
+{{ template "shebang-bash.tmpl" . }}
 # Update Neovim Python and Node.js packages
 # This script runs when its content changes to update Neovim dependencies
 

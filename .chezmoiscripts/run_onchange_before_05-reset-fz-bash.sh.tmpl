@@ -1,12 +1,12 @@
-{{- if ne .chezmoi.os "darwin" }}
-#!/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Reset fz.bash before external repository updates to prevent git conflicts (bash only)
 # fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") | sha256sum }}{{ end }}
 
 FZ_DIR="$HOME/.local/share/fz"
 FZ_BASH_FILE="$FZ_DIR/fz.bash"
 
-if [[ -d "$FZ_DIR/.git" ]] && [[ -e "$FZ_BASH_FILE" ]]; then
+# Only run this for bash users (zsh can use fz.sh directly)
+if [[ "${SHELL##*/}" == "bash" ]] && [[ -d "$FZ_DIR/.git" ]] && [[ -e "$FZ_BASH_FILE" ]]; then
     echo "Resetting fz.bash before external updates..."
     cd "$FZ_DIR"
     
@@ -23,4 +23,3 @@ if [[ -d "$FZ_DIR/.git" ]] && [[ -e "$FZ_BASH_FILE" ]]; then
     
     cd - >/dev/null
 fi
-{{- end }}

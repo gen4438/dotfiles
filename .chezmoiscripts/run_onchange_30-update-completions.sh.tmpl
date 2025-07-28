@@ -1,8 +1,4 @@
-{{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
-{{- else -}}
-#!/bin/bash
-{{- end }}
+{{ template "shebang-bash.tmpl" . }}
 # Update shell completions for various tools
 # This script runs when this file changes (indicated by hash comment below)
 

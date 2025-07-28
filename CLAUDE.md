@@ -123,6 +123,11 @@ When adding new configurations, **always follow this planning process**:
   # config_file.ext hash: {{ include "config_file.ext" | sha256sum }}
   ```
 
+### Script Templates
+- **Cross-platform shebang**: Always use `{{ template "shebang-bash.tmpl" . }}` instead of hardcoded `#!/bin/bash`
+- **Handles Android/Termux**: Automatically uses correct bash path for different platforms
+- **Template location**: `.chezmoitemplates/shebang-bash.tmpl` provides consistent shebang across all scripts
+
 ## Best Practices
 
 1. **Avoid hardcoding sensitive data** - Use templates and config variables

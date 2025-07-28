@@ -1,8 +1,4 @@
-{{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
-{{- else -}}
-#!/bin/bash
-{{- end }}
+{{ template "shebang-bash.tmpl" . }}
 # Setup Neovim Python and Node.js environments
 # This script runs once to set up Neovim-specific dependencies
 # script hash: {{ include ".chezmoiscripts/run_once_after_25-setup-neovim-environment.sh.tmpl" | sha256sum }}

@@ -1,8 +1,4 @@
-{{- if eq .chezmoi.os "android" -}}
-#!/data/data/com.termux/files/usr/bin/bash
-{{- else -}}
-#!/bin/bash
-{{- end }}
+{{ template "shebang-bash.tmpl" . }}
 # Setup development tools after package installation
 # script hash: {{ include ".chezmoiscripts/run_once_after_20-setup-tools.sh.tmpl" | sha256sum }}
 

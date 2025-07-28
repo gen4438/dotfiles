@@ -1,5 +1,4 @@
-{{- if ne .chezmoi.os "darwin" }}
-#!/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Create bash-compatible version of fz.sh after external updates (bash only)
 # fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") | sha256sum }}{{ end }}
 
@@ -7,7 +6,8 @@ FZ_DIR="$HOME/.local/share/fz"
 FZ_SH_FILE="$FZ_DIR/fz.sh"
 FZ_BASH_FILE="$FZ_DIR/fz.bash"
 
-if [[ -f "$FZ_SH_FILE" ]]; then
+# Only run this for bash users (zsh can use fz.sh directly)
+if [[ "${SHELL##*/}" == "bash" ]] && [[ -f "$FZ_SH_FILE" ]]; then
     # Check if update is needed
     if [[ ! -f "$FZ_BASH_FILE" ]] || [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
         # Remove existing symlink if it exists
@@ -30,6 +30,5 @@ if [[ -f "$FZ_SH_FILE" ]]; then
         echo "fz.bash is up to date"
     fi
 else
-    echo "fz.sh not found at $FZ_SH_FILE"
+    [[ "${SHELL##*/}" == "zsh" ]] && echo "Using zsh - fz.sh is used directly, skipping bash compatibility patch"
 fi
-{{- end }}

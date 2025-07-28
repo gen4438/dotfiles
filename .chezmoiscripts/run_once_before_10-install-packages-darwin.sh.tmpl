@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "darwin" -}}
-#!/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Install essential packages for macOS development environment
 
 set -e

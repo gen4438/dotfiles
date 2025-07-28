@@ -1,7 +1,7 @@
 {{- if eq .chezmoi.os "linux" -}}
 {{- $distro := .chezmoi.osRelease.id -}}
 {{- if not (eq $distro "termux") -}}
-#!/bin/bash
+{{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Linux distributions
 
 set -e
