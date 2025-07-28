@@ -1,78 +1,70 @@
 return {
-  -- https://github.com/ibhagwan/fzf-lua
   {
     "ibhagwan/fzf-lua",
-    -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    cmd = { "FzfLua" },
     keys = {
-      -- buffers and files
-      { ';fb',  function() require('fzf-lua').buffers() end,                                       mode = "n" },
-      { ';ff',  function() require('fzf-lua').files() end,                                         mode = "n" },
-      -- find parent directory of the current buffer
-      { ';fe',  function() require('fzf-lua').files({ cwd = vim.fn.expand('%:p:h') }) end,         mode = "n" },
-      -- non-recursive search in current directory only
-      { ';f.',  function() require('fzf-lua').files({ cwd = ".", fd_opts = "--max-depth=1" }) end, mode = "n" },
-      { ';fh',  function() require('fzf-lua').oldfiles() end,                                      mode = "n" },
-      { ';fqq', function() require('fzf-lua').quickfix() end,                                      mode = "n" },
-      { ';fqs', function() require('fzf-lua').quickfix_stack() end,                                mode = "n" },
-      { ';fql', function() require('fzf-lua').loclist() end,                                       mode = "n" },
-      { ';fll', function() require('fzf-lua').lines() end,                                         mode = "n" },
-      { ';flb', function() require('fzf-lua').blines() end,                                        mode = "n" },
-      -- { ';ft',   function() require('fzf-lua').tabs() end,                       mode = "n" },
-      { ';fa',  function() require('fzf-lua').args() end,                                          mode = "n" },
+      -- Files and buffers
+      { ';fb',  function() require('fzf-lua').buffers() end,                                       mode = "n", desc = "Find buffers" },
+      { ';ff',  function() require('fzf-lua').files() end,                                         mode = "n", desc = "Find files" },
+      { ';fe',  function() require('fzf-lua').files({ cwd = vim.fn.expand('%:p:h') }) end,         mode = "n", desc = "Find files (current dir)" },
+      { ';f.',  function() require('fzf-lua').files({ cwd = ".", fd_opts = "--max-depth=1" }) end, mode = "n", desc = "Find files (shallow)" },
+      { ';fh',  function() require('fzf-lua').oldfiles() end,                                      mode = "n", desc = "Find recent files" },
+      { ';fa',  function() require('fzf-lua').args() end,                                          mode = "n", desc = "Find arguments" },
 
-      -- grep
-      { ';gw',  function() require('fzf-lua').grep_cword() end,                                    mode = "n" },
-      { ';gg',  function() require('fzf-lua').grep_visual() end,                                   mode = "x" },
-      { ';gg',  function() require('fzf-lua').live_grep() end,                                     mode = "n" },
-      { ';ge',  function() require('fzf-lua').live_grep({ cwd = vim.fn.expand('%:p:h') }) end,     mode = "n" },
-      { ';gr',  function() require('fzf-lua').live_grep_resume() end,                              mode = "n" },
-      -- alias
-      { ';fgw', ';gw',                                                                             mode = "n", remap = true },
-      { ';fge', ';ge',                                                                             mode = "n", remap = true },
-      { ';fgg', ';gg',                                                                             mode = "n", remap = true },
-      { ';fgg', ';gg',                                                                             mode = "x", remap = true },
-      { ';fgr', ';gr',                                                                             mode = "n", remap = true },
+      -- Quickfix and lists
+      { ';fqq', function() require('fzf-lua').quickfix() end,                                      mode = "n", desc = "Quickfix list" },
+      { ';fqs', function() require('fzf-lua').quickfix_stack() end,                                mode = "n", desc = "Quickfix stack" },
+      { ';fql', function() require('fzf-lua').loclist() end,                                       mode = "n", desc = "Location list" },
+      { ';fll', function() require('fzf-lua').lines() end,                                         mode = "n", desc = "Find lines (all buffers)" },
+      { ';flb', function() require('fzf-lua').blines() end,                                        mode = "n", desc = "Find lines (current buffer)" },
 
-      -- tags
-      { ';ftt', function() require('fzf-lua').tags() end,                                          mode = "n" },
-      { ';ftb', function() require('fzf-lua').btags() end,                                         mode = "n" },
-      { ';ftg', function() require('fzf-lua').tags_live_grep() end,                                mode = "n" },
-      { ';ftg', function() require('fzf-lua').tags_grep_visual() end,                              mode = "x" },
+      -- Grep
+      { ';gw',  function() require('fzf-lua').grep_cword() end,                                    mode = "n", desc = "Grep word under cursor" },
+      { ';gg',  function() require('fzf-lua').grep_visual() end,                                   mode = "x", desc = "Grep visual selection" },
+      { ';gg',  function() require('fzf-lua').live_grep() end,                                     mode = "n", desc = "Live grep" },
+      { ';ge',  function() require('fzf-lua').live_grep({ cwd = vim.fn.expand('%:p:h') }) end,     mode = "n", desc = "Live grep (current dir)" },
+      { ';gr',  function() require('fzf-lua').live_grep_resume() end,                              mode = "n", desc = "Resume last grep" },
+
+      -- Tags
+      { ';ftt', function() require('fzf-lua').tags() end,                                          mode = "n", desc = "Find tags" },
+      { ';ftb', function() require('fzf-lua').btags() end,                                         mode = "n", desc = "Find buffer tags" },
+      { ';ftg', function() require('fzf-lua').tags_live_grep() end,                                mode = "n", desc = "Live grep tags" },
+      { ';ftg', function() require('fzf-lua').tags_grep_visual() end,                              mode = "x", desc = "Grep tags (visual)" },
 
       -- Git
-      { ';gf',  function() require('fzf-lua').git_files() end,                                     mode = "n" },
-      { ';gst', function() require('fzf-lua').git_status() end,                                    mode = "n" },
-      { ';gcc', function() require('fzf-lua').git_commits() end,                                   mode = "n" },
-      { ';gcb', function() require('fzf-lua').git_bcommits() end,                                  mode = "n" },
-      { ';gbl', function() require('fzf-lua').git_blame() end,                                     mode = "n" },
-      { ';gbr', function() require('fzf-lua').git_branches() end,                                  mode = "n" },
-      { ';gt',  function() require('fzf-lua').git_tags() end,                                      mode = "n" },
-      { ';gss', function() require('fzf-lua').git_stash() end,                                     mode = "n" },
+      { ';gf',  function() require('fzf-lua').git_files() end,                                     mode = "n", desc = "Git files" },
+      { ';gst', function() require('fzf-lua').git_status() end,                                    mode = "n", desc = "Git status" },
+      { ';gcc', function() require('fzf-lua').git_commits() end,                                   mode = "n", desc = "Git commits" },
+      { ';gcb', function() require('fzf-lua').git_bcommits() end,                                  mode = "n", desc = "Git buffer commits" },
+      { ';gbl', function() require('fzf-lua').git_blame() end,                                     mode = "n", desc = "Git blame" },
+      { ';gbr', function() require('fzf-lua').git_branches() end,                                  mode = "n", desc = "Git branches" },
+      { ';gt',  function() require('fzf-lua').git_tags() end,                                      mode = "n", desc = "Git tags" },
+      { ';gss', function() require('fzf-lua').git_stash() end,                                     mode = "n", desc = "Git stash" },
 
       -- LSP
-      { ';lr',  function() require('fzf-lua').lsp_references() end,                                mode = "n" },
-      { ';ld',  function() require('fzf-lua').lsp_definitions() end,                               mode = "n" },
-      { ';ls',  function() require('fzf-lua').lsp_document_symbols() end,                          mode = "n" },
-      { ';li',  function() require('fzf-lua').lsp_implementations() end,                           mode = "n" },
-      { ';lws', function() require('fzf-lua').lsp_live_workspace_symbols() end,                    mode = "n" },
-      { ';la',  function() require('fzf-lua').lsp_code_actions() end,                              mode = "n" },
-      { ';lgb', function() require('fzf-lua').diagnostics_document() end,                          mode = "n" },
-      { ';lgg', function() require('fzf-lua').diagnostics_workspace() end,                         mode = "n" },
+      { ';lr',  function() require('fzf-lua').lsp_references() end,                                mode = "n", desc = "LSP references" },
+      { ';ld',  function() require('fzf-lua').lsp_definitions() end,                               mode = "n", desc = "LSP definitions" },
+      { ';ls',  function() require('fzf-lua').lsp_document_symbols() end,                          mode = "n", desc = "LSP document symbols" },
+      { ';li',  function() require('fzf-lua').lsp_implementations() end,                           mode = "n", desc = "LSP implementations" },
+      { ';lws', function() require('fzf-lua').lsp_live_workspace_symbols() end,                    mode = "n", desc = "LSP workspace symbols" },
+      { ';la',  function() require('fzf-lua').lsp_code_actions() end,                              mode = "n", desc = "LSP code actions" },
+      { ';lgb', function() require('fzf-lua').diagnostics_document() end,                          mode = "n", desc = "LSP diagnostics (buffer)" },
+      { ';lgg', function() require('fzf-lua').diagnostics_workspace() end,                         mode = "n", desc = "LSP diagnostics (workspace)" },
 
-      -- misc
-      { ';fr',  function() require('fzf-lua').resume() end,                                        mode = "n" },
-      { ';fm',  function() require('fzf-lua').colorschemes() end,                                  mode = "n" },
-      { ';fcc', function() require('fzf-lua').commands() end,                                      mode = "n" },
-      { ';fch', function() require('fzf-lua').command_history() end,                               mode = "n" },
-      { ';fu',  function() require('fzf-lua').changes() end,                                       mode = "n" },
-      { ';fk',  function() require('fzf-lua').keymaps() end,                                       mode = "n" },
-      { ';fT',  function() require('fzf-lua').filetypes() end,                                     mode = "n" },
+      -- Miscellaneous
+      { ';fr',  function() require('fzf-lua').resume() end,                                        mode = "n", desc = "Resume last search" },
+      { ';fm',  function() require('fzf-lua').colorschemes() end,                                  mode = "n", desc = "Colorschemes" },
+      { ';fcc', function() require('fzf-lua').commands() end,                                      mode = "n", desc = "Commands" },
+      { ';fch', function() require('fzf-lua').command_history() end,                               mode = "n", desc = "Command history" },
+      { ';fu',  function() require('fzf-lua').changes() end,                                       mode = "n", desc = "Changes" },
+      { ';fk',  function() require('fzf-lua').keymaps() end,                                       mode = "n", desc = "Keymaps" },
+      { ';fT',  function() require('fzf-lua').filetypes() end,                                     mode = "n", desc = "Filetypes" },
 
-      -- custom
+      -- Custom directory pickers
+
+      -- 将来実装したい
       -- { ';fv',   function() require('fzf-lua').treesitter() end,                       mode = "n" },
-
-      -- プロンプトで入力したパスを検索する
       {
         ';fp',
         function()
@@ -80,9 +72,9 @@ return {
           if path == '' then return end
           require('fzf-lua').files({ cwd = path })
         end,
-        mode = "n"
+        mode = "n",
+        desc = "Find files in custom directory"
       },
-      -- grep
       {
         ";gp",
         function()
@@ -90,11 +82,12 @@ return {
           if path == '' then return end
           require('fzf-lua').live_grep({ cwd = path })
         end,
-        mode = "n"
+        mode = "n",
+        desc = "Grep in custom directory"
       },
       { ";fgp", ";gp", mode = "n", remap = true },
 
-      -- complete path in insert mode (with multi-selection)
+      -- Path completion in insert mode
       {
         '<c-o><c-p>',
         function()
@@ -157,21 +150,21 @@ return {
           vim.cmd('startinsert')
         end,
         mode = { "i", "v" },
-        desc = "複数のパスを選択して挿入（新しい行として追加）"
+        desc = "Insert multiple file paths"
       },
     },
     config = function()
       -- https://github.com/ibhagwan/fzf-lua?tab=readme-ov-file#default-options
       local actions = require "fzf-lua.actions"
       require 'fzf-lua'.setup {
-        winopts  = {
+        winopts = {
           fullscreen = false, -- start fullscreen?
-          preview    = {
+          preview = {
             default = 'bat',  -- override the default previewer?
           },
         },
 
-        keymap   = {
+        keymap = {
           -- Below are the default binds, setting any value in these tables will override
           -- the defaults, to inherit from the defaults change [1] from `false` to `true`
           builtin = {
@@ -193,7 +186,7 @@ return {
             ["ctrl-h"] = "first",
           },
         },
-        actions  = {
+        actions = {
           -- Below are the default actions, setting any value in these tables will override
           -- the defaults, to inherit from the defaults change [1] from `false` to `true`
           files = {
@@ -215,7 +208,7 @@ return {
             -- end
           },
         },
-        files    = {
+        files = {
           -- Uncomment for custom vscode-like formatter where the filename is first:
           -- e.g. "fzf-lua/previewer/fzf.lua" => "fzf.lua previewer/fzf-lua"
           -- formatter = "path.filename_first",

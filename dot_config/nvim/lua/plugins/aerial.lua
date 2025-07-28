@@ -1,15 +1,13 @@
 return {
   {
     'stevearc/aerial.nvim',
-    lazy = false,
+    cmd = { "AerialToggle", "AerialOpen", "AerialNavToggle", "AerialPrev", "AerialNext" },
     keys = {
-      { ';aa', "<cmd>AerialToggle!<CR>",   mode = 'n' },
-      { ';aA', "<cmd>AerialOpen<CR>",      mode = 'n' },
-      { ';ao', "<cmd>AerialOpen<CR>",      mode = 'n' },
-      { ';af', "<cmd>AerialNavToggle<CR>", mode = 'n' },
-      {
-        ';af', function() require("telescope").extensions.aerial.aerial() end, mode = 'n'
-      },
+      { ';aa', "<cmd>AerialToggle!<CR>",   mode = 'n', desc = "Toggle aerial outline" },
+      { ';aA', "<cmd>AerialOpen<CR>",      mode = 'n', desc = "Open aerial outline" },
+      { ';ao', "<cmd>AerialOpen<CR>",      mode = 'n', desc = "Open aerial outline" },
+      { ';an', "<cmd>AerialNavToggle<CR>", mode = 'n', desc = "Toggle aerial navigation" },
+      { ';af', function() require("telescope").extensions.aerial.aerial() end, mode = 'n', desc = "Aerial telescope" },
     },
     opts = {
       backends = { "treesitter", "lsp", "markdown", "asciidoc", "man" },
@@ -84,43 +82,36 @@ return {
       link_tree_to_folds = true,
       nerd_font = "auto",
       on_attach = function(bufnr)
-        vim.keymap.set("n", "[a", "<cmd>AerialPrev<CR>", { buffer = bufnr })
-        vim.keymap.set("n", "]a", "<cmd>AerialNext<CR>", { buffer = bufnr })
+        vim.keymap.set("n", "[a", "<cmd>AerialPrev<CR>", { buffer = bufnr, desc = "Previous aerial item" })
+        vim.keymap.set("n", "]a", "<cmd>AerialNext<CR>", { buffer = bufnr, desc = "Next aerial item" })
       end,
       markdown = {
         update_delay = 100,
       },
     },
     config = function(_, opts)
-      -- 基本設定を適用
       local aerial = require("aerial")
       aerial.setup(opts)
 
-      -- aerial bufferに基づいてソースバッファでMarkdownヘッダーレベルを変更する関数
+      -- Markdownヘッダーレベルを変更する関数
       local function change_header_level_in_source(aerial_line, increment, visual_mode, visual_end_line)
-        -- 現在のバッファと位置を取得
-        local aerial_bufnr = vim.api.nvim_get_current_buf()
         local util = require("aerial.util")
-
-        -- ソースバッファとウィンドウを取得
+        local aerial_bufnr = vim.api.nvim_get_current_buf()
         local source_bufnr = util.get_source_buffer(aerial_bufnr)
+        
         if not source_bufnr then
           vim.notify("Could not find source buffer", vim.log.levels.ERROR)
           return 0
         end
 
-        -- 現在のウィンドウとカーソル位置を保存
         local current_win = vim.api.nvim_get_current_win()
         local current_pos = vim.api.nvim_win_get_cursor(current_win)
-
-        -- データモジュールを使用してシンボル情報を取得
+        
         local data = require("aerial.data")
         local bufdata = data.get_or_create(source_bufnr)
-
-        -- 選択されたシンボルを収集
         local selected_items = {}
 
-        -- 全シンボルを取得して選択範囲内のものを収集 (skip_hidden=falseで非表示のシンボルも含む)
+        -- 選択されたシンボルを収集
         if visual_mode then
           for _, item, i in bufdata:iter({ skip_hidden = false }) do
             if i >= aerial_line and i <= visual_end_line then
@@ -128,101 +119,71 @@ return {
             end
           end
         else
-          -- 単一行の場合
-          local item = nil
-          for _, candidate, i in bufdata:iter({ skip_hidden = false }) do
+          for _, item, i in bufdata:iter({ skip_hidden = false }) do
             if i == aerial_line then
-              item = candidate
+              table.insert(selected_items, item)
               break
             end
           end
-
-          if item then
-            table.insert(selected_items, item)
-          end
         end
 
-        -- 変更を適用するための準備
+        -- 変更を準備
         local changes = {}
         for _, item in ipairs(selected_items) do
           if item and item.lnum then
-            local status, lines = pcall(vim.api.nvim_buf_get_lines, source_bufnr, item.lnum - 1, item.lnum, false)
-            if not status or #lines == 0 then
-              goto continue
-            end
-
-            local source_line = lines[1]
-
-            -- 新しい行を作成
-            local new_line
-            if increment then
-              -- ヘッダーレベルを下げる（#を追加）
-              new_line = "#" .. source_line
-            else
-              -- ヘッダーレベルを上げる（#を削除 - 少なくとも##がある場合のみ）
-              if source_line:match("^##") then
-                new_line = source_line:sub(2)
+            local ok, lines = pcall(vim.api.nvim_buf_get_lines, source_bufnr, item.lnum - 1, item.lnum, false)
+            if ok and #lines > 0 then
+              local source_line = lines[1]
+              local new_line
+              
+              if increment then
+                new_line = "#" .. source_line
               else
-                new_line = source_line -- 変更なし
+                new_line = source_line:match("^##") and source_line:sub(2) or source_line
+              end
+              
+              if new_line ~= source_line then
+                table.insert(changes, { lnum = item.lnum, new_line = new_line })
               end
             end
-
-            -- 変更があれば収集
-            if new_line ~= source_line then
-              table.insert(changes, {
-                lnum = item.lnum,
-                old_line = source_line,
-                new_line = new_line
-              })
-            end
           end
-          ::continue::
         end
 
-        -- 変更がなければ終了
         if #changes == 0 then
           return 0
         end
 
-        -- 変更をソースバッファに適用
+        -- 変更を適用
         local success_count = 0
-
-        -- ソースウィンドウを探す
         local source_win = util.get_source_win(current_win)
-
+        
         if not source_win then
-          -- ソースウィンドウが見つからない場合、別の方法でバッファを直接編集
+          -- 直接バッファを編集
           for _, change in ipairs(changes) do
-            local status = pcall(function()
-              vim.api.nvim_buf_set_lines(source_bufnr, change.lnum - 1, change.lnum, false, { change.new_line })
+            if pcall(vim.api.nvim_buf_set_lines, source_bufnr, change.lnum - 1, change.lnum, false, { change.new_line }) then
               success_count = success_count + 1
-            end)
+            end
           end
         else
-          -- ソースウィンドウを使用して変更を適用（undoが正しく機能するように）
-          -- 現在のウィンドウを保存
+          -- ソースウィンドウ経由で編集（undoが正しく機能）
           local prev_win = vim.api.nvim_get_current_win()
-
-          local status = pcall(function()
-            -- ソースウィンドウに切り替え
+          if pcall(function()
             vim.api.nvim_set_current_win(source_win)
-
-            -- 全ての変更を一括で適用
             for _, change in ipairs(changes) do
-              vim.api.nvim_win_set_cursor(source_win, { change.lnum, 0 })
               vim.api.nvim_buf_set_lines(source_bufnr, change.lnum - 1, change.lnum, false, { change.new_line })
               success_count = success_count + 1
             end
-
-            -- 元のウィンドウに戻る
             vim.api.nvim_set_current_win(prev_win)
             if current_win == prev_win and vim.api.nvim_win_is_valid(current_win) then
               vim.api.nvim_win_set_cursor(current_win, current_pos)
             end
-          end)
+          end) then
+            -- Success
+          else
+            vim.notify("Error applying changes", vim.log.levels.ERROR)
+          end
         end
 
-        -- シンボルを更新
         if success_count > 0 then
           pcall(aerial.refetch_symbols, source_bufnr)
         end
@@ -230,29 +191,116 @@ return {
         return success_count
       end
 
-      -- augroup を作成してキーマップを設定
-      local augroup = vim.api.nvim_create_augroup("AerialCustom", { clear = true })
+      -- ソースバッファでundo/redoを実行する関数
+      local function execute_source_command(command, error_msg)
+        local util = require("aerial.util")
+        local aerial_bufnr = vim.api.nvim_get_current_buf()
+        local source_bufnr = util.get_source_buffer(aerial_bufnr)
+        
+        if not source_bufnr then
+          return
+        end
 
-      -- aerial バッファが読み込まれたときにキーマップを設定
+        local source_win = util.get_source_win()
+        if not source_win then
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_get_buf(win) == source_bufnr then
+              source_win = win
+              break
+            end
+          end
+        end
+
+        local current_win = vim.api.nvim_get_current_win()
+
+        if not source_win then
+          -- 一時ウィンドウを作成
+          if not pcall(function()
+            vim.cmd("split")
+            source_win = vim.api.nvim_get_current_win()
+            vim.api.nvim_win_set_buf(source_win, source_bufnr)
+            
+            if command == "undo" then
+              vim.cmd("normal! u")
+            else
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-r>", true, false, true), "nx", true)
+              vim.cmd("redraw")
+            end
+            
+            vim.api.nvim_win_close(source_win, true)
+            vim.api.nvim_set_current_win(current_win)
+          end) then
+            vim.notify(error_msg, vim.log.levels.ERROR)
+          end
+        else
+          if not pcall(function()
+            vim.api.nvim_set_current_win(source_win)
+            
+            if command == "undo" then
+              vim.cmd("normal! u")
+            else
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-r>", true, false, true), "nx", true)
+              vim.cmd("redraw")
+            end
+            
+            vim.api.nvim_set_current_win(current_win)
+          end) then
+            vim.notify(error_msg, vim.log.levels.ERROR)
+            pcall(vim.api.nvim_set_current_win, current_win)
+          end
+        end
+
+        pcall(aerial.refetch_symbols, source_bufnr)
+      end
+
+      -- ビジュアルモード用のヘルパー関数（ローカルスコープ）
+      local function aerial_visual_helper(increment)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+        
+        vim.defer_fn(function()
+          local win = vim.api.nvim_get_current_win()
+          local cur_pos = vim.api.nvim_win_get_cursor(win)
+          local start_line = vim.fn.line("'<")
+          local end_line = vim.fn.line("'>")
+
+          if start_line <= 0 or end_line <= 0 then
+            vim.notify("Invalid selection range", vim.log.levels.ERROR)
+            return
+          end
+
+          local success_count = change_header_level_in_source(start_line, increment, true, end_line)
+
+          if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_set_cursor(win, cur_pos)
+          end
+
+          if success_count <= 0 then
+            vim.notify("Failed to change header level", vim.log.levels.ERROR)
+          end
+        end, 10)
+      end
+
+      -- aerial バッファ用のキーマップ設定
+      local augroup = vim.api.nvim_create_augroup("AerialCustom", { clear = true })
+      
       vim.api.nvim_create_autocmd("FileType", {
         group = augroup,
         pattern = "aerial",
         callback = function()
           local bufnr = vim.api.nvim_get_current_buf()
 
-          -- 古いマッピングを削除
+          -- 既存のマッピングを削除
           pcall(vim.keymap.del, "n", ">>", { buffer = bufnr })
           pcall(vim.keymap.del, "n", "<<", { buffer = bufnr })
           pcall(vim.keymap.del, "x", ">>", { buffer = bufnr })
           pcall(vim.keymap.del, "x", "<<", { buffer = bufnr })
 
-          -- ノーマルモードでヘッダーレベルを下げる (# を追加)
+          -- ノーマルモード: ヘッダーレベル変更
           vim.keymap.set("n", ">>", function()
             local win = vim.api.nvim_get_current_win()
             local cur_pos = vim.api.nvim_win_get_cursor(win)
             local success_count = change_header_level_in_source(cur_pos[1], true, false)
 
-            -- 操作後、元のカーソル位置に戻す
             if vim.api.nvim_win_is_valid(win) then
               vim.api.nvim_win_set_cursor(win, cur_pos)
             end
@@ -262,13 +310,11 @@ return {
             end
           end, { buffer = bufnr, desc = "ヘッダーレベルを下げる (#を追加)" })
 
-          -- ノーマルモードでヘッダーレベルを上げる (# を削除)
           vim.keymap.set("n", "<<", function()
             local win = vim.api.nvim_get_current_win()
             local cur_pos = vim.api.nvim_win_get_cursor(win)
             local success_count = change_header_level_in_source(cur_pos[1], false, false)
 
-            -- 操作後、元のカーソル位置に戻す
             if vim.api.nvim_win_is_valid(win) then
               vim.api.nvim_win_set_cursor(win, cur_pos)
             end
@@ -278,194 +324,35 @@ return {
             end
           end, { buffer = bufnr, desc = "ヘッダーレベルを上げる (#を削除)" })
 
-          -- ビジュアルモード用のヘルパー関数
-          _G.aerial_visual_helper = function(increment)
-            -- Escキーを押してビジュアルモードを終了
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+          -- ビジュアルモード用コマンド作成（バッファローカル）
+          local cmd_down = "AerialVisualHeaderDown_" .. bufnr
+          local cmd_up = "AerialVisualHeaderUp_" .. bufnr
+          
+          vim.api.nvim_buf_create_user_command(bufnr, cmd_down:match("_(%d+)$") and cmd_down:sub(1, -string.len("_" .. bufnr) - 1) or cmd_down, function()
+            aerial_visual_helper(true)
+          end, {})
 
-            -- 少し待ってからマークを取得
-            vim.defer_fn(function()
-              -- 現在のウィンドウとカーソル位置を保存
-              local win = vim.api.nvim_get_current_win()
-              local cur_pos = vim.api.nvim_win_get_cursor(win)
+          vim.api.nvim_buf_create_user_command(bufnr, cmd_up:match("_(%d+)$") and cmd_up:sub(1, -string.len("_" .. bufnr) - 1) or cmd_up, function()
+            aerial_visual_helper(false)
+          end, {})
 
-              -- 選択範囲を取得
-              local start_line = vim.fn.line("'<")
-              local end_line = vim.fn.line("'>")
+          -- ビジュアルモードマッピング
+          vim.keymap.set("x", ">>", function()
+            aerial_visual_helper(true)
+          end, { buffer = bufnr, desc = "ヘッダーレベルを下げる (選択範囲)" })
 
-              -- 行番号の検証
-              if start_line <= 0 or end_line <= 0 then
-                vim.notify("Invalid selection range", vim.log.levels.ERROR)
-                return
-              end
+          vim.keymap.set("x", "<<", function()
+            aerial_visual_helper(false)
+          end, { buffer = bufnr, desc = "ヘッダーレベルを上げる (選択範囲)" })
 
-              -- 変更を適用
-              local success_count = change_header_level_in_source(start_line, increment, true, end_line)
-
-              -- 操作後、元のカーソル位置に戻す
-              if vim.api.nvim_win_is_valid(win) then
-                vim.api.nvim_win_set_cursor(win, cur_pos)
-              end
-
-              if success_count <= 0 then
-                vim.notify("Failed to change header level", vim.log.levels.ERROR)
-              end
-            end, 10) -- 10ms遅延を設定
-          end
-
-          -- グローバルコマンドを登録
-          if not vim.api.nvim_get_commands({})["AerialVisualHeaderDown"] then
-            vim.api.nvim_create_user_command("AerialVisualHeaderDown", function()
-              _G.aerial_visual_helper(true)
-            end, {})
-
-            vim.api.nvim_create_user_command("AerialVisualHeaderUp", function()
-              _G.aerial_visual_helper(false)
-            end, {})
-          end
-
-          -- ビジュアルモードのマッピングをExコマンド経由で設定
-          vim.cmd([[
-            xnoremap <buffer> <silent> >> <Esc>:AerialVisualHeaderDown<CR>
-            xnoremap <buffer> <silent> << <Esc>:AerialVisualHeaderUp<CR>
-          ]])
-
-          -- undoとredoのキーマッピング
+          -- undo/redo
           vim.keymap.set("n", "u", function()
-            -- aerial bufferのウィンドウとソースバッファを取得
-            local aerial_bufnr = vim.api.nvim_get_current_buf()
-            local util = require("aerial.util")
-            local source_bufnr = util.get_source_buffer(aerial_bufnr)
-
-            if not source_bufnr then
-              return
-            end
-
-            -- ソースウィンドウを探す
-            local source_win = util.get_source_win()
-
-            if not source_win then
-              for _, win in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_get_buf(win) == source_bufnr then
-                  source_win = win
-                  break
-                end
-              end
-            end
-
-            -- 現在のウィンドウを記憶
-            local current_win = vim.api.nvim_get_current_win()
-
-            if not source_win then
-              -- ソースバッファを表示するウィンドウが見つからない場合
-              -- 一時的なウィンドウを作成
-              local status = pcall(function()
-                vim.cmd("split")
-                source_win = vim.api.nvim_get_current_win()
-                vim.api.nvim_win_set_buf(source_win, source_bufnr)
-
-                -- undoを実行
-                vim.cmd("normal! u")
-
-                -- 一時ウィンドウを閉じる
-                vim.api.nvim_win_close(source_win, true)
-                vim.api.nvim_set_current_win(current_win)
-              end)
-
-              if not status then
-                vim.notify("Error occurred during undo operation", vim.log.levels.ERROR)
-              end
-            else
-              local status = pcall(function()
-                -- ソースウィンドウに切り替えてundoを実行
-                vim.api.nvim_set_current_win(source_win)
-                vim.cmd("normal! u")
-
-                -- 元のaerialウィンドウに戻る
-                vim.api.nvim_set_current_win(current_win)
-              end)
-
-              if not status then
-                vim.notify("undo操作中にエラーが発生しました", vim.log.levels.ERROR)
-                -- エラーが発生したら元のウィンドウに戻るように試みる
-                pcall(vim.api.nvim_set_current_win, current_win)
-              end
-            end
-
-            -- シンボルを更新
-            pcall(aerial.refetch_symbols, source_bufnr)
-          end, { buffer = bufnr, desc = "元に戻す (ソースバッファでundo)" })
+            execute_source_command("undo", "Error occurred during undo operation")
+          end, { buffer = bufnr, desc = "元に戻す (ソースバッファ)" })
 
           vim.keymap.set("n", "<C-r>", function()
-            -- aerial bufferのウィンドウとソースバッファを取得
-            local aerial_bufnr = vim.api.nvim_get_current_buf()
-            local util = require("aerial.util")
-            local source_bufnr = util.get_source_buffer(aerial_bufnr)
-
-            if not source_bufnr then
-              return
-            end
-
-            -- ソースウィンドウを探す
-            local source_win = util.get_source_win()
-
-            if not source_win then
-              for _, win in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_get_buf(win) == source_bufnr then
-                  source_win = win
-                  break
-                end
-              end
-            end
-
-            -- 現在のウィンドウを記憶
-            local current_win = vim.api.nvim_get_current_win()
-
-            if not source_win then
-              -- ソースバッファを表示するウィンドウが見つからない場合
-              -- 一時的なウィンドウを作成
-              local status = pcall(function()
-                vim.cmd("split")
-                source_win = vim.api.nvim_get_current_win()
-                vim.api.nvim_win_set_buf(source_win, source_bufnr)
-
-                -- feedkeysでredoを実行
-                vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-r>", true, false, true), "nx", true)
-
-                -- 確実に更新するため
-                vim.cmd("redraw")
-
-                -- 一時ウィンドウを閉じる
-                vim.api.nvim_win_close(source_win, true)
-                vim.api.nvim_set_current_win(current_win)
-              end)
-
-              if not status then
-                vim.notify("Error occurred during redo operation", vim.log.levels.ERROR)
-              end
-            else
-              local status = pcall(function()
-                -- ソースウィンドウに切り替えてredoを実行
-                vim.api.nvim_set_current_win(source_win)
-                vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-r>", true, false, true), "nx", true)
-
-                -- 確実に更新するため
-                vim.cmd("redraw")
-
-                -- 元のaerialウィンドウに戻る
-                vim.api.nvim_set_current_win(current_win)
-              end)
-
-              if not status then
-                vim.notify("redo操作中にエラーが発生しました", vim.log.levels.ERROR)
-                -- エラーが発生したら元のウィンドウに戻るように試みる
-                pcall(vim.api.nvim_set_current_win, current_win)
-              end
-            end
-
-            -- シンボルを更新
-            pcall(aerial.refetch_symbols, source_bufnr)
-          end, { buffer = bufnr, desc = "やり直す (ソースバッファでredo)" })
+            execute_source_command("redo", "Error occurred during redo operation")
+          end, { buffer = bufnr, desc = "やり直す (ソースバッファ)" })
         end
       })
     end,

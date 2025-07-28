@@ -1,8 +1,7 @@
 return { {
   'github/copilot.vim',
   enabled = true,
-  lazy = true,
-  event = "VimEnter",
+  event = "InsertEnter",
   init = function()
     vim.g.copilot_filetypes = {
       csv = false,
@@ -19,6 +18,18 @@ return { {
     }
     vim.g.copilot_no_tab_map = true
     vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#FF5555', ctermfg = 8 })
+
+    -- 大きいファイルでは無効化（パフォーマンス改善）
+    vim.api.nvim_create_autocmd("BufReadPre", {
+      pattern = "*",
+      callback = function()
+        local file_size = vim.fn.getfsize(vim.fn.expand("<afile>"))
+        if file_size > 100000 or file_size == -2 then
+          vim.b.copilot_enabled = false
+        end
+      end,
+      desc = "Disable Copilot for large files"
+    })
   end,
   keys = {
     {
@@ -86,27 +97,6 @@ return { {
       desc = "Accept line"
     }
   }
-
-  -- " " coc.nvim との連携
-  -- " if !empty(globpath(&rtp, 'plugin/coc.vim'))
-  -- " let g:copilot_no_tab_map = v:true
-  -- " inoremap <silent><expr> <TAB>
-  -- "       \ coc#pum#visible() ? coc#pum#next(1):
-  -- "       \ exists('b:_copilot.suggestions') ? copilot#Accept("\<CR>") :
-  -- "       \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
-  -- "       \ CheckBackspace() ? "\<Tab>" :
-  -- "       \ coc#refresh()
-  -- " endif
-
-  -- " 大きいファイルでは無効化
-  -- augroup file_size_limit
-  --   autocmd BufReadPre *
-  --      \ let f=getfsize(expand("<afile>"))
-  --      \ | if f > 100000 || f == -2
-  --      \ | let b:copilot_enabled = v:false
-  --      \ | endif
-  -- augroup END
-
 },
   {
     'zbirenbaum/copilot.lua',

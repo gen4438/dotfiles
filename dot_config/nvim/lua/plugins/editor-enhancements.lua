@@ -1,25 +1,13 @@
 -- エディタの機能を拡張するプラグイン
 return {
-  -- undoの履歴表示
-  {
-    'mbbill/undotree',
-    lazy = true,
-    enabled = false,
-    cmd = {
-      "UndotreeToggle",
-    },
-    keys = {
-      { "<c-e><c-u>", "<cmd>UndotreeToggle<CR>" },
-    }
-  },
+  -- Undo history tree
   {
     "jiaoshijie/undotree",
     name = "undotree-lua",
     lazy = true,
-    -- dependencies = "nvim-lua/plenary.nvim",
     config = true,
-    keys = { -- load the plugin only when using it's keybinding:
-      { "<c-e><c-u>", "<cmd>lua require('undotree').toggle()<cr>" },
+    keys = {
+      { "<c-e><c-u>", "<cmd>lua require('undotree').toggle()<cr>", desc = "Toggle undo tree" },
     },
   },
   {
@@ -49,52 +37,48 @@ return {
       vim.g['asterisk#keeppos'] = 1
     end,
     keys = {
-      { '*',  '<Plug>(asterisk-z*)',  mode = { "n", "x" } },
-      { '#',  '<Plug>(asterisk-z#)',  mode = { "n", "x" } },
-      { 'g*', '<Plug>(asterisk-gz*)', mode = { "n", "x" } },
-      { 'g#', '<Plug>(asterisk-gz#)', mode = { "n", "x" } },
+      { '*',  '<Plug>(asterisk-z*)',  mode = { "n", "x" }, desc = "Search forward (keep cursor)" },
+      { '#',  '<Plug>(asterisk-z#)',  mode = { "n", "x" }, desc = "Search backward (keep cursor)" },
+      { 'g*', '<Plug>(asterisk-gz*)', mode = { "n", "x" }, desc = "Search forward partial" },
+      { 'g#', '<Plug>(asterisk-gz#)', mode = { "n", "x" }, desc = "Search backward partial" },
     }
   },
-  -- 検索数の表示
+  -- Search count display
   {
     'osyo-manga/vim-anzu',
     lazy = true,
     keys = {
-      { "n", "<Plug>(anzu-n-with-echo)" },
-      { "N", "<Plug>(anzu-N-with-echo)" },
+      { "n", "<Plug>(anzu-n-with-echo)", desc = "Next search result" },
+      { "N", "<Plug>(anzu-N-with-echo)", desc = "Previous search result" },
     },
     config = function()
       vim.o.statusline = '%{anzu#search_status()}'
     end
   },
 
-  -- 移動
+  -- Easy motion
   {
     'easymotion/vim-easymotion',
     lazy = true,
-    config = function()
-      -- EasyMotionの設定
+    init = function()
       vim.g.EasyMotion_smartcase = 1
     end,
     keys = {
-      { '<leader><leader>s', '<Plug>(easymotion-sn)',        mode = { "n" } },
-      { '<leader>j',         '<Plug>(easymotion-j)',         mode = { "n", "x" } },
-      { '<leader>k',         '<Plug>(easymotion-k)',         mode = { "n", "x" } },
-      { '<leader>w',         '<Plug>(easymotion-overwin-w)', mode = { "n" } },
+      { '<leader>/', '<Plug>(easymotion-sn)',        mode = { "n" },      desc = "EasyMotion search" },
+      { '<leader>j', '<Plug>(easymotion-j)',         mode = { "n", "x" }, desc = "EasyMotion down" },
+      { '<leader>k', '<Plug>(easymotion-k)',         mode = { "n", "x" }, desc = "EasyMotion up" },
+      { '<leader>w', '<Plug>(easymotion-overwin-w)', mode = { "n" },      desc = "EasyMotion word" },
     }
   },
+  -- Quick scope: highlight unique characters for f/F/t/T movement
   {
     'unblevable/quick-scope',
-    lazy = true,
-    -- let g:qs_lazy_highlight = 1
-    -- let g:qs_hi_priority = 2
-    -- autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
-    -- autocmd ColorScheme * highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
     event = "BufEnter",
-    config = function()
+    init = function()
       vim.g.qs_lazy_highlight = 1
       vim.g.qs_hi_priority = 2
-
+    end,
+    config = function()
       local qsg = vim.api.nvim_create_augroup('quick-scope', { clear = true })
       vim.api.nvim_create_autocmd('ColorScheme', {
         pattern = "*",
@@ -116,11 +100,10 @@ return {
     -- event = 'VimEnter',
     -- dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
-      -- " session management
-      { "<leader>so", ":SessionManager load_current_dir_session<CR>", mode = "n" },
-      { "<leader>sf", ":SessionManager load_session<CR>",             mode = "n" },
-      { "<leader>ss", ":SessionManager save_current_session<CR>",     mode = "n" },
-      { "<leader>sd", ":SessionManager delete_session<CR>",           mode = "n" },
+      { "<leader>so", ":SessionManager load_current_dir_session<CR>", mode = "n", desc = "Load current dir session" },
+      { "<leader>sf", ":SessionManager load_session<CR>",             mode = "n", desc = "Load session" },
+      { "<leader>ss", ":SessionManager save_current_session<CR>",     mode = "n", desc = "Save current session" },
+      { "<leader>sd", ":SessionManager delete_session<CR>",           mode = "n", desc = "Delete session" },
     },
     opts = function()
       local Path = require('plenary.path')
@@ -150,8 +133,7 @@ return {
     lazy = true,
     event = "BufEnter",
     keys = {
-      { "v", "<Plug>(expand_region_expand)", mode = "x" },
-      -- { "<C-v>", "<Plug>(expand_region_shrink)", mode = "x" },
+      { "v", "<Plug>(expand_region_expand)", mode = "x", desc = "Expand region" },
     },
 
   },
@@ -161,8 +143,8 @@ return {
     'junegunn/vim-easy-align',
     lazy = true,
     keys = {
-      { "ea", "<Plug>(EasyAlign)", mode = "x" },
-      { "ea", "<Plug>(EasyAlign)", mode = "n" },
+      { "ea", "<Plug>(EasyAlign)", mode = "x", desc = "Align text (visual)" },
+      { "ea", "<Plug>(EasyAlign)", mode = "n", desc = "Align text (normal)" },
     }
   },
 
@@ -184,8 +166,8 @@ return {
       vim.g.maximizer_set_default_mapping = 0
     end,
     keys = {
-      { "so", ":MaximizerToggle<CR>",   mode = "n" },
-      { "so", ":MaximizerToggle<CR>gv", mode = "v" },
+      { "so", ":MaximizerToggle<CR>",   mode = "n", desc = "Toggle window maximize" },
+      { "so", ":MaximizerToggle<CR>gv", mode = "v", desc = "Toggle window maximize (restore visual)" },
     }
   },
 
@@ -193,10 +175,7 @@ return {
   {
     'vim-scripts/vis',
     lazy = true,
-    cmd = {
-      "B",
-      "S",
-    }
+    cmd = { "B", "S" },
   },
 
   -- 一時ファイル作成
@@ -224,7 +203,7 @@ return {
       "Linediff",
     },
     keys = {
-      { "<localleader>ld", ":Linediff<CR>", mode = { "n", "x" } }
+      { "<localleader>ld", ":Linediff<CR>", mode = { "n", "x" }, desc = "Compare lines/selection" }
     }
   },
 
@@ -252,7 +231,7 @@ return {
       vim.g.BufKillActionWhenBufferDisplayedInAnotherWindow = 'kill'
     end,
     keys = {
-      { "<leader>cc", ":BD<CR>" },
+      { "<leader>cc", ":BD<CR>", mode = "n", desc = "Delete buffer (keep window)" },
     }
   },
 
@@ -260,37 +239,33 @@ return {
   {
     'tpope/vim-abolish',
     lazy = true,
-    keys = {
-      -- crm        (MixedCase)
-      -- crc        (camelCase)
-      -- crs        (snake_case)
-      -- cru        (UPPER_CASE)
-      -- cr-        (dash-case)
-      -- cr.        (dot.case)
-      -- cr<space>  (space case)
-      -- crt        (and Title Case)
-    }
+    event = { "BufReadPost", "BufNewFile" },
+    -- Uses built-in coercion mappings:
+    -- crm        (MixedCase)
+    -- crc        (camelCase)
+    -- crs        (snake_case)
+    -- cru        (UPPER_CASE)
+    -- cr-        (dash-case)
+    -- cr.        (dot.case)
+    -- cr<space>  (space case)
+    -- crt        (Title Case)
   },
 
   -- テンプレート
   {
     'mattn/vim-sonictemplate',
     lazy = true,
-    command = function()
+    init = function()
       vim.g.sonictemplate_vim_template_dir = vim.fn.stdpath('config') .. '/sonictemplate'
     end,
-    cmd = {
-      "SonicTemplate",
-    }
+    cmd = { "SonicTemplate" },
   },
 
   -- vimのコマンドの実行結果をバッファに出力
   {
     'vim-scripts/ViewOutput',
     lazy = true,
-    cmd = {
-      "VO",
-    }
+    cmd = { "VO" },
   },
 
   -- 行末の空白を強調
@@ -301,9 +276,7 @@ return {
     init = function()
       vim.g.extra_whitespace_ignored_filetypes = nil
     end,
-    cmd = {
-      "FixWhitespace",
-    }
+    cmd = { "FixWhitespace" },
   },
 
   -- 指定ワードをハイライト
@@ -311,8 +284,8 @@ return {
     't9md/vim-quickhl',
     lazy = true,
     keys = {
-      { "<space>m", "<Plug>(quickhl-manual-this)",  mode = { "n", "x" } },
-      { "<space>M", "<Plug>(quickhl-manual-reset)", mode = { "n", "x" } },
+      { "<space>m", "<Plug>(quickhl-manual-this)",  mode = { "n", "x" }, desc = "Highlight word/selection" },
+      { "<space>M", "<Plug>(quickhl-manual-reset)", mode = { "n", "x" }, desc = "Clear all highlights" },
     }
   },
 
@@ -354,10 +327,10 @@ return {
       "CccHighlighterToggle",
     },
     keys = {
-      { "<c-c><c-p>", ":CccPick<cr>",              mode = "n" },
-      { "<c-c><c-p>", "<Plug>(ccc-insert)",        mode = "i" },
-      { "<c-c><c-p>", "<Plug>(ccc-select-color)",  mode = "x" },
-      { "<c-c><c-c>", ":CccHighlighterToggle<cr>", mode = "n" },
+      { "<c-c><c-p>", ":CccPick<cr>",              mode = "n", desc = "Color picker" },
+      { "<c-c><c-p>", "<Plug>(ccc-insert)",        mode = "i", desc = "Insert color" },
+      { "<c-c><c-p>", "<Plug>(ccc-select-color)",  mode = "x", desc = "Select color" },
+      { "<c-c><c-c>", ":CccHighlighterToggle<cr>", mode = "n", desc = "Toggle color highlighter" },
     }
   },
 

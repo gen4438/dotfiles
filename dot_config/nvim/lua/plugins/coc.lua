@@ -48,8 +48,8 @@ local coc_setup = function()
   vim.opt.signcolumn = "yes"
 
   local keyset = vim.keymap.set
-  -- Autocomplete
-  function _G.check_back_space()
+  -- Autocomplete helper (local function)
+  local function check_back_space()
     local col = vim.fn.col('.') - 1
     return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
   end
@@ -60,7 +60,15 @@ local coc_setup = function()
   -- NOTE: Use command ':verbose imap <tab>' to make sure Tab is not mapped by
   -- other plugins before putting this into your config
   local opts = { silent = true, noremap = true, expr = true, replace_keycodes = false }
-  keyset("i", "<TAB>", 'coc#pum#visible() ? coc#pum#next(1) : v:lua.check_back_space() ? "<TAB>" : coc#refresh()', opts)
+  keyset("i", "<TAB>", function()
+    if vim.fn['coc#pum#visible']() ~= 0 then
+      return vim.fn['coc#pum#next'](1)
+    elseif check_back_space() then
+      return vim.api.nvim_replace_termcodes("<TAB>", true, false, true)
+    else
+      return vim.fn['coc#refresh']()
+    end
+  end, { silent = true, expr = true })
   keyset("i", "<S-TAB>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]], opts)
 
   -- Make <CR> to accept selected completion item or notify coc.nvim to format
@@ -68,35 +76,34 @@ local coc_setup = function()
   keyset("i", "<cr>", [[coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"]], opts)
 
   -- Use <c-j> to trigger snippets
-  -- keyset("i", "<c-s>", "<Plug>(coc-snippets-expand-jump)")
+  -- keyset("i", "<c-s>", "<Plug>(coc-snippets-expand-jump)", { silent = true, desc = "Expand snippet" })
   -- Use <c-space> to trigger completion
-  keyset("i", "<c-space>", "coc#refresh()", { silent = true, expr = true })
+  keyset("i", "<c-space>", "coc#refresh()", { silent = true, expr = true, desc = "Trigger completion" })
 
   -- Use `[g` and `]g` to navigate diagnostics
-  -- Use `:CocDiagnostics` to get all diagnostics of current buffer in location list
-  keyset("n", "[g", "<Plug>(coc-diagnostic-prev)", { silent = true })
-  keyset("n", "]g", "<Plug>(coc-diagnostic-next)", { silent = true })
+  keyset("n", "[g", "<Plug>(coc-diagnostic-prev)", { silent = true, desc = "Previous diagnostic" })
+  keyset("n", "]g", "<Plug>(coc-diagnostic-next)", { silent = true, desc = "Next diagnostic" })
 
   -- GoTo code navigation
-  keyset("n", "gd", "<Plug>(coc-definition)", { silent = true })
-  keyset("n", "gy", "<Plug>(coc-type-definition)", { silent = true })
-  keyset("n", "gi", "<Plug>(coc-implementation)", { silent = true })
-  keyset("n", "gr", "<Plug>(coc-references)", { silent = true })
+  keyset("n", "gd", "<Plug>(coc-definition)", { silent = true, desc = "Go to definition" })
+  keyset("n", "gy", "<Plug>(coc-type-definition)", { silent = true, desc = "Go to type definition" })
+  keyset("n", "gi", "<Plug>(coc-implementation)", { silent = true, desc = "Go to implementation" })
+  keyset("n", "gr", "<Plug>(coc-references)", { silent = true, desc = "Go to references" })
 
 
   -- Use K to show documentation in preview window
-  function _G.show_docs()
+  local function show_docs()
     local cw = vim.fn.expand('<cword>')
-    if vim.fn.index({ 'vim', 'help' }, vim.bo.filetype) >= 0 then
-      vim.api.nvim_command('h ' .. cw)
-    elseif vim.api.nvim_eval('coc#rpc#ready()') then
+    if vim.tbl_contains({ 'vim', 'help' }, vim.bo.filetype) then
+      vim.cmd('help ' .. cw)
+    elseif vim.fn['coc#rpc#ready']() then
       vim.fn.CocActionAsync('doHover')
     else
-      vim.api.nvim_command('!' .. vim.o.keywordprg .. ' ' .. cw)
+      vim.cmd('!' .. vim.o.keywordprg .. ' ' .. cw)
     end
   end
 
-  keyset("n", "K", '<CMD>lua _G.show_docs()<CR>', { silent = true })
+  keyset("n", "K", show_docs, { silent = true, desc = "Show documentation" })
 
 
   -- Highlight the symbol and its references on a CursorHold event(cursor is idle)
@@ -106,7 +113,7 @@ local coc_setup = function()
     command = "silent call CocActionAsync('highlight')",
     desc = "Highlight symbol under cursor on CursorHold"
   })
-  
+
   -- Custom highlight colors for COC document highlighting
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = "CocGroup",
@@ -118,7 +125,7 @@ local coc_setup = function()
     end,
     desc = "Set custom COC highlight colors after colorscheme changes"
   })
-  
+
   -- Apply highlight immediately if colorscheme is already loaded
   vim.api.nvim_set_hl(0, "CocHighlightText", { bg = "#5c5c0a", fg = "#ffffff" })
   vim.api.nvim_set_hl(0, "CocHighlightRead", { bg = "#5c5c0a", fg = "#ffffff" })
@@ -126,14 +133,13 @@ local coc_setup = function()
 
 
   -- Symbol renaming
-  keyset("n", "<leader>rn", "<Plug>(coc-rename)", { silent = true })
-
+  keyset("n", "<leader>rn", "<Plug>(coc-rename)", { silent = true, desc = "Rename symbol" })
 
   -- Formatting selected code
-  keyset("x", "<localleader>f", "<Plug>(coc-format-selected)", { silent = true })
-  keyset("n", "<localleader>f", "<Plug>(coc-format)", { silent = true })
-  keyset("x", "<c-p>", "<Plug>(coc-format-selected)", { silent = true })
-  keyset("n", "<c-p>", "<Plug>(coc-format)", { silent = true })
+  keyset("x", "<localleader>f", "<Plug>(coc-format-selected)", { silent = true, desc = "Format selected" })
+  keyset("n", "<localleader>f", "<Plug>(coc-format)", { silent = true, desc = "Format buffer" })
+  keyset("x", "<c-p>", "<Plug>(coc-format-selected)", { silent = true, desc = "Format selected" })
+  keyset("n", "<c-p>", "<Plug>(coc-format)", { silent = true, desc = "Format buffer" })
 
 
   -- Setup formatexpr specified filetype(s)
@@ -154,36 +160,41 @@ local coc_setup = function()
 
   -- Apply codeAction to the selected region
   -- Example: `<leader>aap` for current paragraph
-  local opts = { silent = true, nowait = true }
-  keyset("x", "<leader>a", "<Plug>(coc-codeaction-selected)", opts)
-  keyset("n", "<leader>a", "<Plug>(coc-codeaction-selected)", opts)
+  local action_opts = { silent = true, nowait = true }
+  keyset("x", "<leader>a", "<Plug>(coc-codeaction-selected)",
+    vim.tbl_extend("force", action_opts, { desc = "Code action (selected)" }))
+  keyset("n", "<leader>a", "<Plug>(coc-codeaction-selected)",
+    vim.tbl_extend("force", action_opts, { desc = "Code action (line)" }))
 
-  -- Remap keys for apply code actions at the cursor position.
-  keyset("n", "<leader>ac", "<Plug>(coc-codeaction-cursor)", opts)
-  -- Remap keys for apply source code actions for current file.
-  keyset("n", "<leader>as", "<Plug>(coc-codeaction-source)", opts)
-  -- Apply the most preferred quickfix action on the current line.
-  keyset("n", "<leader>qf", "<Plug>(coc-fix-current)", opts)
+  -- Code actions at different scopes
+  keyset("n", "<leader>ac", "<Plug>(coc-codeaction-cursor)",
+    vim.tbl_extend("force", action_opts, { desc = "Code action (cursor)" }))
+  keyset("n", "<leader>as", "<Plug>(coc-codeaction-source)",
+    vim.tbl_extend("force", action_opts, { desc = "Code action (source)" }))
+  keyset("n", "<leader>qf", "<Plug>(coc-fix-current)", vim.tbl_extend("force", action_opts, { desc = "Quick fix" }))
 
-  -- Remap keys for apply refactor code actions.
-  keyset("n", "<leader>re", "<Plug>(coc-codeaction-refactor)", { silent = true })
-  keyset("x", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true })
-  keyset("n", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true })
+  -- Refactor actions
+  keyset("n", "<leader>re", "<Plug>(coc-codeaction-refactor)", { silent = true, desc = "Refactor" })
+  keyset("x", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor selected" })
+  keyset("n", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor" })
 
-  -- Run the Code Lens actions on the current line
-  keyset("n", "<leader>l", "<Plug>(coc-codelens-action)", opts)
+  -- Code lens
+  keyset("n", "<leader>cl", "<Plug>(coc-codelens-action)",
+    vim.tbl_extend("force", action_opts, { desc = "Code lens action" }))
 
 
   -- -- Map function and class text objects
   -- -- NOTE: Requires 'textDocument.documentSymbol' support from the language server
-  -- keyset("x", "if", "<Plug>(coc-funcobj-i)", opts)
-  -- keyset("o", "if", "<Plug>(coc-funcobj-i)", opts)
-  -- keyset("x", "af", "<Plug>(coc-funcobj-a)", opts)
-  -- keyset("o", "af", "<Plug>(coc-funcobj-a)", opts)
-  -- keyset("x", "ic", "<Plug>(coc-classobj-i)", opts)
-  -- keyset("o", "ic", "<Plug>(coc-classobj-i)", opts)
-  -- keyset("x", "ac", "<Plug>(coc-classobj-a)", opts)
-  -- keyset("o", "ac", "<Plug>(coc-classobj-a)", opts)
+  -- これは TreeSitter の textobj 対応に移行したので、不要
+  -- local textobj_opts = { silent = true, nowait = true }
+  -- keyset("x", "if", "<Plug>(coc-funcobj-i)", vim.tbl_extend("force", textobj_opts, { desc = "Inner function" }))
+  -- keyset("o", "if", "<Plug>(coc-funcobj-i)", vim.tbl_extend("force", textobj_opts, { desc = "Inner function" }))
+  -- keyset("x", "af", "<Plug>(coc-funcobj-a)", vim.tbl_extend("force", textobj_opts, { desc = "Around function" }))
+  -- keyset("o", "af", "<Plug>(coc-funcobj-a)", vim.tbl_extend("force", textobj_opts, { desc = "Around function" }))
+  -- keyset("x", "ic", "<Plug>(coc-classobj-i)", vim.tbl_extend("force", textobj_opts, { desc = "Inner class" }))
+  -- keyset("o", "ic", "<Plug>(coc-classobj-i)", vim.tbl_extend("force", textobj_opts, { desc = "Inner class" }))
+  -- keyset("x", "ac", "<Plug>(coc-classobj-a)", vim.tbl_extend("force", textobj_opts, { desc = "Around class" }))
+  -- keyset("o", "ac", "<Plug>(coc-classobj-a)", vim.tbl_extend("force", textobj_opts, { desc = "Around class" }))
 
 
   -- Remap <C-f> and <C-b> to scroll float windows/popups
@@ -198,11 +209,10 @@ local coc_setup = function()
   keyset("v", "<C-f>", 'coc#float#has_scroll() ? coc#float#scroll(1) : "<C-f>"', opts)
   keyset("v", "<C-b>", 'coc#float#has_scroll() ? coc#float#scroll(0) : "<C-b>"', opts)
 
-
   -- Use CTRL-S for selections ranges
   -- Requires 'textDocument/selectionRange' support of language server
-  -- keyset("n", "<C-s>", "<Plug>(coc-range-select)", { silent = true })
-  -- keyset("x", "<C-s>", "<Plug>(coc-range-select)", { silent = true })
+  keyset("n", "<C-s>", "<Plug>(coc-range-select)", { silent = true, desc = "Range select" })
+  keyset("x", "<C-s>", "<Plug>(coc-range-select)", { silent = true, desc = "Extend range select" })
 
   -- Add `:Format` command to format current buffer
   vim.api.nvim_create_user_command("Format", "call CocAction('format')", {})
@@ -221,26 +231,22 @@ local coc_setup = function()
   -- Mappings for CoCList
   -- code actions and coc stuff
   ---@diagnostic disable-next-line: redefined-local
-  local opts = { silent = true, nowait = true }
-  -- Show all diagnostics
-  keyset("n", "<localleader>a", ":<C-u>CocList diagnostics<cr>", opts)
-  -- Manage extensions
-  keyset("n", "<localleader>e", ":<C-u>CocList extensions<cr>", opts)
-  -- Show commands
-  keyset("n", "<localleader>c", ":<C-u>CocList commands<cr>", opts)
-  -- Find symbol of current document
-  keyset("n", "<localleader>o", ":<C-u>CocList outline<cr>", opts)
-  -- Search workspace symbols
-  keyset("n", "<localleader>s", ":<C-u>CocList -I symbols<cr>", opts)
-  -- Do default action for next item
-  keyset("n", "<localleader>j", ":<C-u>CocNext<cr>", opts)
-  -- Do default action for previous item
-  keyset("n", "<localleader>k", ":<C-u>CocPrev<cr>", opts)
-  -- Resume latest coc list
-  keyset("n", "<localleader>p", ":<C-u>CocListResume<cr>", opts)
-
-  -- coc-marketplace
-  keyset("n", "<localleader>m", ":<C-u>CocList marketplace<cr>", opts)
+  local list_opts = { silent = true, nowait = true }
+  keyset("n", "<localleader>a", ":<C-u>CocList diagnostics<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Show diagnostics" }))
+  keyset("n", "<localleader>e", ":<C-u>CocList extensions<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Manage extensions" }))
+  keyset("n", "<localleader>c", ":<C-u>CocList commands<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Show commands" }))
+  keyset("n", "<localleader>o", ":<C-u>CocList outline<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Document outline" }))
+  keyset("n", "<localleader>s", ":<C-u>CocList -I symbols<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Workspace symbols" }))
+  keyset("n", "<localleader>j", ":<C-u>CocNext<cr>", vim.tbl_extend("force", list_opts, { desc = "Next item" }))
+  keyset("n", "<localleader>k", ":<C-u>CocPrev<cr>", vim.tbl_extend("force", list_opts, { desc = "Previous item" }))
+  keyset("n", "<localleader>p", ":<C-u>CocListResume<cr>", vim.tbl_extend("force", list_opts, { desc = "Resume list" }))
+  keyset("n", "<localleader>m", ":<C-u>CocList marketplace<cr>",
+    vim.tbl_extend("force", list_opts, { desc = "Marketplace" }))
 
 
   -- " Use <C-j> for jump to next placeholder, it's default of coc.nvim
@@ -260,11 +266,12 @@ end
 return {
   {
     "neoclide/coc.nvim",
-    lazy = true,
-    enable = true,
-    event = "VeryLazy",
     branch = "release",
-    cmd = { "CocInstall", "CocUninstall", "CocUpdate", "CocUpdateSync" },
+    event = { "BufReadPre", "BufNewFile" },
+    cmd = {
+      "CocInstall", "CocUninstall", "CocUpdate", "CocUpdateSync",
+      "CocList", "CocNext", "CocPrev", "CocAction", "Format", "Fold", "OR"
+    },
     config = coc_setup,
     dependencies = {
       'SirVer/ultisnips'

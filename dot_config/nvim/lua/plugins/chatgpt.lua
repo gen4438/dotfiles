@@ -1,8 +1,8 @@
 return {
   {
     "jackMort/ChatGPT.nvim",
+    enabled = false, -- ほぼコメントアウトされているため無効化
     lazy = true,
-    -- event = "VeryLazy",
     config = function()
       require("chatgpt").setup(
 

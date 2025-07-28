@@ -80,12 +80,12 @@ return {
       },
     },
     keys = {
-      { "<c-l>", ":BufferLineCycleNext<CR>", mode = "n" },
-      { "<c-h>", ":BufferLineCyclePrev<CR>", mode = "n" },
-      { "s>", ":BufferLineMoveNext<CR>",  mode = "n" },
-      { "s<", ":BufferLineMovePrev<CR>",  mode = "n" },
-      { "<leader>bse", ":BufferLineSortByExtension<CR>", mode = "n" },
-      { "<leader>bsd", ":BufferLineSortByDirectory<CR>", mode = "n" },
+      { "<c-l>", ":BufferLineCycleNext<CR>", mode = "n", desc = "Next buffer" },
+      { "<c-h>", ":BufferLineCyclePrev<CR>", mode = "n", desc = "Previous buffer" },
+      { "s>", ":BufferLineMoveNext<CR>",  mode = "n", desc = "Move buffer right" },
+      { "s<", ":BufferLineMovePrev<CR>",  mode = "n", desc = "Move buffer left" },
+      { "<leader>bse", ":BufferLineSortByExtension<CR>", mode = "n", desc = "Sort buffers by extension" },
+      { "<leader>bsd", ":BufferLineSortByDirectory<CR>", mode = "n", desc = "Sort buffers by directory" },
     }
   },
 

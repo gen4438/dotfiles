@@ -4,23 +4,23 @@ return {
   {
     'tpope/vim-fugitive',
     keys = {
-      { '<leader>go',  ':GBrowse!<CR>',         mode = 'v' },
-      { '<leader>go',  ':GBrowse!<CR>' },
-      { '<leader>ga',  ':Gwrite<CR>' },
-      { '<leader>gc',  ':Git commit -v' },
-      { '<leader>gsh', ':Git push' },
-      { '<leader>glh', ':Gclog<CR>' },
-      { '<leader>glg', ':0Gclog<CR>' },
-      { '<leader>glg', ':Gclog<CR>',           mode = 'v' },
-      { '<leader>gll', ':Git pull' },
-      { '<leader>gst', ':Git<CR>' },
-      { '<leader>gb',  ':Git blame<CR>' },
-      { '<leader>gd',  ':Gvdiffsplit' },
-      { '<leader>grb', ':Git rebase -i origin' },
-      { '<leader>grd', ':Gread' },
-      { '<leader>ge',  ':Gedit' },
-      { '<leader>grm', ':GRemove' },
-      { '<leader>gmv', ':GRename' },
+      { '<leader>go',  ':GBrowse!<CR>',         mode = 'v', desc = "Open in browser (visual)" },
+      { '<leader>go',  ':GBrowse!<CR>',         mode = 'n', desc = "Open in browser" },
+      { '<leader>ga',  ':Gwrite<CR>',           mode = 'n', desc = "Git add current file" },
+      { '<leader>gc',  ':Git commit -v',        mode = 'n', desc = "Git commit" },
+      { '<leader>gsh', ':Git push',             mode = 'n', desc = "Git push" },
+      { '<leader>glh', ':Gclog<CR>',            mode = 'n', desc = "Git log (current file)" },
+      { '<leader>glg', ':0Gclog<CR>',           mode = 'n', desc = "Git log (current line)" },
+      { '<leader>glg', ':Gclog<CR>',            mode = 'v', desc = "Git log (visual range)" },
+      { '<leader>gll', ':Git pull',             mode = 'n', desc = "Git pull" },
+      { '<leader>gst', ':Git<CR>',              mode = 'n', desc = "Git status" },
+      { '<leader>gb',  ':Git blame<CR>',        mode = 'n', desc = "Git blame" },
+      { '<leader>gd',  ':Gvdiffsplit',          mode = 'n', desc = "Git diff (vertical split)" },
+      { '<leader>grb', ':Git rebase -i origin', mode = 'n', desc = "Git rebase interactive" },
+      { '<leader>grd', ':Gread',                mode = 'n', desc = "Git restore file" },
+      { '<leader>ge',  ':Gedit',                mode = 'n', desc = "Git edit" },
+      { '<leader>grm', ':GRemove',              mode = 'n', desc = "Git remove file" },
+      { '<leader>gmv', ':GRename',              mode = 'n', desc = "Git rename file" },
     },
     cmd = {
       "Git",
@@ -119,20 +119,30 @@ return {
     'lewis6991/gitsigns.nvim',
     event = "BufRead",
     keys = {
-      { ']c', function()
-        if vim.wo.diff then
-          vim.cmd.normal({ ']c', bang = true })
-        else
-          require('gitsigns').nav_hunk('next')
-        end
-      end },
-      { '[c', function()
-        if vim.wo.diff then
-          vim.cmd.normal({ '[c', bang = true })
-        else
-          require('gitsigns').nav_hunk('prev')
-        end
-      end },
+      {
+        ']c',
+        function()
+          if vim.wo.diff then
+            vim.cmd.normal({ ']c', bang = true })
+          else
+            require('gitsigns').nav_hunk('next')
+          end
+        end,
+        mode = 'n',
+        desc = "Next git hunk"
+      },
+      {
+        '[c',
+        function()
+          if vim.wo.diff then
+            vim.cmd.normal({ '[c', bang = true })
+          else
+            require('gitsigns').nav_hunk('prev')
+          end
+        end,
+        mode = 'n',
+        desc = "Previous git hunk"
+      },
     },
     config = function()
       require('gitsigns').setup {

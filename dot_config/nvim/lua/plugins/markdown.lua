@@ -35,11 +35,9 @@ return {
     dependencies = {
       'tyru/open-browser.vim',
     },
-    cmd = {
-      "PrevimOpen",
-    },
+    cmd = { "PrevimOpen" },
     keys = {
-      { "<c-k>v", ":PrevimOpen<CR>" },
+      { "<c-k>v", ":PrevimOpen<CR>", mode = "n", desc = "Preview markdown (previm)" },
     }
   },
 
@@ -55,11 +53,8 @@ return {
     end,
     ft = { "markdown" },
     keys = {
-      -- " normal/insert
-      -- <Plug>MarkdownPreview
-      -- <Plug>MarkdownPreviewStop
-      -- <Plug>MarkdownPreviewToggle
-      { "<leader>mv", "<Plug>MarkdownPreview", mode = "n" },
+      -- Available plugs: <Plug>MarkdownPreview, <Plug>MarkdownPreviewStop, <Plug>MarkdownPreviewToggle
+      { "<leader>mv", "<Plug>MarkdownPreview", mode = "n", desc = "Preview markdown (browser)" },
     },
     config = function()
       vim.g.mkdp_refresh_slow                 = 1
@@ -93,8 +88,7 @@ return {
       vim.g.mdip_imgname = 'image'
     end,
     keys = {
-      -- autocmd FileType markdown nmap <buffer><silent> <leader>p :call mdip#MarkdownClipboardImage()<CR>
-      { "<leader>p", ":call mdip#MarkdownClipboardImage()<CR>", mode = "n", { noremap = true, silent = true } }
+      { "<leader>p", ":call mdip#MarkdownClipboardImage()<CR>", mode = "n", noremap = true, silent = true, desc = "Paste image from clipboard" }
     }
   },
 
@@ -125,9 +119,8 @@ return {
       end,
     },
     keys = {
-      { "<leader>fe", ":FeMaco<cr>",      mode = "n" },
-      -- visual mode では選択を解除してから FeMaco を実行
-      { "<leader>fe", ":<C-u>FeMaco<cr>", mode = "x" },
+      { "<leader>fe", ":FeMaco<cr>",      mode = "n", desc = "Edit code fence" },
+      { "<leader>fe", ":<C-u>FeMaco<cr>", mode = "x", desc = "Edit code fence (visual)" },
     },
   }
 }
