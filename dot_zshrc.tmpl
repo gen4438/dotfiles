@@ -1,6 +1,8 @@
 # Zsh configuration
 # Managed by chezmoi - see dot_zshrc.tmpl
 
+# Set byobu config directory to XDG compliant location
+export BYOBU_CONFIG_DIR="$HOME/.config/byobu"
 
 # Plugin management
 {{- if eq .chezmoi.os "linux" }}
@@ -120,6 +122,7 @@ if type "rg" > /dev/null 2>&1; then
   export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git/*'"
   export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 fi
+
 
 # Load local zsh configuration if exists
 if [ -f "$HOME/.zshrc_local" ]; then

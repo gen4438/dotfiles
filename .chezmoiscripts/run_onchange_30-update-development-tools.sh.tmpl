@@ -176,19 +176,28 @@ if [[ -d "$HOME/.fzf" ]]; then
     echo "✅ fzf updated"
 fi
 
-# Update z
-if [[ -d "$HOME/bin/z" ]]; then
-    echo "📁 Updating z..."
-    cd "$HOME/bin/z" && git pull
+# Update z, fz, tmux-xpanes (bash: .local/share, zsh: zplug managed)
+{{- if ne .chezmoi.os "darwin" }}
+if [[ -d "$HOME/.local/share/z" ]]; then
+    echo "📁 Updating z (bash)..."
+    cd "$HOME/.local/share/z" && git pull
     echo "✅ z updated"
 fi
 
-# Update fz
-if [[ -d "$HOME/bin/fz" ]]; then
-    echo "📁 Updating fz..."
-    cd "$HOME/bin/fz" && git pull
+if [[ -d "$HOME/.local/share/fz" ]]; then
+    echo "📁 Updating fz (bash)..."
+    cd "$HOME/.local/share/fz" && git pull
     echo "✅ fz updated"
 fi
+
+if [[ -d "$HOME/.local/share/tmux-xpanes" ]]; then
+    echo "🖥️ Updating tmux-xpanes (bash)..."
+    cd "$HOME/.local/share/tmux-xpanes" && git pull
+    echo "✅ tmux-xpanes updated"
+fi
+{{- end }}
+
+# Note: z, fz, tmux-xpanes for zsh are managed by zplug (updated in zplug update section below)
 
 # Update tmux plugin manager and plugins
 if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then

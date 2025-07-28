@@ -1,0 +1,36 @@
+#!/bin/bash
+# Create symlinks for executables in .local/share to .local/bin
+# This script runs when the content changes
+
+set -e
+
+echo "🔗 Setting up symlinks for external tools..."
+
+# Ensure .local/bin directory exists
+mkdir -p "$HOME/.local/bin"
+
+# Create symlinks for tmux-xpanes (only for bash - zsh uses zplug)
+{{ if ne .chezmoi.shell "zsh" -}}
+if [[ -f "$HOME/.local/share/tmux-xpanes/bin/xpanes" ]]; then
+    echo "Creating symlink: xpanes"
+    ln -sf "$HOME/.local/share/tmux-xpanes/bin/xpanes" "$HOME/.local/bin/xpanes"
+    
+    if [[ -f "$HOME/.local/share/tmux-xpanes/bin/tmux-xpanes" ]]; then
+        echo "Creating symlink: tmux-xpanes"
+        ln -sf "$HOME/.local/share/tmux-xpanes/bin/tmux-xpanes" "$HOME/.local/bin/tmux-xpanes"
+    else
+        # Create symlink to xpanes if tmux-xpanes doesn't exist
+        echo "Creating symlink: tmux-xpanes -> xpanes"
+        ln -sf "$HOME/.local/bin/xpanes" "$HOME/.local/bin/tmux-xpanes"
+    fi
+    
+    echo "✅ tmux-xpanes symlinks created"
+else
+    echo "⚠️ tmux-xpanes not found in .local/share, skipping symlink creation"
+fi
+{{ end -}}
+
+echo "✅ Symlink setup completed"
+
+# Hash to trigger updates when script changes
+# Script hash: {{ include ".chezmoiscripts/run_onchange_40-setup-symlinks.sh.tmpl" | sha256sum }}

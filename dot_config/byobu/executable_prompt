@@ -4,8 +4,10 @@ if [ "$TMUX" ]; then
   
   # Shell-specific prompt configuration
   if [ -n "$ZSH_VERSION" ]; then
-    # Zsh prompt - use PROMPT instead of PS1 and zsh color codes
-    export PROMPT='${debian_chroot:+($debian_chroot)}$(vi_mode_prompt_info)%F{245}%n%f@%F{172}%m%f:%F{5}%~%f$(byobu_prompt_symbol) '
+    # Load zsh colors
+    autoload -U colors && colors
+    # Zsh prompt - use modern zsh color format that works reliably with byobu
+    export PROMPT='${debian_chroot:+($debian_chroot)}$(vi_mode_prompt_info)%F{69}%n%f@%F{214}%m%f:%F{167}%~%f$(byobu_prompt_symbol) '
     # Clear right prompt to prevent time display
     export RPS1=""
     export RPROMPT=""

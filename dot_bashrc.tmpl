@@ -1,3 +1,6 @@
+# Set byobu config directory to XDG compliant location
+export BYOBU_CONFIG_DIR="$HOME/.config/byobu"
+
 {{- if eq .chezmoi.os "linux" }}
 # Ubuntu/Debian default bashrc configuration
 {{ template "ubuntu_bashrc.tmpl" . }}
@@ -54,8 +57,8 @@ fi
 
 # External Tools Integration
 [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
-[[ -f ~/bin/z/z.sh ]] && source ~/bin/z/z.sh
-[[ -f ~/bin/fz/fz.bash ]] && source ~/bin/fz/fz.bash
+[[ -f ~/.local/share/z/z.sh ]] && source ~/.local/share/z/z.sh
+[[ -f ~/.local/share/fz/fz.bash ]] && source ~/.local/share/fz/fz.bash
 [[ -f ~/bin/tmux-xpanes/activate.sh ]] && source ~/bin/tmux-xpanes/activate.sh
 
 # Version Managers Initialization

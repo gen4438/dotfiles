@@ -6,20 +6,24 @@
     url = "https://github.com/junegunn/fzf.git"
     refreshPeriod = "168h"  # Weekly updates
 
-["bin/z"]
+# z, fz, tmux-xpanes for bash only (zsh uses zplug)
+{{- $isBash := or (ne (env "SHELL") "") (contains "bash" (env "SHELL" | default "")) }}
+{{- if ne .chezmoi.os "darwin" }}
+[".local/share/z"]
     type = "git-repo"
     url = "https://github.com/rupa/z.git"
     refreshPeriod = "168h"
 
-["bin/fz"]
+[".local/share/fz"]
     type = "git-repo"
     url = "https://github.com/changyuheng/fz.git"
     refreshPeriod = "168h"
 
-["bin/tmux-xpanes"]
+[".local/share/tmux-xpanes"]
     type = "git-repo"
     url = "https://github.com/greymd/tmux-xpanes.git"
     refreshPeriod = "168h"
+{{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}
 # zplug (zsh plugin manager)
@@ -64,6 +68,16 @@
 [".anyenv/plugins/anyenv-update"]
     type = "git-repo"
     url = "https://github.com/znz/anyenv-update.git"
+    refreshPeriod = "168h"
+{{- end }}
+
+{{- if ne .chezmoi.os "darwin" }}
+# gitmux - Git status for tmux/byobu (Linux/other OS)
+[".local/bin/gitmux"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "arl/gitmux" (printf "gitmux_*_%s_%s.tar.gz" .chezmoi.os (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64")) | quote }}
+    executable = true
+    path = "gitmux"
     refreshPeriod = "168h"
 {{- end }}
 
