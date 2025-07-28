@@ -145,12 +145,7 @@ alias zshconfig='${EDITOR:-vim} ~/.zshrc'
 # fzf integration for zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Custom fzf options
-if type "rg" > /dev/null 2>&1; then
-  export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-y:toggle-all,ctrl-s:toggle-sort'
-  export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git/*'"
-  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-fi
+# fzf configuration is now handled in shell_common.tmpl
 
 
 # Load local zsh configuration if exists
@@ -170,11 +165,9 @@ zstyle ':completion:*' menu select=0  # Show list on first tab, select on second
 zstyle ':completion:*' special-dirs false
 zstyle ':completion:*:*:*:*:*' file-patterns '*:all-files' '.*:hidden-files'
 
-# Add vi mode to existing prompt when not using byobu
-if [[ -z "$BYOBU_BACKEND" ]]; then
-  # Remove newlines from existing prompt and prepend vi mode indicator  
-  export PROMPT='$(vi_mode_prompt_info)'"${PROMPT//$'\n'/}"
-fi
+# Add vi mode indicator and environment info to prompt
+# Vi mode indicator is handled here for consistency (not in byobu prompt)
+export PROMPT='$(vi_mode_prompt_info)$(show_virtual_env)$(show_nvm_version)'"${PROMPT//$'\n'/}"
 
 # Performance profiling results - uncomment to show profiling data
 # zprof

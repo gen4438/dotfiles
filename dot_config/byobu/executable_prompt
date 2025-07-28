@@ -6,8 +6,8 @@ if [ "$TMUX" ]; then
   if [ -n "$ZSH_VERSION" ]; then
     # Load zsh colors
     autoload -U colors && colors
-    # Zsh prompt - use modern zsh color format that works reliably with byobu
-    export PROMPT='${debian_chroot:+($debian_chroot)}$(vi_mode_prompt_info)%F{69}%n%f@%F{214}%m%f:%F{167}%~%f$(byobu_prompt_symbol) '
+    # Zsh prompt - vi mode indicator now handled in .zshrc
+    export PROMPT='${debian_chroot:+($debian_chroot)}%F{69}%n%f@%F{214}%m%f:%F{167}%~%f$(byobu_prompt_symbol) '
     # Clear right prompt to prevent time display
     export RPS1=""
     export RPROMPT=""

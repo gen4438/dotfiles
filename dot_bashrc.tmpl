@@ -68,78 +68,13 @@ fi
 # For global packages: npm install -g <package> or pip install <package>
 {{- else }}
 
-# Version managers are initialized in shell_common.tmpl
-
-# pipenv configuration
-export PIPENV_SKIP_LOCK=true
-
-# Remove specific pyenv shims to use system versions
-# These commands work better with system versions rather than pyenv-managed ones
-for cmd in black blackd grip rg gettext envsubst rst2man.py; do
-    if command -v "/usr/bin/$cmd" >/dev/null 2>&1 && [[ -f "$HOME/.pyenv/shims/$cmd" ]]; then
-        rm -f "$HOME/.pyenv/shims/$cmd"
-    fi
-done
-
 {{- end }}
 
-# Tool-Specific Configuration
-
-# Git internationalization
-export GIT_INTERNAL_GETTEXT_TEST_FALLBACKS=1
-
-# fzf (fuzzy finder) with ripgrep integration
-if command -v rg >/dev/null 2>&1; then
-    export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-y:toggle-all,ctrl-s:toggle-sort'
-    export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git/*'"
-    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-fi
-
-# Kubernetes configuration
-if command -v kubectl >/dev/null 2>&1; then
-    # kubectl aliases (https://github.com/ahmetb/kubectl-aliases)
-    [[ -f ~/.kubectl_aliases ]] && source ~/.kubectl_aliases
-    complete -o default -F __start_kubectl k
-    export KUBE_EDITOR=vim
-fi
-
-# direnv (directory-specific environment variables)
-if command -v direnv >/dev/null 2>&1; then
-    eval "$(direnv hook bash)"
-fi
-
-# Common shell configuration already loaded above
+# Common configuration now handled in shell_common.tmpl
 
 # Prompt Customization
-# Disable pyenv's automatic virtualenv prompt (we'll handle it ourselves)
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-
-# Show Python virtual environment in prompt (when using direnv)
-show_virtual_env() {
-    if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
-        echo "($(basename "$VIRTUAL_ENV"))"
-    fi
-}
-export -f show_virtual_env
-PS1='$(show_virtual_env)'$PS1
-
-# Show Conda environment in prompt (when using direnv)
-show_conda_env() {
-    if [[ -n "$CONDA_DEFAULT_ENV" && -n "$DIRENV_DIR" ]]; then
-        echo "($(basename "$CONDA_DEFAULT_ENV"))"
-    fi
-}
-export -f show_conda_env
-PS1='$(show_conda_env)'$PS1
-
-# Show Node.js version in prompt (when using direnv with nvm)
-show_nvm_version() {
-    if [[ -n "$DIRENV_NVM_VERSION" && -n "$DIRENV_DIR" ]]; then
-        echo "(node-$(node --version))"
-    fi
-}
-export -f show_nvm_version
-PS1='$(show_nvm_version)'$PS1
+# Add virtual environment and Node.js version to prompt (after vi mode indicator from .inputrc)
+PS1='$(show_virtual_env)$(show_nvm_version)'$PS1
 
 # Node.js local modules PATH
 add_to_path "node_modules/bin"
@@ -155,10 +90,5 @@ fi
 # Disable Ctrl+S/Ctrl+Q flow control (allows Ctrl+S for search)
 stty -ixon
 
-# Rust Cargo environment
-if [[ -f "$HOME/.cargo/env" ]]; then
-    source "$HOME/.cargo/env"
-fi
-
-# Final PATH cleanup to remove any remaining duplicates
-remove_path_duplicates
+# Cargo environment is now handled in shell_common.tmpl
+# PATH cleanup is now handled in shell_common.tmpl
