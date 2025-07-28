@@ -17,6 +17,10 @@
   "coc.preferences.enableMarkdown": false,
   "coc.preferences.useQuickfixForLocations": true,
   "suggest.noselect": true,
+  
+  // Document highlight settings - カーソル位置のシンボルハイライト
+  "coc.preferences.currentFunctionSymbol": "",
+  "documentHighlight.enable": true,
   // "suggest.autoTrigger": "trigger"
   // "suggest.preferCompleteThanJumpPlaceholder": true,
   "inlayHint.enable": false,

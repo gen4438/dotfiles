@@ -106,6 +106,23 @@ local coc_setup = function()
     command = "silent call CocActionAsync('highlight')",
     desc = "Highlight symbol under cursor on CursorHold"
   })
+  
+  -- Custom highlight colors for COC document highlighting
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    group = "CocGroup",
+    callback = function()
+      -- Document highlight groups used by COC for cursor position highlighting
+      vim.api.nvim_set_hl(0, "CocHighlightText", { bg = "#5c5c0a", fg = "#ffffff" })
+      vim.api.nvim_set_hl(0, "CocHighlightRead", { bg = "#5c5c0a", fg = "#ffffff" })
+      vim.api.nvim_set_hl(0, "CocHighlightWrite", { bg = "#c2780a", fg = "#ffffff" })
+    end,
+    desc = "Set custom COC highlight colors after colorscheme changes"
+  })
+  
+  -- Apply highlight immediately if colorscheme is already loaded
+  vim.api.nvim_set_hl(0, "CocHighlightText", { bg = "#5c5c0a", fg = "#ffffff" })
+  vim.api.nvim_set_hl(0, "CocHighlightRead", { bg = "#5c5c0a", fg = "#ffffff" })
+  vim.api.nvim_set_hl(0, "CocHighlightWrite", { bg = "#c2780a", fg = "#ffffff" })
 
 
   -- Symbol renaming
