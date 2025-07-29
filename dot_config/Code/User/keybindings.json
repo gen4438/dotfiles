@@ -249,6 +249,12 @@
     "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
   },
   {
+    "key": "ctrl+s",
+    "command": "vscode-neovim.send",
+    "args": "<C-s>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
     "key": "ctrl+t",
     "command": "vscode-neovim.send",
     "args": "<C-t>",

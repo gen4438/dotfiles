@@ -31,7 +31,7 @@ function M.setup()
 
     -- ファイル操作の最適化
     vim.opt.updatetime = 300
-    vim.opt.timeoutlen = 1000
+    vim.opt.timeoutlen = 2000
 
     -- バックアップ・スワップファイルの調整
     -- VSCodeが自動保存を管理するため、設定を軽量化
