@@ -51,6 +51,15 @@ vim.keymap.set('x', '>', '>gv', { desc = "Increase indent and reselect" })
 vim.keymap.set('n', 'j', 'gj', { desc = "Move down (display line)" })
 vim.keymap.set('n', 'k', 'gk', { desc = "Move up (display line)" })
 
+-- select next/previous
+vim.keymap.set('i', '<C-n>', function()
+  vscode.call('selectNextSuggestion')
+end, { desc = "Select next suggestion" })
+
+vim.keymap.set('i', '<C-p>', function()
+  vscode.call('selectPrevSuggestion')
+end, { desc = "Select previous suggestion" })
+
 -- ============================================================================
 -- File Path Operations
 -- ============================================================================
@@ -120,7 +129,20 @@ vim.keymap.set('n', 'yR', ':YankRelativePath<CR>', { desc = "Yank relative path 
 -- ============================================================================
 
 -- Window management (s prefix)
-vim.keymap.set('n', 's', '<Nop>', opts)  -- Disable 's' to use as prefix
+vim.keymap.set('n', 's', '<Nop>', opts) -- Disable 's' to use as prefix
+
+-- Maximize/restore editor
+vim.keymap.set('n', 'so', function()
+  vscode.call('workbench.action.maximizeEditorHideSidebar')
+end, { desc = "Maximize/restore editor" })
+
+vim.keymap.set('n', 'sO', function()
+  vscode.call('workbench.action.evenEditorWidths')
+end, { desc = "Toggle panel" })
+
+vim.keymap.set('n', 'sm', function()
+  vscode.call('workbench.action.toggleMaximizedPanel')
+end, { desc = "Toggle panel" })
 
 -- Buffer/Editor operations with VSCode API
 vim.keymap.set('n', 'sq', function()
@@ -361,13 +383,29 @@ vim.keymap.set('n', '<leader>gll', function()
   vscode.call('git.pull')
 end, { desc = "Git pull" })
 
+-- Jump to next change
+vim.keymap.set('n', ']c', function()
+  vscode.call('workbench.action.editor.nextChange')
+  vscode.call('workbench.action.compareEditor.nextChange')
+end, { desc = "Next change" })
+
+-- Jump to previous change
+vim.keymap.set('n', '[c', function()
+  vscode.call('workbench.action.editor.previousChange')
+  vscode.call('workbench.action.compareEditor.previousChange')
+end, { desc = "Previous change" })
+
 -- Merge conflict resolution
 vim.keymap.set('n', 'dp', function()
-  vscode.call('git.diff.stageSelection')
+  vscode.call('git.diff.stageHunk')
 end, { desc = "Accept current change" })
 
-vim.keymap.set('n', 'do', function()
-  vscode.call('git.unstageSelectedRanges')
+vim.keymap.set('x', 'dp', function()
+  vscode.call('git.stageSelectedRanges')
+end, { desc = "Accept current change" })
+
+vim.keymap.set('x', 'do', function()
+  vscode.call('git.revertSelectedRanges')
 end, { desc = "Accept incoming change" })
 
 -- ============================================================================
