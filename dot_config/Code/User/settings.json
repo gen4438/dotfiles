@@ -1,0 +1,32 @@
+{
+    "database-client.autoSync": true,
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1
+    },
+    "vscode-neovim.compositeKeys": {},
+    "vscode-neovim.ctrlKeysForInsertMode": [
+        "j",
+        "o",
+        "r",
+        "u",
+        "x",
+        "y",
+        "f",
+    ],
+    "vscode-neovim.ctrlKeysForNormalMode": [
+        "a",
+        "d",
+        "e",
+        "f",
+        "h",
+        "i",
+        "l",
+        "o",
+        "p",
+        "r",
+        "u",
+        "v",
+        "w",
+    ],
+    "github.copilot.nextEditSuggestions.enabled": true
+}

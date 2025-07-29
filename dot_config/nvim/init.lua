@@ -1,6 +1,25 @@
 -- Neovim configuration entry point
 -- Loading order is important for proper initialization
 
+-- VSCode統合の分岐処理
+if vim.g.vscode then
+  -- VSCode環境でも基本設定を共通化
+  require("config.base")
+  require("config.environment").setup()
+  require("config.options")
+  require("config.autocmds")
+  require("_vscode.config.keymaps-vscode") -- VSCode専用のキーマップを読み込む
+  -- require("config.commands")
+  -- require("config.filetypes")
+  require("config.colorscheme_pre")
+  require("config.lazy")
+  require("config.colorscheme_post")
+  require("config.custom")
+  require("_vscode.config.custom-vscode").setup()  -- VSCode固有の最適化を最後に実行
+  return -- VSCode環境ではここで終了
+end
+
+-- 通常のNeovim環境での設定（VSCode以外）
 -- Basic Vim functionality and settings
 require("config.base")
 

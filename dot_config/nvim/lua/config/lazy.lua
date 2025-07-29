@@ -16,10 +16,12 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
+local plugin_dir = vim.g.vscode and "_vscode/plugins" or "plugins"
+
 require("lazy").setup({
   spec = {
-    -- import your plugins
-    { import = "plugins" },
+    -- VSCode環境では vscode/plugins、通常環境では plugins を使用
+    { import = plugin_dir },
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.

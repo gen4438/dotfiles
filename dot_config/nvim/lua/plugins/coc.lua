@@ -174,9 +174,9 @@ local coc_setup = function()
   keyset("n", "<leader>qf", "<Plug>(coc-fix-current)", vim.tbl_extend("force", action_opts, { desc = "Quick fix" }))
 
   -- Refactor actions
-  keyset("n", "<leader>re", "<Plug>(coc-codeaction-refactor)", { silent = true, desc = "Refactor" })
-  keyset("x", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor selected" })
-  keyset("n", "<leader>r", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor" })
+  keyset("n", "<leader>rf", "<Plug>(coc-codeaction-refactor)", { silent = true, desc = "Refactor" })
+  keyset("x", "<leader>rr", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor selected" })
+  keyset("n", "<leader>rr", "<Plug>(coc-codeaction-refactor-selected)", { silent = true, desc = "Refactor" })
 
   -- Code lens
   keyset("n", "<leader>cl", "<Plug>(coc-codelens-action)",
