@@ -253,8 +253,13 @@
     "command": "vscode-neovim.send",
     "args": "<C-t>",
     "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
-  }
+  },
 
   // ===== 手動追加キーバインド =====
   // ここに他のカスタムキーバインドを追加できます
+  {
+    "command": "vscode-neovim.escape",
+    "key": "Escape",
+    "when": "editorTextFocus && neovim.init"
+  }
 ]
