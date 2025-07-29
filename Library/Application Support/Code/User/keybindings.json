@@ -1,0 +1,265 @@
+[
+  // ===== Neovim高優先度キーバインド =====
+  // settings.jsonの設定に基づき、NeovimにCtrlキーを直接渡す
+  //
+  // 通常モード用キー: a, d, e, f, h, i, l, o, p, r, u, v, w
+  // 挿入モード用キー: j, o, r, u
+
+  // -- Normal Mode Keys --
+  {
+    "key": "ctrl+a",
+    "command": "vscode-neovim.send",
+    "args": "<C-a>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+d",
+    "command": "vscode-neovim.send",
+    "args": "<C-d>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "vscode-neovim.send",
+    "args": "<C-e>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+f",
+    "command": "vscode-neovim.send",
+    "args": "<C-f>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+h",
+    "command": "vscode-neovim.send",
+    "args": "<C-h>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+i",
+    "command": "vscode-neovim.send",
+    "args": "<C-i>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "vscode-neovim.send",
+    "args": "<C-j>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "vscode-neovim.send",
+    "args": "<C-l>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+m",
+    "command": "vscode-neovim.send",
+    "args": "<C-m>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "vscode-neovim.send",
+    "args": "<C-o>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+p",
+    "command": "vscode-neovim.send",
+    "args": "<C-p>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "vscode-neovim.send",
+    "args": "<C-r>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+u",
+    "command": "vscode-neovim.send",
+    "args": "<C-u>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+v",
+    "command": "vscode-neovim.send",
+    "args": "<C-v>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+w",
+    "command": "vscode-neovim.send",
+    "args": "<C-w>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+b",
+    "command": "vscode-neovim.send",
+    "args": "<C-b>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+c",
+    "command": "vscode-neovim.send",
+    "args": "<C-c>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "vscode-neovim.send",
+    "args": "<C-k>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+t",
+    "command": "vscode-neovim.send",
+    "args": "<C-t>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+x",
+    "command": "vscode-neovim.send",
+    "args": "<C-x>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+y",
+    "command": "vscode-neovim.send",
+    "args": "<C-y>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+z",
+    "command": "vscode-neovim.send",
+    "args": "<C-z>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+/",
+    "command": "vscode-neovim.send",
+    "args": "<C-/>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+  {
+    "key": "ctrl+]",
+    "command": "vscode-neovim.send",
+    "args": "<C-]>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+  },
+
+  // -- Insert Mode Keys --
+  {
+    "key": "ctrl+j",
+    "command": "vscode-neovim.send",
+    "args": "<C-j>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+p",
+    "command": "vscode-neovim.send",
+    "args": "<C-p>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+n",
+    "command": "vscode-neovim.send",
+    "args": "<C-n>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "vscode-neovim.send",
+    "args": "<C-o>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "vscode-neovim.send",
+    "args": "<C-r>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+u",
+    "command": "vscode-neovim.send",
+    "args": "<C-u>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+f",
+    "command": "vscode-neovim.send",
+    "args": "<C-f>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+x",
+    "command": "vscode-neovim.send",
+    "args": "<C-x>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+w",
+    "command": "vscode-neovim.send",
+    "args": "<C-w>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "vscode-neovim.send",
+    "args": "<C-l>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+y",
+    "command": "vscode-neovim.send",
+    "args": "<C-y>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+a",
+    "command": "vscode-neovim.send",
+    "args": "<C-a>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+c",
+    "command": "vscode-neovim.send",
+    "args": "<C-c>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+d",
+    "command": "vscode-neovim.send",
+    "args": "<C-d>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+h",
+    "command": "vscode-neovim.send",
+    "args": "<C-h>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+m",
+    "command": "vscode-neovim.send",
+    "args": "<C-m>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+  {
+    "key": "ctrl+t",
+    "command": "vscode-neovim.send",
+    "args": "<C-t>",
+    "when": "editorTextFocus && neovim.init && neovim.mode == 'insert'"
+  },
+
+  // ===== 手動追加キーバインド =====
+  // ここに他のカスタムキーバインドを追加できます
+  {
+    "command": "vscode-neovim.escape",
+    "key": "Escape",
+    "when": "editorTextFocus && neovim.init"
+  }
+]

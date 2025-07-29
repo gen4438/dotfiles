@@ -95,6 +95,17 @@ Documents/WindowsPowerShell/
 .config/Code/logs/
 .config/Code/CachedExtensions/
 
+# VS Code - Exclude other OS settings directories
+{{- if ne .chezmoi.os "linux" }}
+.config/Code/
+{{- end }}
+{{- if ne .chezmoi.os "darwin" }}
+Library/Application Support/Code/
+{{- end }}
+{{- if ne .chezmoi.os "windows" }}
+AppData/Roaming/Code/
+{{- end }}
+
 # Firefox/Browser data
 .mozilla/firefox/*/lock
 .mozilla/firefox/*/places.sqlite*
