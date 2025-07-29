@@ -20,8 +20,6 @@ function M.setup()
   vim.opt.signcolumn = "no"   -- サインカラムを非表示
   vim.opt.foldcolumn = "0"    -- フォールドカラムを非表示
   
-  -- シンタックスハイライトの無効化（VSCodeが管理）
-  vim.cmd('syntax off')
   
   -- カーソルライン・カラムの調整
   vim.opt.cursorline = false  -- VSCodeがカーソルライン表示を管理

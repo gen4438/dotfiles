@@ -369,3 +369,32 @@ end, { desc = "Accept current change" })
 vim.keymap.set('n', 'do', function()
   vscode.call('git.unstageSelectedRanges')
 end, { desc = "Accept incoming change" })
+
+-- ============================================================================
+-- VSCode Integration - Inline Suggestions
+-- ============================================================================
+
+-- Accept next word from inline suggestion
+vim.keymap.set('i', '<c-w>', function()
+  vscode.call('editor.action.inlineSuggest.acceptNextWord')
+end, { desc = "Accept next word from inline suggestion" })
+
+-- Accept next line from inline suggestion
+vim.keymap.set('i', '<c-l>', function()
+  vscode.call('editor.action.inlineSuggest.acceptNextLine')
+end, { desc = "Accept next line from inline suggestion" })
+
+-- Commit inline suggestion
+vim.keymap.set('i', '<c-j>', function()
+  vscode.call('editor.action.inlineSuggest.commit')
+end, { desc = "Commit inline suggestion" })
+
+-- Trigger inline edit explicitly
+vim.keymap.set('n', '<c-m>', function()
+  vscode.call('editor.action.inlineSuggest.triggerInlineEditExplicit')
+end, { desc = "Trigger inline edit explicitly" })
+
+-- Accept next line from inline suggestion
+vim.keymap.set('n', '<c-j>', function()
+  vscode.call('editor.action.inlineSuggest.commit')
+end, { desc = "Commit inline suggestion" })
