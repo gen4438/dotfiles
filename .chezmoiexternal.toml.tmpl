@@ -26,6 +26,7 @@
     url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
     executable = true
     path = "delta.exe"
+    stripComponents = 1
     refreshPeriod = "168h"
 {{- else }}
 [".local/bin/delta"]
@@ -74,6 +75,9 @@
     stripComponents = 1
     refreshPeriod = "168h"
 {{- end }}
+
+# 以降は windows ではインストールしない
+{{- if ne .chezmoi.os "windows" }}
 
 # z, fz, tmux-xpanes for bash users (zsh uses zplug)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
@@ -169,4 +173,5 @@
     url = "https://github.com/github/gitignore.git"
     refreshPeriod = "168h"
 
+{{- end }}
 {{- end }}
