@@ -136,7 +136,8 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHo
   group = file_ops_group,
   pattern = "*",
   callback = function()
-    if vim.fn.mode() ~= "c" then
+    local buftype = vim.api.nvim_buf_get_option(0, "buftype")
+    if buftype == "" and vim.fn.mode() ~= "c" then
       vim.cmd("checktime")
     end
   end,

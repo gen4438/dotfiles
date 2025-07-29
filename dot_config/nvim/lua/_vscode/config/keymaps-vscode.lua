@@ -51,14 +51,20 @@ vim.keymap.set('x', '>', '>gv', { desc = "Increase indent and reselect" })
 vim.keymap.set('n', 'j', 'gj', { desc = "Move down (display line)" })
 vim.keymap.set('n', 'k', 'gk', { desc = "Move up (display line)" })
 
--- select next/previous
-vim.keymap.set('i', '<C-n>', function()
-  vscode.call('selectNextSuggestion')
-end, { desc = "Select next suggestion" })
-
-vim.keymap.set('i', '<C-p>', function()
-  vscode.call('selectPrevSuggestion')
-end, { desc = "Select previous suggestion" })
+-- Insert mode completion shortcuts (easier than <c-x> combinations)
+vim.keymap.set('i', '<c-o><c-l>', '<c-x><c-l>', { desc = "Line completion" })
+vim.keymap.set('i', '<c-o><c-p>', '<c-x><c-p>', { desc = "Keyword completion" })
+vim.keymap.set('i', '<c-o><c-n>', '<c-x><c-n>', { desc = "Keyword completion" })
+vim.keymap.set('i', '<c-o><c-k>', '<c-x><c-k>', { desc = "Dictionary completion" })
+vim.keymap.set('i', '<c-o><c-t>', '<c-x><c-t>', { desc = "Thesaurus completion" })
+vim.keymap.set('i', '<c-o><c-i>', '<c-x><c-i>', { desc = "Include file completion" })
+vim.keymap.set('i', '<c-o><c-]>', '<c-x><c-]>', { desc = "Tag completion" })
+vim.keymap.set('i', '<c-o><c-f>', '<c-x><c-f>', { desc = "File path completion" })
+vim.keymap.set('i', '<c-o><c-d>', '<c-x><c-d>', { desc = "Definition completion" })
+vim.keymap.set('i', '<c-o><c-v>', '<c-x><c-v>', { desc = "Vim command completion" })
+vim.keymap.set('i', '<c-o><c-u>', '<c-x><c-u>', { desc = "User-defined completion" })
+vim.keymap.set('i', '<c-o><c-o>', '<c-x><c-o>', { desc = "Omni completion" })
+vim.keymap.set('i', '<c-o><c-s>', '<c-x>s', { desc = "Spell completion" })
 
 -- ============================================================================
 -- File Path Operations
@@ -133,15 +139,15 @@ vim.keymap.set('n', 's', '<Nop>', opts) -- Disable 's' to use as prefix
 
 -- Maximize/restore editor
 vim.keymap.set('n', 'so', function()
+  vscode.call('workbench.action.toggleMaximizeEditorGroup')
+end, { desc = "Maximize/restore editor" })
+
+vim.keymap.set('n', 'sm', function()
   vscode.call('workbench.action.maximizeEditorHideSidebar')
 end, { desc = "Maximize/restore editor" })
 
-vim.keymap.set('n', 'sO', function()
+vim.keymap.set('n', 's=', function()
   vscode.call('workbench.action.evenEditorWidths')
-end, { desc = "Toggle panel" })
-
-vim.keymap.set('n', 'sm', function()
-  vscode.call('workbench.action.toggleMaximizedPanel')
 end, { desc = "Toggle panel" })
 
 -- Buffer/Editor operations with VSCode API
@@ -313,6 +319,13 @@ vim.keymap.set('n', ';ff', function()
   vscode.call('workbench.action.quickOpen')
 end, { desc = "Quick open files" })
 
+vim.keymap.set('n', ';fe', function()
+  local parent = vim.fn.expand('%:p:h')
+  local cwd = vim.fn.getcwd()
+  local rel = parent:sub(#cwd + 2)
+  vscode.call('workbench.action.quickOpen', { args = { rel .. '/' } })
+end, { desc = "Quick open files in parent directory (relative to project root)" })
+
 vim.keymap.set('n', ';fg', function()
   vscode.call('workbench.action.findInFiles')
 end, { desc = "Find in files" })
@@ -407,6 +420,19 @@ end, { desc = "Accept current change" })
 vim.keymap.set('x', 'do', function()
   vscode.call('git.revertSelectedRanges')
 end, { desc = "Accept incoming change" })
+
+-- ============================================================================
+-- VSCode Integration - Completion
+-- ============================================================================
+
+-- select next/previous
+vim.keymap.set('i', '<C-n>', function()
+  vscode.call('selectNextSuggestion')
+end, { desc = "Select next suggestion" })
+
+vim.keymap.set('i', '<C-p>', function()
+  vscode.call('selectPrevSuggestion')
+end, { desc = "Select previous suggestion" })
 
 -- ============================================================================
 -- VSCode Integration - Inline Suggestions
