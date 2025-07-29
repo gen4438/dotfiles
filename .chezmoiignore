@@ -79,6 +79,15 @@ Library/
 # Exclude Windows-specific files on non-Windows systems
 AppData/
 Documents/WindowsPowerShell/
+# Exclude PowerShell scripts on non-Windows systems
+.chezmoiscripts/*.ps1
+.chezmoiscripts/*.ps1.tmpl
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+# Exclude shell scripts on Windows (cannot execute bash scripts)
+.chezmoiscripts/*.sh
+.chezmoiscripts/*.sh.tmpl
 {{- end }}
 
 
