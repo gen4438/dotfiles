@@ -1,7 +1,8 @@
 return { {
   'github/copilot.vim',
   enabled = true,
-  event = "InsertEnter",
+  lazy = true,
+  event = "VimEnter",
   init = function()
     vim.g.copilot_filetypes = {
       csv = false,

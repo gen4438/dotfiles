@@ -1,10 +1,79 @@
 # Chezmoi External Tool Management
 # This file manages external tools downloaded from git repositories or archives
+# Cross-platform support for Linux, macOS, and Windows
+# Cross-platform binary tools (archive-file format)
+# fzf - Command-line fuzzy finder
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/fzf.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-windows_%s.zip" (.chezmoi.arch | replace "x86_64" "amd64")) | quote }}
+    executable = true
+    path = "fzf.exe"
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/fzf"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" .chezmoi.os (.chezmoi.arch | replace "x86_64" "amd64")) | quote }}
+    executable = true
+    path = "fzf"
+    refreshPeriod = "168h"
+{{- end }}
 
-[".fzf"]
-    type = "git-repo"
-    url = "https://github.com/junegunn/fzf.git"
-    refreshPeriod = "168h"  # Weekly updates
+# delta - A syntax-highlighting pager for git, diff, grep, and blame output
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/delta.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "delta.exe"
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/delta"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    executable = true
+    path = "delta"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- end }}
+
+# bat - A cat clone with wings (syntax highlighting)
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/bat.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "bat.exe"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/bat"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    executable = true
+    path = "bat"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- end }}
+
+# fd - A simple, fast and user-friendly alternative to find
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/fd.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "fd.exe"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/fd"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    executable = true
+    path = "fd"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- end }}
 
 # z, fz, tmux-xpanes for bash users (zsh uses zplug)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
