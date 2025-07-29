@@ -1,8 +1,34 @@
 {
+    "[glsl]": {
+        "editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "code-runner.defaultLanguage": "shellscript",
+    "code-runner.enableAppInsights": false,
+    "code-runner.runInTerminal": true,
     "database-client.autoSync": true,
+    "database-client.telemetry.usesOnlineServices": false,
+    "editor.cursorStyle": "block",
+    "editor.scrollBeyondLastLine": false,
+    "editor.selectionHighlight": false,
+    "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?、。「」【】『』（）！？てにをはがのともへでや",
     "extensions.experimental.affinity": {
         "asvetliakov.vscode-neovim": 1
     },
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "gitlens.telemetry.enabled": false,
+    "path-intellisense.autoSlashAfterDirectory": true,
+    "path-intellisense.showHiddenFiles": true,
+    "python.languageServer": "Pylance",
+    "redhat.telemetry.enabled": false,
+    "settingsSync.ignoredSettings": [
+        "remote.SSH.configFile"
+    ],
+    "telemetry.editStats.enabled": false,
+    "telemetry.feedback.enabled": false,
+    "telemetry.telemetryLevel": "off",
     "vscode-neovim.compositeKeys": {},
     "vscode-neovim.ctrlKeysForInsertMode": [
         "a",
@@ -49,8 +75,10 @@
         "/",
         "]",
     ],
-    "github.copilot.nextEditSuggestions.enabled": true,
-    "[jsonc]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
+    "vsicons.dontShowNewVersionMessage": true,
+    "workbench.iconTheme": "material-icon-theme",
+    "vscode-neovim.neovimExecutablePaths.linux": "/usr/bin/nvim",
+    "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
+    "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua"
 }

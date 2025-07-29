@@ -37,7 +37,7 @@ end
 
 -- Performance and responsiveness
 vim.opt.updatetime = 300        -- Faster completion and diagnostics
-vim.opt.timeoutlen = 500        -- Shorter timeout for key sequences (was 5000)
+vim.opt.timeoutlen = 1000        -- Shorter timeout for key sequences (was 5000)
 vim.opt.ttimeoutlen = 10        -- Faster key code timeout (was 100)
 vim.opt.lazyredraw = false      -- Don't redraw during macros (can cause issues with modern plugins)
 vim.opt.ttyfast = true          -- Fast terminal connection
