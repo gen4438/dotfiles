@@ -2,19 +2,12 @@
 -- coding-tools.luaの設定をVSCode環境用に調整
 
 return {
-  -- emmet（VSCodeでも有効）
-  {
-    'mattn/emmet-vim',
-    lazy = true,
-    keys = {
-      { "<C-y><C-y>", "<plug>(emmet-expand-abbr)", mode = "i", desc = "Expand Abbreviation" },
-    }
-  },
   -- UltiSnips（VSCodeでも基本機能は動作）
   {
     'SirVer/ultisnips',
-    enabled = true,
+    enabled = false,
     lazy = true,
+    event = 'BufEnter',
     dependencies = {
       'honza/vim-snippets',
     },
@@ -26,6 +19,8 @@ return {
     end,
     keys = {
       { "<c-s>", mode = "i", desc = "Expand snippet" },
+      { "<c-j>", mode = "i" },
+      { "<c-k>", mode = "i" },
     },
     init = function()
       -- 既存の設定を踏襲
@@ -38,11 +33,6 @@ return {
       vim.g.UltiSnipsJumpBackwardTrigger = "<c-k>"
     end,
     config = function()
-      -- VSCode環境用の最小限の設定
-      if vim.g.vscode then
-        -- VSCode環境では複雑なfzf統合は無効にして、基本機能のみを使用
-        vim.notify("UltiSnips loaded for VSCode (basic functionality)", vim.log.levels.INFO)
-      end
     end
   },
   

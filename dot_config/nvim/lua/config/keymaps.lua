@@ -277,7 +277,7 @@ vim.keymap.set('n', '<c-q>', AddCursorToQuickfix, { desc = "Add cursor position 
 
 -- Insert mode completion shortcuts (easier than <c-x> combinations)
 vim.keymap.set('i', '<c-o><c-l>', '<c-x><c-l>', { desc = "Line completion" })
-vim.keymap.set('i', '<c-o><c-p>', '<c-x><c-p>', { desc = "Keyword completion" })
+-- vim.keymap.set('i', '<c-o><c-p>', '<c-x><c-p>', { desc = "Keyword completion" })  -- used for <c-o><c-p> in fzf-lua
 vim.keymap.set('i', '<c-o><c-n>', '<c-x><c-n>', { desc = "Keyword completion" })
 vim.keymap.set('i', '<c-o><c-k>', '<c-x><c-k>', { desc = "Dictionary completion" })
 vim.keymap.set('i', '<c-o><c-t>', '<c-x><c-t>', { desc = "Thesaurus completion" })

@@ -26,6 +26,7 @@
     "settingsSync.ignoredSettings": [
         "remote.SSH.configFile"
     ],
+    "settingsSync.keybindingsPerPlatform": false,
     "telemetry.editStats.enabled": false,
     "telemetry.feedback.enabled": false,
     "telemetry.telemetryLevel": "off",
@@ -43,6 +44,7 @@
         "o",
         "p",
         "r",
+        "s",
         "t",
         "u",
         "w",
@@ -76,9 +78,8 @@
         "]",
     ],
     "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
-    "vsicons.dontShowNewVersionMessage": true,
-    "workbench.iconTheme": "material-icon-theme",
     "vscode-neovim.neovimExecutablePaths.linux": "/usr/bin/nvim",
+    "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
-    "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua"
+    "workbench.iconTheme": "material-icon-theme"
 }

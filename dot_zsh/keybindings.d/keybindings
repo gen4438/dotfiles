@@ -65,6 +65,6 @@ bindkey '^E' autosuggest-execute
 bindkey '^W' forward-word
 bindkey -M viins '^W' forward-word
 
-# Ctrl+Y: Accept full autosuggestion
-bindkey '^Y' autosuggest-accept
-bindkey -M viins '^Y' autosuggest-accept
+# Ctrl+J: Accept full autosuggestion
+bindkey '^J' autosuggest-accept
+bindkey -M viins '^J' autosuggest-accept
