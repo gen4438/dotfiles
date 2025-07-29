@@ -87,67 +87,85 @@ return {
       },
       { ";fgp", ";gp", mode = "n", remap = true },
 
-      -- Path completion in insert mode
+      -- Path completion with multi-selection support
       {
         '<c-o><c-p>',
         function()
-          -- カスタムコールバック関数を定義して複数選択を処理
-          local function custom_path_handler(selected)
-            if not selected or #selected == 0 then
-              return
-            end
-
-            -- ファイルパスを抽出
-            local paths = {}
-            for _, item in ipairs(selected) do
-              local path = require('fzf-lua.path').entry_to_file(item)
-              if path and path.path ~= "<none>" then
-                table.insert(paths, path.path)
-              end
-            end
-
-            -- 複数行の場合は各行を個別に挿入
-            local pos = vim.api.nvim_win_get_cursor(0)
-            local row, col = pos[1], pos[2]
-
-            -- 最初のパスを現在の行に挿入
-            local current_line = vim.api.nvim_get_current_line()
-            local new_line = current_line:sub(1, col) .. paths[1] .. current_line:sub(col + 1)
-            vim.api.nvim_set_current_line(new_line)
-
-            -- 残りのパスを新しい行として挿入
-            if #paths > 1 then
-              local additional_lines = {}
-              for i = 2, #paths do
-                table.insert(additional_lines, paths[i])
-              end
-              vim.api.nvim_buf_set_lines(0, row, row, false, additional_lines)
-
-              -- カーソルを最後の挿入行の終わりに移動
-              vim.api.nvim_win_set_cursor(0, { row + #additional_lines, 0 })
-            else
-              -- 1つだけならカーソル位置を更新
-              vim.api.nvim_win_set_cursor(0, { row, col + #paths[1] })
+          local function return_to_insert(opts)
+            if opts.__CTX and opts.__CTX.mode == "i" then
+              vim.cmd [[noautocmd lua vim.api.nvim_feedkeys('i', 'n', true)]]
             end
           end
 
-          -- complete_pathをカスタムコールバックでオーバーライド
           require("fzf-lua").complete_path({
-            actions = {
-              ["default"] = custom_path_handler,
-              ["ctrl-s"] = custom_path_handler, -- ctrl-sでも選択可能に
+            fzf_opts = {
+              ["--no-multi"] = false,
+              ["--multi"] = "",
             },
             winopts = {
-              preview = {
-                title = "複数選択可能 (TABで選択切替, CTRL-Aですべて選択)"
-              }
+              preview = { title = "複数選択可能 (TAB: 選択切替, Ctrl-A: 全選択)" }
             },
-            fzf_opts = {
-              ["--multi"] = "", -- 複数選択を有効化
+            actions = {
+              ["default"] = function(selected, opts)
+                if #selected == 0 then
+                  return_to_insert(opts)
+                  return
+                end
+
+                -- Extract file paths
+                local paths = {}
+                for _, item in ipairs(selected) do
+                  local entry = require('fzf-lua.path').entry_to_file(item, opts)
+                  if entry and entry.path and entry.path ~= "<none>" then
+                    local relpath = require('fzf-lua.path').relative_to(entry.path, opts.cwd)
+                    local resolved_path = opts._cwd and require('fzf-lua.path').join({ opts._cwd, relpath }) or relpath
+                    table.insert(paths, resolved_path)
+                  end
+                end
+
+                if #paths == 0 then
+                  return_to_insert(opts)
+                  return
+                end
+
+                -- Calculate insertion position
+                local line = opts.__CTX.line
+                local col = opts.__CTX.cursor[2] + 1
+                local match = opts.word_pattern or "[^%s\"']*"
+                local before = col > 1 and line:sub(1, col - 1):reverse():match(match):reverse() or ""
+                local after = line:sub(col):match(match) or ""
+                if #before == 0 and #after == 0 and #line > col then
+                  col = col + 1
+                  after = line:sub(col):match(match) or ""
+                end
+
+                local replace_at = col - #before
+                local before_path = replace_at > 1 and line:sub(1, replace_at - 1) or ""
+                local rest_of_line = #line >= (col + #after) and line:sub(col + #after) or ""
+
+                -- Insert first path in current line
+                local new_line = before_path .. paths[1] .. rest_of_line
+                vim.api.nvim_set_current_line(new_line)
+
+                -- Handle multiple paths
+                if #paths > 1 then
+                  vim.schedule(function()
+                    local current_row = opts.__CTX.cursor[1]
+                    local additional_lines = {}
+                    for i = 2, #paths do
+                      table.insert(additional_lines, paths[i])
+                    end
+                    vim.api.nvim_buf_set_lines(0, current_row, current_row, false, additional_lines)
+                    vim.api.nvim_win_set_cursor(0, { current_row + #additional_lines, #paths[#paths] })
+                    return_to_insert(opts)
+                  end)
+                else
+                  vim.api.nvim_win_set_cursor(0, { opts.__CTX.cursor[1], replace_at + #paths[1] - 2 })
+                  return_to_insert(opts)
+                end
+              end
             }
           })
-
-          vim.cmd('startinsert')
         end,
         mode = { "i", "v" },
         desc = "Insert multiple file paths"
