@@ -160,7 +160,7 @@ return {
                     return_to_insert(opts)
                   end)
                 else
-                  vim.api.nvim_win_set_cursor(0, { opts.__CTX.cursor[1], replace_at + #paths[1] - 2 })
+                  vim.api.nvim_win_set_cursor(0, { opts.__CTX.cursor[1], replace_at + #paths[1] - 1 })
                   return_to_insert(opts)
                 end
               end
