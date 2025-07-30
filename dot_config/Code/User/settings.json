@@ -79,7 +79,9 @@
     ],
     "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
     "vscode-neovim.neovimExecutablePaths.linux": "/usr/bin/nvim",
+    "vscode-neovim.neovimExecutablePaths.win32": "C:\\Program Files\\Neovim\\bin\\nvim.exe",
     "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
+    "vscode-neovim.neovimInitVimPaths.win32": "%USERPROFILE%\\AppData\\Local\\nvim\\init.lua",
     "workbench.iconTheme": "material-icon-theme"
 }
