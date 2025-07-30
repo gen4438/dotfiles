@@ -17,39 +17,8 @@ winget source update
 
 # Install packages from winget.json
 $packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\winget.json"
-if (Test-Path $packageFile) {
-    Write-Host "Installing packages from winget.json..."
-    winget import --import-file $packageFile --ignore-unavailable --accept-package-agreements --accept-source-agreements
-} else {
-    Write-Host "Package file not found, installing essential packages individually..."
-    
-    # Essential development tools
-    $packages = @(
-        "Git.Git",
-        "OpenJS.NodeJS.LTS", 
-        "Python.Python.3.13",
-        "GoLang.Go",
-        "Neovim.Neovim",
-        "Microsoft.VisualStudioCode",
-        "Microsoft.PowerToys",
-        "7zip.7zip",
-        "voidtools.Everything",
-        "Google.Chrome",
-        "BurntSushi.ripgrep.MSVC",
-        "junegunn.fzf",
-        "GitHub.cli"
-    )
-    
-    foreach ($package in $packages) {
-        Write-Host "Installing $package..."
-        try {
-            winget install $package --accept-package-agreements --accept-source-agreements --silent
-            Write-Host "✅ $package installed successfully"
-        } catch {
-            Write-Warning "❌ Failed to install $package`: $_"
-        }
-    }
-}
+Write-Host "Installing packages from winget.json..."
+winget import --import-file $packageFile --ignore-unavailable --accept-package-agreements --accept-source-agreements
 
 # Enable PowerShell execution policy for current user
 Write-Host "Setting PowerShell execution policy..."

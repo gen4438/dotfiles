@@ -13,7 +13,7 @@
 {{- else }}
 [".local/bin/fzf"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" .chezmoi.os (.chezmoi.arch | replace "x86_64" "amd64")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64")) | quote }}
     executable = true
     path = "fzf"
     refreshPeriod = "168h"
@@ -31,7 +31,7 @@
 {{- else }}
 [".local/bin/delta"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "delta"
     stripComponents = 1
@@ -50,7 +50,7 @@
 {{- else }}
 [".local/bin/bat"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "bat"
     stripComponents = 1
@@ -69,9 +69,28 @@
 {{- else }}
 [".local/bin/fd"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-gnu")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "fd"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- end }}
+
+# ripgrep - Recursively search directories for a regex pattern
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/rg.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "rg.exe"
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/rg"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
+    executable = true
+    path = "rg"
     stripComponents = 1
     refreshPeriod = "168h"
 {{- end }}

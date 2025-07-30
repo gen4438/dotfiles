@@ -11,16 +11,13 @@
           "PackageIdentifier": "OpenJS.NodeJS.LTS"
         },
         {
-          "PackageIdentifier": "Python.Python.3.12"
+          "PackageIdentifier": "Python.Python.3"
         },
         {
           "PackageIdentifier": "Neovim.Neovim"
         },
         {
           "PackageIdentifier": "Microsoft.VisualStudioCode"
-        },
-        {
-          "PackageIdentifier": "Microsoft.WindowsTerminal.Preview"
         },
         {
           "PackageIdentifier": "Microsoft.PowerToys"
@@ -57,6 +54,12 @@
         },
         {
           "PackageIdentifier": "Gyan.FFmpeg"
+        },
+        {
+          "PackageIdentifier": "GoLang.Go"
+        },
+        {
+          "PackageIdentifier": "GitHub.cli"
         }
       ],
       "SourceDetails": {
