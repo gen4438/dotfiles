@@ -60,6 +60,12 @@
         },
         {
           "PackageIdentifier": "GitHub.cli"
+        },
+        {
+          "PackageIdentifier": "MSYS2.MSYS2"
+        },
+        {
+          "PackageIdentifier": "LLVM.LLVM"
         }
       ],
       "SourceDetails": {
