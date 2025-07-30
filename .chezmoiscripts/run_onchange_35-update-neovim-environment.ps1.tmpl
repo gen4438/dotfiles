@@ -1,0 +1,40 @@
+# Update Neovim Python and Node.js packages for Windows
+# This script runs when its content changes to update Neovim dependencies
+
+Write-Host "🔄 Updating Neovim environment packages for Windows..." -ForegroundColor Cyan
+
+# Update Python packages for Neovim
+if (Get-Command python.exe -ErrorAction SilentlyContinue) {
+    Write-Host "🐍 Updating Python packages for Neovim..." -ForegroundColor Yellow
+    
+    try {
+        # Update pip and Neovim packages
+        python.exe -m pip install --user --upgrade pip
+        python.exe -m pip install --user --upgrade neovim pynvim
+        Write-Host "✅ Neovim Python packages updated" -ForegroundColor Green
+    } catch {
+        Write-Host "❌ Failed to update Python packages: $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Write-Host "⚠️  Python not found in PATH" -ForegroundColor Red
+}
+
+# Update Node.js packages for Neovim
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Host "📦 Updating Node.js packages for Neovim..." -ForegroundColor Yellow
+    
+    try {
+        # Update Neovim Node.js package
+        npm update -g neovim
+        Write-Host "✅ Neovim Node.js package updated" -ForegroundColor Green
+    } catch {
+        Write-Host "❌ Failed to update Node.js packages: $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Write-Host "⚠️  npm not found in PATH" -ForegroundColor Red
+}
+
+Write-Host "✅ Neovim environment packages updated successfully!" -ForegroundColor Green
+
+# Hash to trigger updates when script changes
+# Script hash: {{ include ".chezmoiscripts/run_onchange_35-update-neovim-environment.ps1.tmpl" | sha256sum }}
