@@ -78,6 +78,7 @@ Library/
 {{- if ne .chezmoi.os "windows" }}
 # Exclude Windows-specific files on non-Windows systems
 AppData/
+Documents/PowerShell/
 Documents/WindowsPowerShell/
 # Exclude PowerShell scripts on non-Windows systems
 .chezmoiscripts/*.ps1

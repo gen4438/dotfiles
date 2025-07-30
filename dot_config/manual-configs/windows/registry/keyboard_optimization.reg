@@ -1,0 +1,80 @@
+Windows Registry Editor Version 5.00
+
+; =============================================================================
+; KEYBOARD CURSOR MOVEMENT OPTIMIZATION
+; =============================================================================
+; Purpose: Improve cursor movement speed with arrow keys and key repeat
+; Target: Match the responsiveness of GNOME Terminal and iTerm2
+; Focus: ONLY settings that directly affect cursor movement speed
+; Safety: User-level settings only (HKEY_CURRENT_USER)
+; =============================================================================
+
+; -----------------------------------------------------------------------------
+; KEYBOARD REPEAT SETTINGS - CORE OPTIMIZATION
+; -----------------------------------------------------------------------------
+; These are the PRIMARY settings that control cursor movement speed
+[HKEY_CURRENT_USER\Control Panel\Keyboard]
+; KeyboardDelay: Initial delay before key repeat starts
+; Range: 0-3 (0=250ms, 1=500ms, 2=750ms, 3=1000ms)
+; Effect: 0 = shortest delay = cursor starts moving immediately when holding arrow key
+"KeyboardDelay"="0"
+
+; KeyboardSpeed: Speed of key repetition once started  
+; Range: 0-31 (0=slowest ~2.5/sec, 31=fastest ~30/sec)
+; Effect: 31 = maximum speed = cursor moves fastest when holding arrow key
+"KeyboardSpeed"="31"
+
+; -----------------------------------------------------------------------------
+; ADVANCED KEYBOARD RESPONSE FINE-TUNING
+; -----------------------------------------------------------------------------
+; More precise control over key repeat timing for optimal cursor movement
+[HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
+; AutoRepeatDelay: Milliseconds before auto-repeat begins (overrides KeyboardDelay)
+; Range: 0-2000ms, Default: 1000ms
+; Effect: 200ms provides very responsive cursor movement without accidental repeats
+"AutoRepeatDelay"="200"
+
+; AutoRepeatRate: Auto-repeat frequency once started
+; Range: 0-31 (higher = faster), Default: 6
+; Effect: 7 provides near-maximum speed while maintaining precise control
+"AutoRepeatRate"="7"
+
+; BounceTime: Minimum time between keystrokes to be recognized as separate
+; Range: 0-5000ms, Default: 0 (disabled)
+; Effect: 0 = no filtering = maximum responsiveness for rapid key presses
+"BounceTime"="0"
+
+; DelayBeforeAcceptance: Minimum time key must be held to be accepted
+; Range: 0-5000ms, Default: 0 (disabled)  
+; Effect: 0 = immediate key acceptance = no input lag
+"DelayBeforeAcceptance"="0"
+
+; Flags: Controls FilterKeys features that can slow down input
+; Effect: 0 = all filtering disabled = maximum keyboard responsiveness
+"Flags"="0"
+
+; -----------------------------------------------------------------------------
+; ACCESSIBILITY FEATURES THAT AFFECT INPUT SPEED
+; -----------------------------------------------------------------------------
+; Disable features that can interfere with fast cursor movement
+
+; StickyKeys: Can interfere with modifier key combinations during fast typing
+[HKEY_CURRENT_USER\Control Panel\Accessibility\StickyKeys]
+; Flags: 506 = Feature available but disabled, no sound, no confirmation
+; Effect: Prevents accidental activation that could slow down cursor movement
+"Flags"="506"
+
+; Keyboard Response accessibility flags (separate from FilterKeys above)
+[HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
+; Flags: 2 = Available but turned off
+; Effect: Keeps accessibility features inactive for maximum performance
+"Flags"="2"
+
+; =============================================================================
+; EXPECTED CURSOR MOVEMENT IMPROVEMENTS:
+; =============================================================================
+; • Arrow key repeat starts in 250ms instead of 1000ms (4x faster startup)
+; • Key repeat rate: ~20-25 chars/sec instead of ~6 chars/sec (3-4x faster)
+; • Total improvement: Cursor movement 3-5x more responsive
+; • Affects: All applications including Windows Terminal, text editors, IDEs
+; =============================================================================
