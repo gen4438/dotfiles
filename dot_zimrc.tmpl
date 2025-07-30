@@ -28,6 +28,10 @@ zmodule ohmyzsh/ohmyzsh --root plugins/vi-mode --source vi-mode.plugin.zsh
 # Async operations framework
 zmodule mafredri/zsh-async
 
+# fzf-tab - Replace zsh's default completion selection menu with fzf
+# Must be loaded before zsh-autosuggestions
+zmodule Aloxaf/fzf-tab
+
 # Auto-suggestions (with async support)
 zmodule zsh-users/zsh-autosuggestions
 

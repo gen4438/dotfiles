@@ -287,6 +287,7 @@ fgcoc() {
 }
 
 
+
 # # キーバインド
 # # 参考: ~/.fzf/shell/key-bindings.zsh
 # if [[ $- =~ i ]]; then
@@ -318,4 +319,22 @@ fgcoc() {
 #   bindkey -m vi-insert '"\C-g\C-r": "\C-z\C-g\C-r\C-z"'
 #   bindkey -m vi-insert '"\C-g\C-s": "\C-z\C-g\C-s\C-z"'
 # fi
+
+# fzf で カレントディレクトリ直下のファイル、隠しファイルを含むを対象、recursive しない
+_fzf_current_dir_files_zsh() {
+  local files
+  files=(${(f)"$(ls -A 2>/dev/null)"})
+  
+  local selected
+  selected=$(printf "%s\n" "${files[@]}" | fzf --no-hscroll --no-multi --ansi) || return 1
+
+  # 選択結果を zsh の入力行に挿入
+  LBUFFER="${LBUFFER}${selected}"
+}
+
+# zsh widget として登録
+zle -N _fzf_current_dir_files_zsh
+
+# Ctrl+F Ctrl+F にバインド
+bindkey '^F^F' _fzf_current_dir_files_zsh
 

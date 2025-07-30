@@ -352,5 +352,6 @@ _fzf_current_dir_files() {
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
 }
 
+
 # bash の readline に登録
 bind -x '"\C-f\C-f": _fzf_current_dir_files'

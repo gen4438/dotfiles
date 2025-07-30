@@ -83,7 +83,7 @@ add_to_path "node_modules/bin"
 
 # fzf completions for various commands
 if command -v _fzf_setup_completion >/dev/null 2>&1; then
-    _fzf_setup_completion path ag git kubectl ll vim
+    _fzf_setup_completion path ag git kubectl ll vim "chezmoi edit"
     _fzf_setup_completion dir tree
 fi
 

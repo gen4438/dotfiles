@@ -138,7 +138,7 @@
 # 以降は windows ではインストールしない
 {{- if ne .chezmoi.os "windows" }}
 
-# z, fz, tmux-xpanes for bash users (zsh uses zplug)
+# z, fz, tmux-xpanes for bash users (zsh uses zim)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
 {{- if and $shells.uses_bash (ne .chezmoi.os "darwin") }}
 [".local/share/z"]
@@ -168,12 +168,6 @@
 {{- end }}
 
 {{- if and $shells.uses_zsh (ne .chezmoi.os "darwin") }}
-
-# Keep zplug for migration period - will be removed later
-[".zplug"]
-    type = "git-repo"
-    url = "https://github.com/zplug/zplug.git"
-    refreshPeriod = "168h"
 
 # tmux plugin manager
 [".tmux/plugins/tpm"]

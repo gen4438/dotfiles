@@ -78,6 +78,38 @@ download_completion \
     "$HOME/.bash/completion.d/yarn-completion.bash" \
     "Yarn bash completion"
 
+# Chezmoi completion
+if command -v chezmoi >/dev/null 2>&1; then
+    # Check if chezmoi supports completion command
+    if chezmoi completion --help >/dev/null 2>&1; then
+        # Generate bash completion using --output flag
+        if chezmoi completion bash --output "$HOME/.bash/completion.d/chezmoi.bash"; then
+            if [[ -s "$HOME/.bash/completion.d/chezmoi.bash" ]]; then
+                echo "✅ chezmoi bash completion updated"
+            else
+                echo "⚠️ chezmoi bash completion generated but is empty"
+            fi
+        else
+            echo "⚠️ chezmoi bash completion failed"
+        fi
+        
+        # Generate zsh completion using --output flag
+        if chezmoi completion zsh --output "$HOME/.zsh/completion.d/_chezmoi"; then
+            if [[ -s "$HOME/.zsh/completion.d/_chezmoi" ]]; then
+                echo "✅ chezmoi zsh completion updated"
+            else
+                echo "⚠️ chezmoi zsh completion generated but is empty"
+            fi
+        else
+            echo "⚠️ chezmoi zsh completion failed"
+        fi
+    else
+        echo "⚠️ chezmoi completion command not available (older version or snap limitation)"
+    fi
+else
+    echo "⚠️ chezmoi not found, skipping completion setup"
+fi
+
 # Set appropriate permissions
 chmod +x "$HOME"/.bash/completion.d/*.bash 2>/dev/null || true
 chmod +x "$HOME"/.zsh/completion.d/_* 2>/dev/null || true

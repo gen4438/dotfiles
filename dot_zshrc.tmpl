@@ -71,44 +71,6 @@ export ZSH_AUTOSUGGEST_MANUAL_REBIND=true
 {{ template "shell_common.tmpl" . }}
 
 
-# Legacy zplug configuration (temporarily disabled for Zim migration)
-# if command -v zplug &> /dev/null; then
-#     # Performance optimizations for zplug
-#     zstyle ':zplug:tag' depth 1           # Shallow clones for faster downloads
-#     export ZPLUG_LOADFILE="$HOME/.zplug_loadfile"  # Cache load order
-#     # oh-my-zsh plugins
-#     zplug "lib/completion", from:oh-my-zsh
-#     zplug "lib/directories", from:oh-my-zsh
-#     zplug "lib/functions", from:oh-my-zsh
-#     zplug "lib/history", from:oh-my-zsh
-#     zplug "plugins/git", from:oh-my-zsh
-#     zplug "plugins/dotenv", from:oh-my-zsh
-#     zplug "plugins/poetry", from:oh-my-zsh
-#     zplug "plugins/npm", from:oh-my-zsh
-#     zplug "plugins/kubectl", from:oh-my-zsh
-#     zplugh "plugins/gh", from:oh-my-zsh
-#     zplug "plugins/vi-mode", from:oh-my-zsh
-# 
-#     # Other plugins with performance optimizations
-#     zplug "mafredri/zsh-async", from:github
-#     zplug "zsh-users/zsh-autosuggestions", defer:2
-#     zplug "zsh-users/zsh-history-substring-search", defer:2
-#     zplug "changyuheng/fz", defer:1
-#     zplug "rupa/z", use:z.sh
-#     zplug "greymd/tmux-xpanes", defer:2
-#     zplug "qoomon/zsh-lazyload"
-# 
-#     # Install plugins if there are plugins that have not been installed
-#     if ! zplug check --verbose; then
-#         printf "Install? [y/N]: "
-#         if read -q; then
-#             echo; zplug install
-#         fi
-#     fi
-# 
-#     # Load plugins
-#     zplug load
-# fi
 
 # Zsh-specific settings
 setopt AUTO_CD              # Change directory by typing directory name
@@ -146,6 +108,20 @@ alias zshconfig='${EDITOR:-vim} ~/.zshrc'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # fzf configuration is now handled in shell_common.tmpl
+
+# fzf-tab configuration
+# disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+# preview directory's content with eza when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 --color=always $realpath'
+# preview file content for various commands
+zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath} 2>/dev/null || file ${(Q)realpath}'
 
 
 # Load local zsh configuration if exists

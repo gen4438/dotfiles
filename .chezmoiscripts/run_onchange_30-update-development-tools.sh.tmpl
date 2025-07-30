@@ -171,10 +171,10 @@ fi
 
 # Note: z, fz, tmux-xpanes repositories are updated automatically by chezmoi external
 # For bash users: managed at .local/share/* (chezmoi external)
-# For zsh users: managed via zplug plugins
+# For zsh users: managed via zim plugins
 echo "📁 External tools (z, fz, tmux-xpanes) are managed by chezmoi external with weekly updates"
 
-# Note: z, fz, tmux-xpanes for zsh are managed by zplug (updated in zplug update section below)
+# Note: z, fz, tmux-xpanes for zsh are managed by zim
 
 # Update tmux plugins (TPM repository updated automatically by chezmoi external)
 if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
@@ -190,49 +190,40 @@ if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
 fi
 
 
-# Update zplug plugins (only for zsh users)
+# Update zim plugins (only for zsh users and when running in zsh-compatible environment)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
 {{- if $shells.uses_zsh }}
-if command -v zsh >/dev/null 2>&1; then
-    echo "🔌 Updating zplug plugins..."
+# Skip zim updates if running in bash environment
+if [[ -n "$BASH_VERSION" ]] && [[ -z "$ZSH_VERSION" ]]; then
+    echo "⚠️ Running in bash environment, skipping zim plugin updates (zim is zsh-only)"
+elif command -v zsh >/dev/null 2>&1; then
+    echo "🔌 Updating zim plugins..."
     
-    # Platform-appropriate zplug detection
-    {{- if eq .chezmoi.os "darwin" }}
-    # macOS - check Homebrew locations first, then local (chezmoi external backup)
-    ZPLUG_HOME=""
-    for zplug_path in \
-        "/opt/homebrew/opt/zplug" \
-        "/usr/local/opt/zplug" \
-        "/opt/homebrew/share/zplug" \
-        "/usr/local/share/zplug" \
-        "$HOME/.zplug"; do
-        if [[ -f "$zplug_path/init.zsh" ]]; then
-            ZPLUG_HOME="$zplug_path"
-            break
+    # Check if zimfw is available and set up environment
+    if [[ -f "$HOME/.zim/zimfw.zsh" ]]; then
+        # Only run if current shell is zsh or if zsh users are detected
+        if [[ -n "$ZSH_VERSION" ]] || [[ "$0" == *"zsh"* ]] || command -v zsh >/dev/null 2>&1; then
+            zsh -c "
+                export ZIM_HOME='$HOME/.zim'
+                source '$HOME/.zim/zimfw.zsh'
+                zimfw update
+            " 2>/dev/null
+            if [[ $? -eq 0 ]]; then
+                echo "✅ zim plugins updated"
+            else
+                echo "⚠️ zim update failed, may not be needed in current environment"
+            fi
+        else
+            echo "⚠️ zsh environment not available, skipping zim updates"
         fi
-    done
-    {{- else }}
-    # Linux/Android/other - chezmoi external manages zplug at ~/.zplug
-    if [[ -f "$HOME/.zplug/init.zsh" ]]; then
-        ZPLUG_HOME="$HOME/.zplug"
-    fi
-    {{- end }}
-    
-    if [[ -n "$ZPLUG_HOME" ]]; then
-        zsh -c "
-            export ZPLUG_HOME='$ZPLUG_HOME'
-            source '$ZPLUG_HOME/init.zsh'
-            zplug update
-        "
-        echo "✅ zplug plugins updated"
     else
-        echo "⚠️ zplug not found, skipping plugin updates"
+        echo "⚠️ zim not found, skipping plugin updates"
     fi
 else
-    echo "⚠️ zsh not available, skipping zplug plugin updates"
+    echo "⚠️ zsh not available, skipping zim plugin updates"
 fi
 {{- else }}
-echo "⚠️ zsh not detected, skipping zplug plugin updates"
+echo "⚠️ zsh not detected, skipping zim plugin updates"
 {{- end }}
 
 # Update Neovim plugins
