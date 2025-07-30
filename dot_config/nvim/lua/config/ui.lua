@@ -187,7 +187,7 @@ M.setup = function()
   
   -- Load local UI configuration if it exists
   -- This allows overriding font settings and other UI preferences
-  local local_ui_config = vim.fn.stdpath("config") .. "/lua/config/ui.local.lua"
+  local local_ui_config = vim.fn.stdpath("config") .. "ui.local.lua"
   if vim.fn.filereadable(local_ui_config) == 1 then
     dofile(local_ui_config)
   end
