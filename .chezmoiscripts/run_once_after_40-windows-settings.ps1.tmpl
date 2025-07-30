@@ -45,11 +45,12 @@ Add-ToPath $userBinPath
 Add-ToPath $localBinPath
 
 # Add MSYS2 and LLVM bin directories to PATH
-$extraPaths = @(
-    "C:\msys64\usr\bin",
-    "C:\Program Files\LLVM\bin"
-)
-$extraPaths | ForEach-Object { Add-ToPath $_ }
+# Note: With Scoop, these packages automatically manage PATH, so manual addition is no longer needed
+# $extraPaths = @(
+#     "C:\msys64\usr\bin",
+#     "C:\Program Files\LLVM\bin"
+# )
+# $extraPaths | ForEach-Object { Add-ToPath $_ }
 
 # Apply keyboard repeat rate settings
 $regFile = "{{ .chezmoi.sourceDir }}\scripts\windows\key_speed.reg"

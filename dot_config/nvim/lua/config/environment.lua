@@ -177,12 +177,60 @@ M.is_ssh = function()
   return vim.env.SSH_CONNECTION ~= nil
 end
 
+-- Windows shell configuration
+M.setup_windows_shell = function()
+  if not M.is_windows() then
+    return
+  end
+  
+  -- Check for MSYS2 bash from Scoop installation path
+  local scoop_msys_bash = vim.fn.expand('~/scoop/apps/msys2/current/usr/bin/bash.exe')
+  local system_msys_bash = 'C:/msys64/usr/bin/bash.exe'
+  
+  if vim.fn.executable(scoop_msys_bash) == 1 then
+    vim.opt.shell = scoop_msys_bash
+    vim.opt.shellcmdflag = '-c'
+    vim.opt.shellquote = ''
+    vim.opt.shellxquote = ''
+    -- Set SHELL environment variable for :terminal
+    vim.env.SHELL = scoop_msys_bash
+  elseif vim.fn.executable(system_msys_bash) == 1 then
+    vim.opt.shell = system_msys_bash
+    vim.opt.shellcmdflag = '-c'
+    vim.opt.shellquote = ''
+    vim.opt.shellxquote = ''
+    -- Set SHELL environment variable for :terminal
+    vim.env.SHELL = system_msys_bash
+  -- Fallback to PowerShell
+  elseif vim.fn.executable('pwsh') == 1 then
+    vim.opt.shell = 'pwsh'
+    vim.opt.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command'
+    vim.opt.shellquote = ''
+    vim.opt.shellxquote = ''
+    vim.env.SHELL = 'pwsh'
+  elseif vim.fn.executable('powershell') == 1 then
+    vim.opt.shell = 'powershell'
+    vim.opt.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command'
+    vim.opt.shellquote = ''
+    vim.opt.shellxquote = ''
+    vim.env.SHELL = 'powershell'
+  -- Final fallback to cmd
+  else
+    vim.opt.shell = 'cmd'
+    vim.opt.shellcmdflag = '/c'
+    vim.opt.shellquote = ''
+    vim.opt.shellxquote = '"'
+    vim.env.SHELL = 'cmd'
+  end
+end
+
 -- Main setup function
 M.setup = function()
   M.setup_python()
   M.setup_nodejs()
   M.setup_clipboard()
   M.setup_env_vars()
+  M.setup_windows_shell()
 end
 
 return M
