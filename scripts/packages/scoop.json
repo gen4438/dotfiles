@@ -1,0 +1,28 @@
+{
+  "apps": [
+    "git",
+    "nodejs-lts",
+    "python",
+    "neovim",
+    "vscode",
+    "powertoys",
+    "7zip",
+    "everything",
+    "googlechrome",
+    "vcxsrv",
+    "oh-my-posh",
+    "fzf",
+    "ripgrep",
+    "fd",
+    "bat",
+    "ffmpeg",
+    "go",
+    "gh",
+    "msys2",
+    "llvm"
+  ],
+  "buckets": [
+    "extras",
+    "main"
+  ]
+}

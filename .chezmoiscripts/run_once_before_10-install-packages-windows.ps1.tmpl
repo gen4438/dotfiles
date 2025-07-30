@@ -5,20 +5,38 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Installing essential packages for Windows..."
 
-# Check if winget is available
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Error "winget is not available. Please install Windows Package Manager first."
-    exit 1
+# Install Scoop if not already installed
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing Scoop package manager..."
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 }
 
-# Update winget sources
-Write-Host "Updating winget sources..."
-winget source update
+# Read scoop packages configuration
+$packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\scoop.json"
+$config = Get-Content $packageFile | ConvertFrom-Json
 
-# Install packages from winget.json
-$packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\winget.json"
-Write-Host "Installing packages from winget.json..."
-winget import --import-file $packageFile --ignore-unavailable --accept-package-agreements --accept-source-agreements
+# Add required buckets
+Write-Host "Adding Scoop buckets..."
+foreach ($bucket in $config.buckets) {
+    try {
+        scoop bucket add $bucket
+        Write-Host "✅ Added bucket: $bucket"
+    } catch {
+        Write-Warning "❌ Failed to add bucket $bucket : $_"
+    }
+}
+
+# Install packages
+Write-Host "Installing packages with Scoop..."
+foreach ($app in $config.apps) {
+    try {
+        scoop install $app
+        Write-Host "✅ $app installed successfully"
+    } catch {
+        Write-Warning "❌ Failed to install $app : $_"
+    }
+}
 
 # Enable PowerShell execution policy for current user
 Write-Host "Setting PowerShell execution policy..."
