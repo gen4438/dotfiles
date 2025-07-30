@@ -193,5 +193,9 @@ dot_config/nvim/lua/plugins/*.local.lua
 
 {{- if eq .chezmoi.os "windows" }}
 # Include Windows-specific files
+!Documents/
+Documents/**
 !Documents/WindowsPowerShell/
+Documents/WindowsPowerShell/**
+!Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 {{- end }}
