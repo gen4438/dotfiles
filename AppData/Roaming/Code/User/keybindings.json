@@ -97,12 +97,6 @@
     "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
   },
   {
-    "key": "ctrl+b",
-    "command": "vscode-neovim.send",
-    "args": "<C-b>",
-    "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
-  },
-  {
     "key": "ctrl+c",
     "command": "vscode-neovim.send",
     "args": "<C-c>",
