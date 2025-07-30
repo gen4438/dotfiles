@@ -3,6 +3,14 @@
 # Cross-platform support for Linux, macOS, and Windows
 # Cross-platform binary tools (archive-file format)
 # fzf - Command-line fuzzy finder
+# Platform-specific release naming patterns:
+# Linux x86_64: fzf-{version}-linux_amd64.tar.gz
+# Linux aarch64: fzf-{version}-linux_arm64.tar.gz
+# Linux armv7/armv6/armv5: fzf-{version}-linux_armv7.tar.gz
+# macOS x86_64: fzf-{version}-darwin_amd64.tar.gz
+# macOS aarch64: fzf-{version}-darwin_arm64.tar.gz
+# Windows x86_64: fzf-{version}-windows_amd64.zip
+# Android (arm64): Uses Linux arm64 binary
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/fzf.exe"]
     type = "archive-file"
@@ -13,13 +21,21 @@
 {{- else }}
 [".local/bin/fzf"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64" | replace "arm" "armv7")) | quote }}
     executable = true
     path = "fzf"
     refreshPeriod = "168h"
 {{- end }}
 
 # delta - A syntax-highlighting pager for git, diff, grep, and blame output
+# Platform-specific release naming patterns:
+# Linux x86_64: delta-{version}-x86_64-unknown-linux-gnu.tar.gz
+# Linux aarch64: delta-{version}-aarch64-unknown-linux-gnu.tar.gz
+# Linux armv7: delta-{version}-arm-unknown-linux-gnueabihf.tar.gz
+# macOS x86_64: delta-{version}-x86_64-apple-darwin.tar.gz
+# macOS aarch64: delta-{version}-aarch64-apple-darwin.tar.gz
+# Windows x86_64: delta-{version}-x86_64-pc-windows-msvc.zip
+# Android (arm64): Uses Linux aarch64 binary
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/delta.exe"]
     type = "archive-file"
@@ -31,7 +47,7 @@
 {{- else }}
 [".local/bin/delta"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "delta"
     stripComponents = 1
@@ -39,6 +55,14 @@
 {{- end }}
 
 # bat - A cat clone with wings (syntax highlighting)
+# Platform-specific release naming patterns:
+# Linux x86_64: bat-v{version}-x86_64-unknown-linux-gnu.tar.gz
+# Linux aarch64: bat-v{version}-aarch64-unknown-linux-gnu.tar.gz
+# Linux armv7: bat-v{version}-arm-unknown-linux-gnueabihf.tar.gz
+# macOS x86_64: bat-v{version}-x86_64-apple-darwin.tar.gz
+# macOS aarch64: bat-v{version}-aarch64-apple-darwin.tar.gz
+# Windows x86_64: bat-v{version}-x86_64-pc-windows-msvc.zip
+# Android (arm64): Uses Linux aarch64 binary
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/bat.exe"]
     type = "archive-file"
@@ -50,7 +74,7 @@
 {{- else }}
 [".local/bin/bat"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "bat"
     stripComponents = 1
@@ -58,6 +82,14 @@
 {{- end }}
 
 # fd - A simple, fast and user-friendly alternative to find
+# Platform-specific release naming patterns:
+# Linux x86_64: fd-v{version}-x86_64-unknown-linux-gnu.tar.gz
+# Linux aarch64: fd-v{version}-aarch64-unknown-linux-gnu.tar.gz
+# Linux armv7: fd-v{version}-arm-unknown-linux-gnueabihf.tar.gz
+# macOS x86_64: fd-v{version}-x86_64-apple-darwin.tar.gz
+# macOS aarch64: fd-v{version}-aarch64-apple-darwin.tar.gz
+# Windows x86_64: fd-v{version}-x86_64-pc-windows-msvc.zip
+# Android (arm64): Uses Linux aarch64 binary
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/fd.exe"]
     type = "archive-file"
@@ -69,7 +101,7 @@
 {{- else }}
 [".local/bin/fd"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "fd"
     stripComponents = 1
@@ -77,6 +109,14 @@
 {{- end }}
 
 # ripgrep - Recursively search directories for a regex pattern
+# Platform-specific release naming patterns:
+# Linux x86_64: ripgrep-{version}-x86_64-unknown-linux-gnu.tar.gz
+# Linux aarch64: ripgrep-{version}-aarch64-unknown-linux-gnu.tar.gz
+# Linux armv7: ripgrep-{version}-armv7-unknown-linux-gnueabihf.tar.gz
+# macOS x86_64: ripgrep-{version}-x86_64-apple-darwin.tar.gz
+# macOS aarch64: ripgrep-{version}-aarch64-apple-darwin.tar.gz
+# Windows x86_64: ripgrep-{version}-x86_64-pc-windows-msvc.zip
+# Android (arm64): Uses Linux aarch64 binary
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/rg.exe"]
     type = "archive-file"
@@ -88,7 +128,7 @@
 {{- else }}
 [".local/bin/rg"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.os "android" | ternary "unknown-linux-gnu" "unknown-linux-gnu"))) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64" | replace "arm" "armv7") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
     executable = true
     path = "rg"
     stripComponents = 1
