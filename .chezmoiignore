@@ -186,3 +186,12 @@ logs/
 # Neovim local configuration files - User manages these directly
 dot_config/nvim/lua/config/*.local.lua
 dot_config/nvim/lua/plugins/*.local.lua
+
+# ==============================================================================
+# PLATFORM-SPECIFIC INCLUDES
+# ==============================================================================
+
+{{- if eq .chezmoi.os "windows" }}
+# Include Windows-specific files
+!Documents/WindowsPowerShell/
+{{- end }}
