@@ -131,6 +131,15 @@
                 "hidden": false,
                 "name": "Developer PowerShell for VS 2022",
                 "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "colorScheme": "Solarized Dark",
+                "commandline": "%USERPROFILE%\\scoop\\shims\\msys2.cmd",
+                "guid": "{23e76eba-82e6-4432-aea4-0e761a16601c}",
+                "hidden": false,
+                "icon": "%USERPROFILE%\\scoop\\apps\\msys2\\current\\msys2.ico",
+                "name": "msys2",
+                "startingDirectory": "%USERPROFILE%"
             }
         ]
     },
