@@ -37,7 +37,7 @@ Windows Registry Editor Version 5.00
 ; AutoRepeatRate: Auto-repeat frequency once started
 ; Range: 0-31 (higher = faster), Default: 6
 ; Effect: 7 provides near-maximum speed while maintaining precise control
-"AutoRepeatRate"="7"
+"AutoRepeatRate"="3"
 
 ; BounceTime: Minimum time between keystrokes to be recognized as separate
 ; Range: 0-5000ms, Default: 0 (disabled)
