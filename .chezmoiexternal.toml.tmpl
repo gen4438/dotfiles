@@ -21,7 +21,7 @@
 {{- else }}
 [".local/bin/fzf"]
     type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64" | replace "arm" "armv7")) | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64")) | quote }}
     executable = true
     path = "fzf"
     refreshPeriod = "168h"
