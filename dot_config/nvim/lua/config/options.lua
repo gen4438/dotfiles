@@ -119,23 +119,28 @@ if vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 then
     vim.opt.shellcmdflag = '-c'
     vim.opt.shellquote = ''
     vim.opt.shellxquote = ''
+    -- Set SHELL environment variable for :terminal
+    vim.env.SHELL = msys_bash
   -- Fallback to PowerShell
   elseif vim.fn.executable('pwsh') == 1 then
     vim.opt.shell = 'pwsh'
     vim.opt.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command'
     vim.opt.shellquote = ''
     vim.opt.shellxquote = ''
+    vim.env.SHELL = 'pwsh'
   elseif vim.fn.executable('powershell') == 1 then
     vim.opt.shell = 'powershell'
     vim.opt.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command'
     vim.opt.shellquote = ''
     vim.opt.shellxquote = ''
+    vim.env.SHELL = 'powershell'
   -- Final fallback to cmd
   else
     vim.opt.shell = 'cmd'
     vim.opt.shellcmdflag = '/c'
     vim.opt.shellquote = ''
     vim.opt.shellxquote = '"'
+    vim.env.SHELL = 'cmd'
   end
 end
 
