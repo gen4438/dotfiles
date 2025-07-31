@@ -73,7 +73,7 @@ if [[ -d "$HOME/.nvm" ]]; then
         # Check if neovim package is already installed
         if ! npm list -g neovim >/dev/null 2>&1; then
             echo "Installing Node.js packages for Neovim..."
-            npm install -g neovim
+            npm install -g neovim tree-sitter-cli
             echo "✅ Neovim Node.js package installed"
         else
             echo "✅ Neovim Node.js package already installed"

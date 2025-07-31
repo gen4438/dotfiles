@@ -34,7 +34,7 @@ if (Get-Command npm -ErrorAction SilentlyContinue) {
     $npmCheck = npm list -g neovim 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Installing Node.js packages for Neovim..." -ForegroundColor Blue
-        npm install -g neovim
+        npm install -g neovim tree-sitter-cli
         Write-Host "[OK] Neovim Node.js package installed" -ForegroundColor Green
     } else {
         Write-Host "[OK] Neovim Node.js package already installed" -ForegroundColor Green
