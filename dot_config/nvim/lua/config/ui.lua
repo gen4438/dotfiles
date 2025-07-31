@@ -5,9 +5,9 @@ local M = {}
 
 -- Font configuration for GUI
 M.font = {
-  family = "CaskaydiaCove Nerd Font",
-  default_size = 14,
-  current_size = 14,
+  family = "CaskaydiaCove NF",
+  default_size = 10,
+  current_size = 10,
 }
 
 -- Initialize font settings
