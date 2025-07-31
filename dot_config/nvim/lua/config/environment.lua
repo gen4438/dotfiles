@@ -14,6 +14,35 @@ local function get_env_or_default(env_var, default_value)
   return os.getenv(env_var) or default_value
 end
 
+-- Helper function to add directory to PATH if not already present
+M.add_to_path = function(dir)
+  if not dir or dir == '' then
+    return
+  end
+  
+  -- Ensure the directory exists
+  if vim.fn.isdirectory(dir) == 0 then
+    return
+  end
+  
+  local path_sep = M.is_windows() and ';' or ':'
+  local current_path = vim.env.PATH or ''
+  
+  -- Normalize directory separators for comparison
+  local normalized_dir = dir:gsub('\\', '/')
+  local paths = vim.split(current_path, path_sep)
+  
+  -- Check if directory is already in PATH
+  for _, p in ipairs(paths) do
+    if p:gsub('\\', '/'):lower() == normalized_dir:lower() then
+      return -- Already in PATH
+    end
+  end
+  
+  -- Add to PATH
+  vim.env.PATH = dir .. path_sep .. current_path
+end
+
 -- Python configuration
 M.setup_python = function()
   if vim.fn.has('unix') == 1 then
@@ -60,7 +89,9 @@ M.setup_nodejs = function()
       local nvm_symlink = nvm_home .. '\\nodejs\\node.exe'
       if vim.fn.executable(nvm_symlink) == 1 then
         vim.g.node_host_prog = nvm_symlink
-        return
+        -- Also add npm global directory to PATH if using nvm
+        local npm_path = nvm_home .. '\\nodejs'
+        M.add_to_path(npm_path)
       end
     end
     
@@ -75,10 +106,17 @@ M.setup_nodejs = function()
           local first_path = node_path:match("^([^\r\n]+)")
           if first_path then
             vim.g.node_host_prog = first_path:gsub("%s+", "")
-            return
           end
         end
       end
+    end
+    
+    -- Add npm global directory to PATH for Windows
+    -- This ensures npm global packages (like tree-sitter-cli) are accessible
+    local appdata = vim.env.APPDATA
+    if appdata then
+      local npm_global_path = appdata .. '\\npm'
+      M.add_to_path(npm_global_path)
     end
   else
     -- Unix-like systems
