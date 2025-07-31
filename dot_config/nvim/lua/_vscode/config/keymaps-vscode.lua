@@ -17,6 +17,12 @@ local opts = { noremap = true, silent = true }
 -- Basic Neovim Keymaps (VSCode Compatible)
 -- ============================================================================
 
+-- workaround for scrolling issues in VSCode
+vim.keymap.set("n", "<c-f>", "<C-d><C-d>", opts)
+vim.keymap.set("x", "<c-f>", "<C-d><C-d>", opts)
+-- vim.keymap.set("n", "<c-p>", "<C-u><C-u>", opts)
+-- vim.keymap.set("x", "<c-p>", "<C-u><C-u>", opts)
+
 -- Disable space in normal mode to use as prefix key
 vim.keymap.set('', '<Space>', '<Nop>', opts)
 

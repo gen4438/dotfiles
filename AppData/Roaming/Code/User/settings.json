@@ -24,7 +24,8 @@
     "python.languageServer": "Pylance",
     "redhat.telemetry.enabled": false,
     "settingsSync.ignoredSettings": [
-        "remote.SSH.configFile"
+        "remote.SSH.configFile",
+        "remote.SSH.remotePlatform"
     ],
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.editStats.enabled": false,
@@ -81,5 +82,8 @@
     "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
-    "workbench.iconTheme": "material-icon-theme"
+    "workbench.iconTheme": "material-icon-theme",
+    "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
+    "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
+    "workbench.colorTheme": "GitHub Dark High Contrast"
 }

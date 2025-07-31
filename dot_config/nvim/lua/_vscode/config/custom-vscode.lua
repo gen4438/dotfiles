@@ -23,6 +23,11 @@ function M.setup()
     vim.opt.cursorline = false -- VSCodeがカーソルライン表示を管理
     vim.opt.cursorcolumn = false
 
+    -- Modeline support
+    vim.opt.modeline = false
+    vim.opt.modelines = 0
+    vim.opt.scrolloff = 0
+
     -- クリップボード統合の強化
     vim.opt.clipboard = "unnamedplus"
 
@@ -41,12 +46,12 @@ function M.setup()
 
     -- フォーマットオプションの調整
     -- VSCodeのフォーマッターと競合しないように
-    vim.opt.formatoptions:remove({"c", "r", "o"})
+    -- vim.opt.formatoptions:remove({"c", "r", "o"})
 
-    -- ポップアップ・補完メニューの調整
-    vim.opt.completeopt = {"menuone", "noselect"}
-    vim.opt.pumheight = 10
-    vim.opt.pumblend = 0 -- VSCode環境では透明度なし
+    -- -- ポップアップ・補完メニューの調整
+    -- vim.opt.completeopt = {"menuone", "noselect"}
+    -- vim.opt.pumheight = 10
+    -- vim.opt.pumblend = 0 -- VSCode環境では透明度なし
 
     -- VSCode固有の変数設定
     -- ========================================
