@@ -28,7 +28,15 @@ brew install chezmoi
 
 #### Windows
 ```powershell
-winget install twpayne.chezmoi
+# scoopのインストール
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+# Install chezmoi using scoop
+scoop install chezmoi
+
+# Alternatively, using winget
+winget install chezmoi
 ```
 
 #### Termux
