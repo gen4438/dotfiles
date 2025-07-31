@@ -15,8 +15,115 @@ command('DumpKeymaps', maps_save, {})
 command('AmbiguousCharWidthDouble', 'set ambiwidth=double', {})
 command('AmbiguousCharWidthSingle', 'set ambiwidth=single', {})
 
--- rootで保存
-command('SaveAsRoot', 'w !sudo tee >/dev/null %', {})
+-- rootで保存 / Save as root
+if vim.fn.has('unix') == 1 then
+  command('SaveAsRoot', 'w !sudo tee >/dev/null %', {})
+elseif vim.fn.has('win32') == 1 then
+  -- Windows implementation using PowerShell with elevation
+  vim.api.nvim_create_user_command('SaveAsRoot', function()
+    local filepath = vim.fn.expand('%:p')
+    if filepath == '' then
+      vim.notify('No file to save', vim.log.levels.ERROR)
+      return
+    end
+    
+    -- Convert MSYS2 path to Windows path if necessary
+    if filepath:match('^/[a-zA-Z]/') then
+      -- Convert /c/path to C:\path format
+      filepath = filepath:gsub('^/([a-zA-Z])/', '%1:\\'):gsub('/', '\\')
+    end
+    
+    -- Function to escape PowerShell special characters
+    local function ps_escape(str)
+      -- Escape backticks, quotes, and dollar signs for PowerShell
+      return str:gsub('`', '``'):gsub('"', '`"'):gsub('%$', '`$')
+    end
+    
+    -- Check for critical system files
+    local critical_paths = {
+      'C:\\Windows\\System32\\config',
+      'C:\\Windows\\System32\\drivers',
+      'C:\\bootmgr',
+      'C:\\pagefile.sys',
+    }
+    
+    for _, critical in ipairs(critical_paths) do
+      if filepath:lower():find(critical:lower(), 1, true) then
+        local confirm = vim.fn.confirm(
+          'WARNING: Modifying system critical file. Continue?',
+          '&Yes\n&No', 2
+        )
+        if confirm ~= 1 then
+          vim.notify('Operation cancelled', vim.log.levels.WARN)
+          return
+        end
+        break
+      end
+    end
+    
+    -- Save buffer to a temporary file
+    local tempfile = vim.fn.tempname()
+    
+    -- Main operation wrapped in pcall for proper cleanup
+    local success, err = pcall(function()
+      vim.cmd('write! ' .. tempfile)
+      
+      -- Convert temp file path if necessary
+      if tempfile:match('^/[a-zA-Z]/') then
+        tempfile = tempfile:gsub('^/([a-zA-Z])/', '%1:\\'):gsub('/', '\\')
+      end
+      
+      -- Properly escape paths for PowerShell
+      local escaped_tempfile = ps_escape(tempfile)
+      local escaped_filepath = ps_escape(filepath)
+      
+      -- Create PowerShell script to copy with elevation
+      local ps_script = string.format([[
+        Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "Copy-Item -Path ''%s'' -Destination ''%s'' -Force"' -Wait
+      ]], escaped_tempfile, escaped_filepath)
+      
+      -- Save current shell settings
+      local original_shell = vim.o.shell
+      local original_shellcmdflag = vim.o.shellcmdflag
+      local original_shellquote = vim.o.shellquote
+      local original_shellxquote = vim.o.shellxquote
+      
+      -- Temporarily switch to PowerShell
+      vim.o.shell = 'powershell'
+      vim.o.shellcmdflag = '-NoProfile -ExecutionPolicy Bypass -Command'
+      vim.o.shellquote = ''
+      vim.o.shellxquote = ''
+      
+      -- Execute the PowerShell script
+      local result = vim.fn.system(ps_script)
+      
+      -- Restore original shell settings
+      vim.o.shell = original_shell
+      vim.o.shellcmdflag = original_shellcmdflag
+      vim.o.shellquote = original_shellquote
+      vim.o.shellxquote = original_shellxquote
+      
+      -- Check if successful
+      if vim.v.shell_error == 0 then
+        vim.notify('File saved with administrator privileges', vim.log.levels.INFO)
+        -- Reload the file to update the buffer
+        vim.cmd('edit!')
+      else
+        error('Failed to save with administrator privileges: ' .. result)
+      end
+    end)
+    
+    -- Always clean up temp file
+    if vim.fn.filereadable(tempfile) == 1 then
+      vim.fn.delete(tempfile)
+    end
+    
+    -- Report error if operation failed
+    if not success then
+      vim.notify(err, vim.log.levels.ERROR)
+    end
+  end, {})
+end
 
 -- jsonを整形
 command('JQ', '%!jq .', {})

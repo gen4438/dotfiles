@@ -5,11 +5,8 @@ local M = {}
 
 -- Helper function to check if a command exists
 local function command_exists(cmd)
-  local handle = io.popen("command -v " .. cmd .. " 2>/dev/null")
-  if not handle then return false end
-  local result = handle:read("*a")
-  handle:close()
-  return result and result:match("%S") ~= nil
+  -- Use vim.fn.executable() which works cross-platform
+  return vim.fn.executable(cmd) == 1
 end
 
 -- Helper function to get environment variable with fallback
@@ -55,28 +52,59 @@ end
 
 -- Node.js configuration
 M.setup_nodejs = function()
-  -- Try nvm first
-  if command_exists('nvm') then
-    local handle = io.popen('bash -c "source ~/.nvm/nvm.sh && nvm which current 2>/dev/null"')
-    if handle then
-      local node_path = handle:read("*a")
-      handle:close()
-      if node_path and node_path:match("%S") then
-        vim.g.node_host_prog = node_path:gsub("%s+", "")
+  if M.is_windows() then
+    -- Windows-specific Node.js detection
+    -- Try nvm-windows first
+    local nvm_home = vim.env.NVM_HOME
+    if nvm_home then
+      local nvm_symlink = nvm_home .. '\\nodejs\\node.exe'
+      if vim.fn.executable(nvm_symlink) == 1 then
+        vim.g.node_host_prog = nvm_symlink
         return
       end
     end
-  end
-  
-  -- Try fnm (Fast Node Manager)
-  if command_exists('fnm') then
-    local handle = io.popen('fnm exec --using default -- which node 2>/dev/null')
-    if handle then
-      local node_path = handle:read("*a")
-      handle:close()
-      if node_path and node_path:match("%S") then
-        vim.g.node_host_prog = node_path:gsub("%s+", "")
-        return
+    
+    -- Try fnm on Windows
+    if command_exists('fnm') then
+      local handle = io.popen('fnm exec --using default -- where node 2>NUL')
+      if handle then
+        local node_path = handle:read("*a")
+        handle:close()
+        if node_path and node_path:match("%S") then
+          -- Take the first line if multiple paths are returned
+          local first_path = node_path:match("^([^\r\n]+)")
+          if first_path then
+            vim.g.node_host_prog = first_path:gsub("%s+", "")
+            return
+          end
+        end
+      end
+    end
+  else
+    -- Unix-like systems
+    -- Try nvm first
+    if command_exists('nvm') then
+      local handle = io.popen('bash -c "source ~/.nvm/nvm.sh && nvm which current 2>/dev/null"')
+      if handle then
+        local node_path = handle:read("*a")
+        handle:close()
+        if node_path and node_path:match("%S") then
+          vim.g.node_host_prog = node_path:gsub("%s+", "")
+          return
+        end
+      end
+    end
+    
+    -- Try fnm (Fast Node Manager)
+    if command_exists('fnm') then
+      local handle = io.popen('fnm exec --using default -- which node 2>/dev/null')
+      if handle then
+        local node_path = handle:read("*a")
+        handle:close()
+        if node_path and node_path:match("%S") then
+          vim.g.node_host_prog = node_path:gsub("%s+", "")
+          return
+        end
       end
     end
   end

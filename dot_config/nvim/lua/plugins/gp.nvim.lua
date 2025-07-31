@@ -3,7 +3,7 @@ return {
     -- "robitx/gp.nvim",
     -- "tarruda/gp.nvim",
     "gen4438/gp.nvim",
-    enabled = false,
+    enabled = true,
     config = function()
       local config = {
         providers = {
@@ -19,17 +19,48 @@ return {
           },
           copilot = {
             disable = false,
-            secret = {
-              "bash",
-              "-c",
-              [[
-                if [ -f ~/.config/github-copilot/apps.json ]; then
-                  cat ~/.config/github-copilot/apps.json | sed -e 's/.*oauth_token...//;s/\".*//'
-                elif [ -f ~/.config/github-copilot/hosts.json ]; then
-                  cat ~/.config/github-copilot/hosts.json | sed -e 's/.*oauth_token...//;s/\".*//'
-                fi
-              ]],
-            },
+            secret = (function()
+              -- Helper function to extract token from JSON
+              local function extract_github_token(json_str)
+                if json_str then
+                  local token = json_str:match('"oauth_token"%s*:%s*"([^"]+)"')
+                  return token or ""
+                end
+                return ""
+              end
+              
+              -- Cross-platform GitHub Copilot config paths
+              local config_paths = {}
+              if vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 then
+                local localappdata = vim.env.LOCALAPPDATA or vim.env.USERPROFILE .. "\\AppData\\Local"
+                config_paths = {
+                  localappdata .. "\\github-copilot\\apps.json",
+                  localappdata .. "\\github-copilot\\hosts.json",
+                }
+              else
+                config_paths = {
+                  vim.fn.expand("~/.config/github-copilot/apps.json"),
+                  vim.fn.expand("~/.config/github-copilot/hosts.json"),
+                }
+              end
+              
+              -- Try to read token from config files
+              for _, path in ipairs(config_paths) do
+                if vim.fn.filereadable(path) == 1 then
+                  local file = io.open(path, "r")
+                  if file then
+                    local content = file:read("*all")
+                    file:close()
+                    local token = extract_github_token(content)
+                    if token ~= "" then
+                      return token
+                    end
+                  end
+                end
+              end
+              
+              return ""
+            end)(),  -- Execute the function immediately to return a string
           },
         },
 
