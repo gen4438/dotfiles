@@ -415,17 +415,17 @@ vim.keymap.set('n', '[c', function()
 end, { desc = "Previous change" })
 
 -- Merge conflict resolution
-vim.keymap.set('n', 'dp', function()
-  vscode.call('git.diff.stageHunk')
-end, { desc = "Accept current change" })
+-- vim.keymap.set('n', 'dp', function()
+--   vscode.call('git.diff.stageHunk')
+-- end, { desc = "Accept current change" })
 
-vim.keymap.set('x', 'dp', function()
-  vscode.call('git.stageSelectedRanges')
-end, { desc = "Accept current change" })
+-- vim.keymap.set('n', 'dp', function()
+--   vscode.call('git.stageSelectedRanges')
+-- end, { desc = "Accept current change" })
 
-vim.keymap.set('x', 'do', function()
-  vscode.call('git.revertSelectedRanges')
-end, { desc = "Accept incoming change" })
+-- vim.keymap.set('n', 'do', function()
+--   vscode.call('git.unstageSelectedRanges')
+-- end, { desc = "Accept incoming change" })
 
 -- ============================================================================
 -- VSCode Integration - Completion

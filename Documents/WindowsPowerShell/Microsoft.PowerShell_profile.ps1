@@ -17,3 +17,14 @@ Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 # Non-default key bindings for intelligent history search
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+
+# 無変換キーが@として入力される問題への対処
+# WindowsのIME設定でキーバインドをカスタマイズすることで解決可能
+# PowerShellでキー入力をデバッグする関数
+function Test-KeyInput {
+    Write-Host "Press any key to see its details (Ctrl+C to exit):" -ForegroundColor Yellow
+    while ($true) {
+        $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Write-Host "KeyChar: '$($key.Character)' VirtualKeyCode: $($key.VirtualKeyCode) ControlKeyState: $($key.ControlKeyState)" -ForegroundColor Cyan
+    }
+}

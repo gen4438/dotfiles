@@ -5,9 +5,10 @@
     "[jsonc]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "code-runner.defaultLanguage": "shellscript",
     "code-runner.enableAppInsights": false,
     "code-runner.runInTerminal": true,
+    "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
+    "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
     "database-client.autoSync": true,
     "database-client.telemetry.usesOnlineServices": false,
     "editor.cursorStyle": "block",
@@ -25,12 +26,29 @@
     "redhat.telemetry.enabled": false,
     "settingsSync.ignoredSettings": [
         "remote.SSH.configFile",
-        "remote.SSH.remotePlatform"
+        "remote.SSH.remotePlatform",
+        "dev.containers.dockerSocketPath"
     ],
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.editStats.enabled": false,
     "telemetry.feedback.enabled": false,
     "telemetry.telemetryLevel": "off",
+    "terminal.integrated.allowChords": false,
+    "terminal.integrated.commandsToSkipShell": [
+        "-workbench.action.quickOpen",
+        "-workbench.action.terminal.findNext",
+        "-workbench.action.terminal.findPrevious",
+        "-workbench.action.debug.continue",
+        "-workbench.action.debug.restart",
+        "-workbench.action.debug.run",
+        "-workbench.action.debug.start",
+        "-workbench.action.debug.stop",
+        "-workbench.action.focusNextPart",
+        "-workbench.action.focusPreviousPart",
+        "-workbench.action.debug.pause",
+        "-workbench.action.quickOpen",
+        "-workbench.action.terminal.focusFind"
+    ],
     "vscode-neovim.compositeKeys": {},
     "vscode-neovim.ctrlKeysForInsertMode": [
         "a",
@@ -50,7 +68,7 @@
         "u",
         "w",
         "x",
-        "y",
+        "y"
     ],
     "vscode-neovim.ctrlKeysForNormalMode": [
         "a",
@@ -74,7 +92,7 @@
         "y",
         "z",
         "/",
-        "]",
+        "]"
     ],
     "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
     "vscode-neovim.neovimExecutablePaths.linux": "/usr/bin/nvim",
@@ -82,8 +100,6 @@
     "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
     "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
-    "workbench.iconTheme": "material-icon-theme",
-    "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
-    "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
-    "workbench.colorTheme": "GitHub Dark High Contrast"
+    "workbench.colorTheme": "GitHub Dark High Contrast",
+    "workbench.iconTheme": "material-icon-theme"
 }
