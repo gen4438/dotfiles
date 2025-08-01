@@ -5,7 +5,6 @@
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
   },
-  "dev.containers.dockerSocketPath": "unix:///run/user/${UID}/docker.sock",
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
@@ -113,5 +112,6 @@
   "claudeCodeChat.wsl.enabled": false,
   "claudeCodeChat.wsl.distro": "Ubuntu",
   "claudeCodeChat.wsl.nodePath": "/usr/bin/node",
-  "claudeCodeChat.wsl.claudePath": "/usr/local/bin/claude"
+  "claudeCodeChat.wsl.claudePath": "/usr/local/bin/claude",
+  "diffEditor.ignoreTrimWhitespace": false
 }
