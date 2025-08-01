@@ -55,7 +55,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     local dir = vim.fn.fnamemodify(file, ":p:h")
     
     -- Skip for special protocols and patterns
-    if file:match("^%w+://") or file:match("^oil://") then
+    if file:match("^%w+://") or file:match("^oil://") or file:match("^fugitive://") then
       return
     end
     
