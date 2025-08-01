@@ -134,7 +134,7 @@ vim.opt.diffopt:append({
   'closeoff',          -- Close diff when one buffer is closed
   'hiddenoff',         -- Don't use diff mode for hidden buffers
   'algorithm:patience', -- Use patience diff algorithm
-  'iwhite',            -- Ignore whitespace changes
+  -- 'iwhite',            -- Ignore whitespace changes
   'vertical',          -- Start diff in vertical split
 })
 

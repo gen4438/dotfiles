@@ -1,7 +1,4 @@
-#!/bin/bash
-
-# Docker completion with fzf integration
-# Enhances docker command completion with fuzzy finding capabilities
+#! /usr/bin/bash
 
 export DOCKER_FZF_PREFIX="--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all"
 
