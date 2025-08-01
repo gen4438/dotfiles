@@ -144,19 +144,6 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHo
   desc = "Check for external file changes",
 })
 
--- Create missing directories when editing new files
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = file_ops_group,
-  pattern = "*",
-  callback = function()
-    local dir = vim.fn.expand("<afile>:p:h")
-    if vim.fn.isdirectory(dir) == 0 then
-      vim.fn.mkdir(dir, "p")
-    end
-  end,
-  desc = "Create directories for new files",
-})
-
 -- Set up better defaults for certain file types
 vim.api.nvim_create_autocmd("FileType", {
   group = formatting_group,

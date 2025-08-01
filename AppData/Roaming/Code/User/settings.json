@@ -2,8 +2,11 @@
     "[glsl]": {
         "editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
     },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
     "[jsonc]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.json-language-features"
     },
     "code-runner.enableAppInsights": false,
     "code-runner.runInTerminal": true,
