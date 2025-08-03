@@ -113,5 +113,7 @@
   "claudeCodeChat.wsl.distro": "Ubuntu",
   "claudeCodeChat.wsl.nodePath": "/usr/bin/node",
   "claudeCodeChat.wsl.claudePath": "/usr/local/bin/claude",
-  "diffEditor.ignoreTrimWhitespace": false
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.externalBrowser": "edge",
+  "vscode-edge-devtools.headless": false
 }

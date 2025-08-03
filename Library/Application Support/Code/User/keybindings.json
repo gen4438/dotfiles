@@ -269,37 +269,67 @@
     "when": "auxiliaryBarFocus"
   },
   {
-    "key": "ctrl+f",
-    "command": "vscode-neovim.send",
     "args": "<C-f>",
+    "command": "vscode-neovim.send",
+    "key": "ctrl+f",
     "when": "editorTextFocus && neovim.ctrlKeysNormal.f && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
   },
   {
-    "key": "ctrl+p",
-    "command": "vscode-neovim.send",
     "args": "<C-p>",
+    "command": "vscode-neovim.send",
+    "key": "ctrl+p",
     "when": "editorTextFocus && neovim.ctrlKeysNormal.p && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
   },
   {
-    "key": "ctrl+u",
-    "command": "vscode-neovim.send",
     "args": "<C-u>",
+    "command": "vscode-neovim.send",
+    "key": "ctrl+u",
     "when": "editorTextFocus && neovim.ctrlKeysNormal.u && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
   },
   {
-    "key": "ctrl+d",
-    "command": "vscode-neovim.send",
     "args": "<C-d>",
+    "command": "vscode-neovim.send",
+    "key": "ctrl+d",
     "when": "editorTextFocus && neovim.ctrlKeysNormal.d && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
   },
   {
-    "key": "shift+ctrl+c",
     "command": "workbench.action.terminal.copySelection",
+    "key": "shift+ctrl+c",
     "when": "terminalFocus"
   },
   {
-    "key": "shift+ctrl+v",
     "command": "workbench.action.terminal.paste",
+    "key": "shift+ctrl+v",
     "when": "terminalFocus"
+  },
+  {
+    "command": "workbench.action.terminal.copySelection",
+    "key": "ctrl+shift+c",
+    "when": "terminalFocus"
+  },
+  {
+    "command": "workbench.action.terminal.paste",
+    "key": "ctrl+shift+v",
+    "when": "terminalFocus"
+  },
+  {
+    "command": "-workbench.action.terminal.copyAndClearSelection",
+    "key": "ctrl+c",
+    "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalFocus && terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+  },
+  {
+    "command": "-workbench.action.terminal.copySelection",
+    "key": "cmd+c",
+    "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+  },
+  {
+    "command": "-workbench.action.terminal.paste",
+    "key": "cmd+v",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "command": "-workbench.action.terminal.paste",
+    "key": "ctrl+v",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported || terminalFocus && terminalHasBeenCreated && terminalProcessSupported"
   }
 ]
