@@ -11,6 +11,7 @@
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
+  "chat.agent.maxRequests": 50,
   "code-runner.enableAppInsights": false,
   "code-runner.runInTerminal": true,
   "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
@@ -33,6 +34,7 @@
   "github.copilot.chat.languageContext.fix.typescript.enabled": true,
   "github.copilot.chat.languageContext.inline.typescript.enabled": true,
   "github.copilot.chat.languageContext.typescript.enabled": true,
+  "github.copilot.chat.notebook.followCellExecution.enabled": true,
   "github.copilot.enable": {
     "markdown": true
   },
