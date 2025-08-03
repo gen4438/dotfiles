@@ -28,3 +28,7 @@ function Test-KeyInput {
         Write-Host "KeyChar: '$($key.Character)' VirtualKeyCode: $($key.VirtualKeyCode) ControlKeyState: $($key.ControlKeyState)" -ForegroundColor Cyan
     }
 }
+
+# Set up aliases for common commands
+Set-Alias vi nvim
+Set-Alias vim nvim
