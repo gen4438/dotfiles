@@ -301,5 +301,35 @@
     "key": "shift+ctrl+v",
     "command": "workbench.action.terminal.paste",
     "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.terminal.copySelection",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "workbench.action.terminal.paste",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+c",
+    "command": "-workbench.action.terminal.copyAndClearSelection",
+    "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalFocus && terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+  },
+  {
+    "key": "cmd+c",
+    "command": "-workbench.action.terminal.copySelection",
+    "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+  },
+  {
+    "key": "cmd+v",
+    "command": "-workbench.action.terminal.paste",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "ctrl+v",
+    "command": "-workbench.action.terminal.paste",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported || terminalFocus && terminalHasBeenCreated && terminalProcessSupported"
   }
 ]
