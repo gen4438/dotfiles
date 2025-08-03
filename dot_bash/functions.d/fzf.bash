@@ -82,6 +82,7 @@ function fds() {
   local cid
   cid=$(docker ps | sed 1d | fzf -q "$1" | awk '{print $1}')
 
+  history -s docker stop "$cid"
   [ -n "$cid" ] && docker stop "$cid"
 }
 
