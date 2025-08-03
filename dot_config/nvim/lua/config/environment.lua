@@ -250,7 +250,8 @@ M.setup_windows_shell = function()
   end
   
   -- Check for MSYS2 bash from Scoop installation path
-  local scoop_msys_bash = vim.fn.expand('~/scoop/apps/msys2/current/usr/bin/bash.exe')
+  -- local scoop_msys_bash = vim.fn.expand('~/scoop/apps/msys2/current/usr/bin/bash.exe')
+  local scoop_msys_bash = vim.fn.expand('~/scoop/shims/msys2')
   local system_msys_bash = 'C:/msys64/usr/bin/bash.exe'
   
   if vim.fn.executable(scoop_msys_bash) == 1 then
