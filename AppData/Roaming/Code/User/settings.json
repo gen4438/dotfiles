@@ -5,6 +5,9 @@
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
   },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
@@ -14,6 +17,7 @@
   "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
   "database-client.autoSync": true,
   "database-client.telemetry.usesOnlineServices": false,
+  "diffEditor.ignoreTrimWhitespace": false,
   "editor.cursorStyle": "block",
   "editor.scrollBeyondLastLine": false,
   "editor.selectionHighlight": false,
@@ -21,10 +25,23 @@
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
   },
+  "github.copilot.chat.agent.thinkingTool": true,
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.editor.temporalContext.enabled": true,
+  "github.copilot.chat.edits.temporalContext.enabled": true,
+  "github.copilot.chat.generateTests.codeLens": true,
+  "github.copilot.chat.languageContext.fix.typescript.enabled": true,
+  "github.copilot.chat.languageContext.inline.typescript.enabled": true,
+  "github.copilot.chat.languageContext.typescript.enabled": true,
+  "github.copilot.enable": {
+    "markdown": true
+  },
   "github.copilot.nextEditSuggestions.enabled": true,
+  "githubPullRequests.experimental.useQuickChat": true,
   "gitlens.telemetry.enabled": false,
   "path-intellisense.autoSlashAfterDirectory": true,
   "path-intellisense.showHiddenFiles": true,
+  "python.analysis.addHoverSummaries": true,
   "python.languageServer": "Pylance",
   "redhat.telemetry.enabled": false,
   "remote.SSH.remotePlatform": {
@@ -54,6 +71,7 @@
     "-workbench.action.quickOpen",
     "-workbench.action.terminal.focusFind"
   ],
+  "vscode-edge-devtools.headless": false,
   "vscode-neovim.compositeKeys": {},
   "vscode-neovim.ctrlKeysForInsertMode": [
     "a",
@@ -105,13 +123,8 @@
   "vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
-  "workbench.colorTheme": "GitHub Dark High Contrast",
-  "workbench.iconTheme": "material-icon-theme",
   "workbench.colorCustomizations": {},
-  "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.colorTheme": "GitHub Dark High Contrast",
   "workbench.externalBrowser": "edge",
-  "vscode-edge-devtools.headless": false
+  "workbench.iconTheme": "material-icon-theme"
 }
