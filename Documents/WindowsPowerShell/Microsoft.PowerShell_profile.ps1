@@ -18,6 +18,12 @@ Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 
+# Tab to complete commands and arguments
+Set-PSReadLineKeyHandler -Key Tab -Function Complete
+
+# Ctrl+d to exit PowerShell
+Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteCharOrExit
+
 # 無変換キーが@として入力される問題への対処
 # WindowsのIME設定でキーバインドをカスタマイズすることで解決可能
 # PowerShellでキー入力をデバッグする関数
