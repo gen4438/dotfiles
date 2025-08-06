@@ -35,8 +35,8 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   # Hostのグルーピング
   $sshConfigHostGroups = $sshConfig | Select-String -Pattern '^\s*Host\s+' -Context 0, $sshConfig.Count | 
     Select-Object Line, @{
-        Name = 'DisplayPostContent'
-        Expression = { $_.Context.DisplayPostContent }
+        Name = 'DisplayPostContext'
+        Expression = { $_.Context.DisplayPostContext }
     }
 
   # 入力補完格納用配列
@@ -45,13 +45,13 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   # toolTip用にHost項目に紐づくHostName,Userを取得
   foreach ($sshConfigHost in $sshConfigHostGroups) {
     # User 取得
-    $user = $sshConfigHost.DisplayPostContent |
+    $user = $sshConfigHost.DisplayPostContext |
       Select-String -Pattern '^\s*User\s+' |
       Select-Object -First 1 |
       ForEach-Object { $_ -split '\s+' | Select-Object -Skip 1 -First 1 }
 
     # HostName 取得
-    $hostName = $sshConfigHost.DisplayPostContent |
+    $hostName = $sshConfigHost.DisplayPostContext |
       Select-String -Pattern '^\s*HostName\s+' |
       Select-Object -First 1 |
       ForEach-Object { $_ -split '\s+' | Select-Object -Skip 1 -First 1 }
