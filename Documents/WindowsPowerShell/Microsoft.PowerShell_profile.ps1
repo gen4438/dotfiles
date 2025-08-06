@@ -32,42 +32,44 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   $sshConfig = (Get-Content ~\.ssh\config, ~\.ssh\config.d\*.conf -ErrorAction SilentlyContinue).Trim() -replace '\s+', ' ' |
     Where-Object { $_ -ne "" }
 
-  # Hostの行番号を取得
-  $hostLineIndices = @(for ($i = 0; $i -lt $sshConfig.Count; $i++) {
-    if ($sshConfig[$i] -match '^\s*Host\s+') { $i }
-  })
+  # Hostのグルーピング
+  $sshConfigHostGroups = $sshConfig | Select-String -Pattern '^\s*Host\s+' -Context 0, $sshConfig.Count | 
+    Select-Object Line, @{
+        Name = 'DisplayPostContent'
+        Expression = { $_.Context.DisplayPostContent }
+    }
 
   # 入力補完格納用配列
   $autoCompleteList = New-Object System.Collections.ArrayList
 
-  # Hostごとに処理
-  for ($h = 0; $h -lt $hostLineIndices.Count; $h++) {
-    $start = $hostLineIndices[$h]
-    $end = if ($h -lt $hostLineIndices.Count - 1) { $hostLineIndices[$h+1] - 1 } else { $sshConfig.Count - 1 }
-    $block = $sshConfig[$start..$end]
+  # toolTip用にHost項目に紐づくHostName,Userを取得
+  foreach ($sshConfigHost in $sshConfigHostGroups) {
+    # User 取得
+    $user = $sshConfigHost.DisplayPostContent |
+      Select-String -Pattern '^\s*User\s+' |
+      Select-Object -First 1 |
+      ForEach-Object { $_ -split '\s+' | Select-Object -Skip 1 -First 1 }
 
-    # Host名リスト
-    $hostNames = ($block[0] -split '\s+') | Select-Object -Skip 1
+    # HostName 取得
+    $hostName = $sshConfigHost.DisplayPostContent |
+      Select-String -Pattern '^\s*HostName\s+' |
+      Select-Object -First 1 |
+      ForEach-Object { $_ -split '\s+' | Select-Object -Skip 1 -First 1 }
 
-    # User取得
-    $user = ($block | Where-Object { $_ -match '^\s*User\s+' } | Select-Object -First 1) -replace '^\s*User\s+', ''
-    if (-not $user) { $user = "user" }
-
-    # HostName取得
-    $hostName = ($block | Where-Object { $_ -match '^\s*HostName\s+' } | Select-Object -First 1) -replace '^\s*HostName\s+', ''
-    if (-not $hostName) { $hostName = $hostNames[0] }
-
-    foreach ($host in $hostNames) {
-      [void]$autoCompleteList.Add([pscustomobject]@{
-        Host = $host
+    # Host単位で入力補完を作成
+    $sshConfigHost.line -split '\s+' | Select-Object -Skip 1 | ForEach-Object {
+    $autoCompleteList += [pscustomobject]@{
+        Host = $_
         toolTip = "$user@$hostName"
-      })
+        }
     }
   }
 
   # [System.Management.Automation.CompletionResult]を生成
   $autoCompleteList | Where-Object { $_.Host -like "$wordToComplete*" } | ForEach-Object {
     $resultType = [System.Management.Automation.CompletionResultType]::ParameterValue
+    # CompletionResult Class
+    # completeText, listItemText, resultType, toolTip
     [System.Management.Automation.CompletionResult]::new($_.Host, $_.Host, $resultType, $_.toolTip)
   }
 }
