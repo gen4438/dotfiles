@@ -25,34 +25,46 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteCharOrExit
 
 # ~/.ssh/config, ~/.ssh/config.d/*.conf から ssh ホスト名を取得する関数
+Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
+  param($wordToComplete, $commandAst, $cursorPosition)
+
+  # ~/.ssh/config と ~/.ssh/config.d/*.conf からホスト名を取得
+  $sshConfig = (Get-Content ~\.ssh\config, ~\.ssh\config.d\*.conf -ErrorAction SilentlyContinue) -join "`n"
+
+  # Hostブロックごとに分割
+  $hostBlocks = $sshConfig -split '(?m)^\s*Host\s+'
+  $autoCompleteList = @()
+
+  foreach ($block in $hostBlocks) {
+    if ($block -match '^\s*(\S+)') {
+      $hosts = $Matches[1] -split '\s+'
+      $user = ($block | Select-String -Pattern '^\s*User\s+(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
+      $hostName = ($block | Select-String -Pattern '^\s*HostName\s+(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
+      foreach ($host in $hosts) {
+        $autoCompleteList += [pscustomobject]@{
+          Host = $host
+          toolTip = if ($user -and $hostName) { "$user@$hostName" } elseif ($hostName) { $hostName } else { "" }
+        }
+      }
+    }
+  }
+
+  # 重複排除
+  $autoCompleteList = $autoCompleteList | Sort-Object Host -Unique
+
+  # [System.Management.Automation.CompletionResult]を生成
+  $autoCompleteList | Where-Object { $_.Host -like "$wordToComplete*" } | ForEach-Object {
+    $resultType = [System.Management.Automation.CompletionResultType]::ParameterValue
+    [System.Management.Automation.CompletionResult]::new($_.Host, $_.Host, $resultType, $_.toolTip)
+  }
+}
+
+
 function Get-SshHosts {
     $configFiles = @(
         "$HOME/.ssh/config"
     ) + (Get-ChildItem -Path "$HOME/.ssh/config.d" -Filter '*.conf' -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
 
-    $hosts = @()
-    foreach ($file in $configFiles) {
-        if (Test-Path $file) {
-            $lines = Get-Content $file | Where-Object { $_ -match '^\s*Host\s+' }
-            foreach ($line in $lines) {
-                $names = $line -replace '^\s*Host\s+', '' -split '\s+'
-                foreach ($name in $names) {
-                    if ($name -notmatch '[*?]') {  # ワイルドカードは除外
-                        $hosts += $name
-                    }
-                }
-            }
-        }
-    }
-    $hosts | Sort-Object -Unique
-}
-
-Register-ArgumentCompleter -CommandName ssh -ParameterName 'ArgumentList' -ScriptBlock {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-    Get-SshHosts | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}
 
 # Set up aliases for common commands
 Set-Alias vi nvim
