@@ -29,28 +29,41 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   param($wordToComplete, $commandAst, $cursorPosition)
 
   # ~/.ssh/config と ~/.ssh/config.d/*.conf からホスト名を取得
-  $sshConfig = (Get-Content ~\.ssh\config, ~\.ssh\config.d\*.conf -ErrorAction SilentlyContinue) -join "`n"
+  $sshConfig = (Get-Content ~\.ssh\config, ~\.ssh\config.d\*.conf -ErrorAction SilentlyContinue).Trim() -replace '\s+', ' ' |
+    Where-Object { $_ -ne "" }
 
-  # Hostブロックごとに分割
-  $hostBlocks = $sshConfig -split '(?m)^\s*Host\s+'
-  $autoCompleteList = @()
+  # Hostの行番号を取得
+  $hostLineIndices = @(for ($i = 0; $i -lt $sshConfig.Count; $i++) {
+    if ($sshConfig[$i] -match '^\s*Host\s+') { $i }
+  })
 
-  foreach ($block in $hostBlocks) {
-    if ($block -match '^\s*(\S+)') {
-      $hosts = $Matches[1] -split '\s+'
-      $user = ($block | Select-String -Pattern '^\s*User\s+(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
-      $hostName = ($block | Select-String -Pattern '^\s*HostName\s+(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
-      foreach ($host in $hosts) {
-        $autoCompleteList += [pscustomobject]@{
-          Host = $host
-          toolTip = if ($user -and $hostName) { "$user@$hostName" } elseif ($hostName) { $hostName } else { "" }
-        }
-      }
+  # 入力補完格納用配列
+  $autoCompleteList = New-Object System.Collections.ArrayList
+
+  # Hostごとに処理
+  for ($h = 0; $h -lt $hostLineIndices.Count; $h++) {
+    $start = $hostLineIndices[$h]
+    $end = if ($h -lt $hostLineIndices.Count - 1) { $hostLineIndices[$h+1] - 1 } else { $sshConfig.Count - 1 }
+    $block = $sshConfig[$start..$end]
+
+    # Host名リスト
+    $hostNames = ($block[0] -split '\s+') | Select-Object -Skip 1
+
+    # User取得
+    $user = ($block | Where-Object { $_ -match '^\s*User\s+' } | Select-Object -First 1) -replace '^\s*User\s+', ''
+    if (-not $user) { $user = "user" }
+
+    # HostName取得
+    $hostName = ($block | Where-Object { $_ -match '^\s*HostName\s+' } | Select-Object -First 1) -replace '^\s*HostName\s+', ''
+    if (-not $hostName) { $hostName = $hostNames[0] }
+
+    foreach ($host in $hostNames) {
+      [void]$autoCompleteList.Add([pscustomobject]@{
+        Host = $host
+        toolTip = "$user@$hostName"
+      })
     }
   }
-
-  # 重複排除
-  $autoCompleteList = $autoCompleteList | Sort-Object Host -Unique
 
   # [System.Management.Automation.CompletionResult]を生成
   $autoCompleteList | Where-Object { $_.Host -like "$wordToComplete*" } | ForEach-Object {
@@ -58,13 +71,6 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
     [System.Management.Automation.CompletionResult]::new($_.Host, $_.Host, $resultType, $_.toolTip)
   }
 }
-
-
-function Get-SshHosts {
-    $configFiles = @(
-        "$HOME/.ssh/config"
-    ) + (Get-ChildItem -Path "$HOME/.ssh/config.d" -Filter '*.conf' -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
-
 
 # Set up aliases for common commands
 Set-Alias vi nvim
