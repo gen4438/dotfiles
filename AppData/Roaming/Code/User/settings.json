@@ -26,6 +26,7 @@
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
   },
+  "git.autofetch": true,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.editor.temporalContext.enabled": true,
@@ -44,6 +45,7 @@
   "path-intellisense.autoSlashAfterDirectory": true,
   "path-intellisense.showHiddenFiles": true,
   "python.analysis.addHoverSummaries": true,
+  "python.analysis.typeCheckingMode": "standard",
   "python.languageServer": "Pylance",
   "redhat.telemetry.enabled": false,
   "remote.SSH.remotePlatform": {

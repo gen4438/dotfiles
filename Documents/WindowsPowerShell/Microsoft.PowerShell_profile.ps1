@@ -33,7 +33,7 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
     Where-Object { $_ -ne "" }
 
   # Hostのグルーピング
-  $sshConfigHostGroups = $sshConfig | Select-String -Pattern '^\s*Host\s+' -Context 0, $sshConfig.Count |
+  $sshConfigHostGroups = $sshConfig | Select-String -Pattern '^\s*Host\s+' -Context 0, $sshConfig.Count | 
     Select-Object Line, @{
         Name = 'DisplayPostContext'
         Expression = { $_.Context.DisplayPostContext }
