@@ -5,6 +5,7 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
     },
+    enabled = true,
     opts = {
       adapters = {
         opts = {
@@ -17,7 +18,7 @@ return {
           return require("codecompanion.adapters").extend("azure_openai", {
             schema = {
               model = {
-                default = "o3-mini",
+                default = "o3",
               },
             },
           })
