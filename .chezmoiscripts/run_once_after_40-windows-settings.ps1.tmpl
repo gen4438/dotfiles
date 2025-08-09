@@ -10,11 +10,11 @@ function Add-ToPath {
     param (
         [string]$NewPath
     )
-    
+
     if (Test-Path $NewPath) {
         $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
         $pathEntries = $currentPath -split ';' | Where-Object { $_ -ne '' }
-        
+
         if ($NewPath -notin $pathEntries) {
             Write-Host "Adding $NewPath to user PATH"
             $newUserPath = ($pathEntries + $NewPath) -join ';'
@@ -43,6 +43,10 @@ $localBinPath = "$env:USERPROFILE\.local\bin"
 # Add to PATH
 Add-ToPath $userBinPath
 Add-ToPath $localBinPath
+
+# Set DISPLAY environment variable for X11 forwarding
+[System.Environment]::SetEnvironmentVariable('DISPLAY', 'localhost:0', [System.EnvironmentVariableTarget]::User)
+Write-Host "✅ Set DISPLAY=localhost:0 for user environment"
 
 # Add MSYS2 and LLVM bin directories to PATH
 # Note: With Scoop, these packages automatically manage PATH, so manual addition is no longer needed
