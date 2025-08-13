@@ -27,9 +27,12 @@ return {
       strategies = {
         -- Change the default chat adapter
         chat = {
-          -- adapter = "copilot",
-          adapter = vim.env.AZURE_API_KEY and "azure_openai" or "copilot",
+          adapter = "copilot",
+          -- adapter = vim.env.AZURE_API_KEY and "azure_openai" or "copilot",
           keymaps = {
+          },
+          opts = {
+            completion_provider = "cmp", -- blink|cmp|coc|default
           },
 
           slash_commands = {
@@ -41,6 +44,7 @@ return {
             },
           },
         },
+
         inline = {
           adapter = "copilot",
         },

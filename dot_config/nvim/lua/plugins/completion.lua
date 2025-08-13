@@ -42,6 +42,52 @@ return {
       cmp.setup({
         enabled = false -- インサートモードでは無効
       })
+
+      -- CodeCompanionチャットバッファ専用の補完設定
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "codecompanion",
+        callback = function()
+          cmp.setup.buffer({
+            enabled = true,
+            mapping = cmp.mapping.preset.insert({
+              ["<CR>"]    = cmp.mapping.confirm({ select = true }),
+              ["<C-Space>"]= cmp.mapping.complete(),
+              ["<Tab>"]   = cmp.mapping.select_next_item(),
+              ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+            }),
+            -- CodeCompanion側が専用ソースを提供するため、sourcesは指定しない
+            -- これによりCodeCompanionの変数/スラッシュコマンド/ツール補完が動作する
+          })
+          -- 既存のcoc用キーマップが干渉するので、このバッファだけ削除
+          pcall(vim.keymap.del, "i", "<Tab>",   { buffer = 0 })
+          pcall(vim.keymap.del, "i", "<S-Tab>", { buffer = 0 })
+          pcall(vim.keymap.del, "i", "<CR>",    { buffer = 0 })
+        end,
+      })
+
+      -- CopilotChatバッファ専用の補完設定
+      vim.api.nvim_create_autocmd("BufEnter", {
+        pattern = "copilot-*",
+        callback = function()
+          cmp.setup.buffer({
+            enabled = true,
+            mapping = cmp.mapping.preset.insert({
+              ["<CR>"]    = cmp.mapping.confirm({ select = true }),
+              ["<C-Space>"]= cmp.mapping.complete(),
+              ["<Tab>"]   = cmp.mapping.select_next_item(),
+              ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+            }),
+            sources = cmp.config.sources({
+              { name = "buffer" },
+              { name = "path" }
+            }),
+          })
+          -- 既存のcoc用キーマップが干渉するので、このバッファだけ削除
+          pcall(vim.keymap.del, "i", "<Tab>",   { buffer = 0 })
+          pcall(vim.keymap.del, "i", "<S-Tab>", { buffer = 0 })
+          pcall(vim.keymap.del, "i", "<CR>",    { buffer = 0 })
+        end,
+      })
     end,
   },
 }

@@ -89,7 +89,7 @@ return {
         -- see config/mappings.lua for implementation
         mappings = {
           complete = {
-            insert = '<S-Tab>',
+            insert = '<Tab>',
           },
           close = {
             normal = 'q',
