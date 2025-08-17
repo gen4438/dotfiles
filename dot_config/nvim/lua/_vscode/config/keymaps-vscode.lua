@@ -78,9 +78,18 @@ vim.keymap.set('i', '<c-o><c-s>', '<c-x>s', { desc = "Spell completion" })
 
 -- File path yanking
 vim.keymap.set('n', 'yn', function() vim.fn.setreg('+', vim.fn.expand('%:t')) end, { desc = "Yank filename" })
-vim.keymap.set('n', 'yp', function() vim.fn.setreg('+', vim.fn.expand('%:p')) end, { desc = "Yank full path" })
-vim.keymap.set('n', 'yr', function() vim.fn.setreg('+', vim.fn.expand('%:p:.')) end, { desc = "Yank relative path" })
-vim.keymap.set('n', 'yd', function() vim.fn.setreg('+', vim.fn.expand('%:p:h')) end, { desc = "Yank directory" })
+vim.keymap.set('n', 'yp', function() 
+  vscode.call('copyFilePath')
+end, { desc = "Yank full path" })
+vim.keymap.set('n', 'yr', function() 
+  vscode.call('copyRelativeFilePath')
+end, { desc = "Yank relative path" })
+vim.keymap.set('n', 'yd', function() 
+  vscode.call('copyFilePath')
+  local full_path = vim.fn.getreg('+')
+  local dir_path = vim.fn.fnamemodify(full_path, ':h')
+  vim.fn.setreg('+', dir_path)
+end, { desc = "Yank directory" })
 
 -- Yank relative path from user input
 vim.api.nvim_create_user_command('YankRelativePath', function()
