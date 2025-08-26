@@ -27,15 +27,24 @@ if command -v pyenv >/dev/null 2>&1; then
     else
         echo "⚠️  Neovim Python environment not found. Run initial setup first."
     fi
+elif command -v pipx >/dev/null 2>&1; then
+    # Fallback to pipx for better isolation
+    echo "⚠️  Using pipx to update packages..."
+    pipx upgrade pynvim || pipx install pynvim
+    pipx upgrade neovim || pipx install neovim
 elif command -v python3 >/dev/null 2>&1; then
-    # Fallback to system Python
-    echo "⚠️  Using system Python to update packages..."
+    # Last resort: system pip
+    echo "⚠️  Using system pip to update packages (consider installing pipx)..."
     python3 -m pip install --user --upgrade neovim pynvim
 fi
 {{- else }}
 # Android/Termux: Use system packages
 echo "🐍 Android/Termux: Updating Python packages globally..."
-if command -v python3 >/dev/null 2>&1; then
+if command -v pipx >/dev/null 2>&1; then
+    pipx upgrade pynvim || pipx install pynvim
+    pipx upgrade neovim || pipx install neovim
+    echo "✅ Neovim Python packages updated"
+elif command -v python3 >/dev/null 2>&1; then
     python3 -m pip install --user --upgrade neovim pynvim
     echo "✅ Neovim Python packages updated"
 fi
