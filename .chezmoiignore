@@ -144,7 +144,7 @@ AppData/Roaming/Code/
 # SSH specific files (should be manually managed)
 .ssh/known_hosts*
 .ssh/authorized_keys*
-.ssh/config.d/*.conf
+# .ssh/config.d/*.conf
 
 # ==============================================================================
 # USER DATA DIRECTORIES - Never manage these
