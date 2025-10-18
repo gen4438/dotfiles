@@ -20,18 +20,14 @@ Follow this process:
    - Do NOT add "🤖 Generated with Claude Code" or "Co-Authored-By: Claude"
    - Keep it simple and follow conventional commit style when appropriate
 
-4. **Confirm with user**:
-   - Present the proposed commit message to the user
-   - Ask if they want to proceed, edit the message, or cancel
-   - Wait for user approval before committing
-
-5. **Execute commit**:
-   - Run `git commit -m "message"` with the approved message
+4. **Execute commit automatically**:
+   - Run `git commit -m "message"` with the generated message
    - Run `git status` to verify the commit succeeded
-   - Report the result to the user
+   - Show the user the commit message and result
 
 Important notes:
 - Only commit files that Claude Code changed in THIS conversation
 - Exclude any unrelated changes that existed before
-- If unsure which files to commit, ask the user
+- If unsure which files to commit, ask the user before proceeding
 - Follow CLAUDE.md guidelines: no Claude Code attribution in commits
+- Commit automatically without asking for confirmation
