@@ -83,21 +83,60 @@ The repository uses two complementary update mechanisms:
 - Updates happen automatically every 7 days when running `chezmoi apply`
 - Force immediate update: `chezmoi apply --refresh-externals`
 
-#### 2. Development Tool Updates
-Use the included Makefile for comprehensive updates:
+#### 2. Manual Tool Updates
+
+##### Linux/macOS (using Makefile)
+Navigate to the chezmoi source directory and use the included Makefile:
 
 ```bash
-# Update everything (recommended)
+# Enter chezmoi source directory
+chezmoi cd
+
+# Update everything (chezmoi apply)
 make update
 
 # Update only development tools (pyenv, nvm, fzf, tmux plugins)
 make update-tools
 
-# Update only Neovim plugins and Python/Node packages
-make update-nvim
+# Update all Neovim plugins (lazy, mason, coc, treesitter)
+make update-neovim
 
-# Update only shell completions
-make update-completions
+# Update Neovim plugins individually
+make update-neovim-lazy        # Lazy.nvim plugins
+make update-neovim-mason       # Mason LSP servers
+make update-neovim-coc         # coc.nvim extensions
+make update-neovim-treesitter  # Tree-sitter parsers
+
+# Update Neovim Python/Node.js environment
+make update-neovim-env
+
+# Run Neovim health check
+make neovim-health
+
+# Update all Neovim components (plugins + environment)
+make update-neovim-all
+```
+
+##### Windows (using PowerShell)
+Navigate to the chezmoi source directory and use the PowerShell script:
+
+```powershell
+# Enter chezmoi source directory
+chezmoi cd
+
+# Update all Neovim components (plugins + environment)
+.\Update-Neovim.ps1 all
+
+# Update only plugins
+.\Update-Neovim.ps1 plugins
+
+# Update individually
+.\Update-Neovim.ps1 lazy        # Lazy.nvim plugins
+.\Update-Neovim.ps1 mason       # Mason LSP servers
+.\Update-Neovim.ps1 coc         # coc.nvim extensions
+.\Update-Neovim.ps1 treesitter  # Tree-sitter parsers
+.\Update-Neovim.ps1 env         # Python/Node.js environment
+.\Update-Neovim.ps1 health      # Run health check
 ```
 
 **Important**: While `chezmoi apply` updates the tool repositories, it doesn't:
@@ -106,7 +145,7 @@ make update-completions
 - Update Neovim plugins
 - Update tmux plugins
 
-Use `make update` periodically to keep everything current.
+Use the manual update commands periodically to keep everything current.
 
 **Note**: On Termux (Android), update scripts are automatically skipped. Use Termux's package manager (`pkg update && pkg upgrade`) for system updates.
 
