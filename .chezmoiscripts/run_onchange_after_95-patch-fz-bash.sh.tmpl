@@ -9,7 +9,7 @@ FZ_BASH_FILE="$FZ_DIR/fz.bash"
 # Only run this for bash users (zsh can use fz.sh directly)
 if [[ "${SHELL##*/}" == "bash" ]] && [[ -f "$FZ_SH_FILE" ]]; then
     # Check if update is needed
-    if [[ ! -f "$FZ_BASH_FILE" ]] || [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
+    if [[ ! -e "$FZ_BASH_FILE" ]] || [[ -L "$FZ_BASH_FILE" ]] || [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
         # Remove existing symlink if it exists
         if [[ -L "$FZ_BASH_FILE" ]]; then
             echo "Removing fz.bash symlink to create bash-compatible copy..."

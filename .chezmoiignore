@@ -96,10 +96,11 @@ Documents/WindowsPowerShell/
 # ==============================================================================
 # APPLICATION-SPECIFIC DYNAMIC DATA
 # ==============================================================================
-# Bash completion scripts (dynamically generated)
-.bash/completion.d/kubectl.bash
-.bash/completion.d/lab.bash
-.bash/completion.d/poetry.bash
+# Shell completion scripts (all dynamically generated via Makefile or .chezmoiexternal.toml.tmpl)
+.bash/completion.d/**
+!.bash/completion.d/.gitignore
+.zsh/completion.d/**
+!.zsh/completion.d/.gitignore
 # VS Code
 .config/Code/User/workspaceStorage/
 .config/Code/User/History/

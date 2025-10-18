@@ -9,16 +9,21 @@ FZ_BASH_FILE="$FZ_DIR/fz.bash"
 if [[ "${SHELL##*/}" == "bash" ]] && [[ -d "$FZ_DIR/.git" ]] && [[ -e "$FZ_BASH_FILE" ]]; then
     echo "Resetting fz.bash before external updates..."
     cd "$FZ_DIR"
-    
-    # Always remove fz.bash (symlink or file) to prevent conflicts
-    echo "Removing fz.bash to prevent git conflicts..."
-    rm -f "$FZ_BASH_FILE"
-    
+
+    # Only remove fz.bash if it's a symlink (to prevent git conflicts)
+    # Preserve regular files (bash-compatible versions created by after script)
+    if [[ -L "$FZ_BASH_FILE" ]]; then
+        echo "Removing fz.bash symlink to prevent git conflicts..."
+        rm -f "$FZ_BASH_FILE"
+    fi
+
     # If it was tracked, reset to clean state
     if git ls-files --error-unmatch fz.bash >/dev/null 2>&1; then
         git checkout -- fz.bash 2>/dev/null || true
-        # Remove it again after git restores it
-        rm -f "$FZ_BASH_FILE"
+        # Remove again if it's a symlink
+        if [[ -L "$FZ_BASH_FILE" ]]; then
+            rm -f "$FZ_BASH_FILE"
+        fi
     fi
     
     cd - >/dev/null
