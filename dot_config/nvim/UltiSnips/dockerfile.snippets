@@ -1,0 +1,5 @@
+snippet devcontainer_rootless "Rootless Docker" b
+  "remoteEnv": {
+    "DOCKER_HOST": "unix:///run/user/${UID}/docker.sock"
+  },
+endsnippet

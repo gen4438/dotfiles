@@ -49,15 +49,17 @@ if command -v pyenv >/dev/null 2>&1; then
         # Deactivate virtual environment
         pyenv deactivate
     fi
-elif command -v pipx >/dev/null 2>&1; then
-    echo "⚠️  pyenv not found, using pipx for better isolation..."
-    # Install packages with pipx for better isolation
-    pipx install pynvim
-    pipx install neovim
 elif command -v python3 >/dev/null 2>&1; then
-    echo "⚠️  pyenv and pipx not found, using system pip (consider installing pipx)..."
-    # Install packages globally (last resort)
-    python3 -m pip install --user --upgrade neovim pynvim
+    echo "⚠️  pyenv not found, creating venv for Neovim..."
+
+    # Create Neovim-specific venv
+    python3 -m venv ~/.local/share/nvim-venv
+
+    # Install Neovim Python packages in venv
+    ~/.local/share/nvim-venv/bin/pip install --upgrade pip
+    ~/.local/share/nvim-venv/bin/pip install pynvim neovim
+
+    echo "✅ Neovim Python environment created at ~/.local/share/nvim-venv"
 fi
 
 # Setup Node.js environment for Neovim

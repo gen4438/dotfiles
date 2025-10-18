@@ -1,0 +1,45 @@
+# Dockerfile for testing chezmoi setup
+# This simulates a fresh Ubuntu environment to verify chezmoi configuration
+
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install minimal required packages for chezmoi and package installation scripts
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    ca-certificates \
+    sudo \
+    software-properties-common \
+    gnupg \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install chezmoi
+RUN sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+
+# Create a test user with sudo privileges
+# This simulates a real user environment
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Cache bust to ensure local changes are copied
+ARG CACHEBUST=$(date +%s)
+
+# Copy local chezmoi source
+COPY --chown=testuser:testuser . /home/testuser/.local/share/chezmoi/
+
+# Copy entrypoint script
+COPY test-entrypoint.sh /usr/local/bin/test-entrypoint.sh
+RUN sudo chmod +x /usr/local/bin/test-entrypoint.sh
+
+# Set entrypoint
+# If CHEZMOI_REPO_URL is set in .env, it will automatically run chezmoi init
+# Otherwise, it starts an interactive bash shell
+ENTRYPOINT ["/usr/local/bin/test-entrypoint.sh"]

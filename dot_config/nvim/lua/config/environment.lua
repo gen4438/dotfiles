@@ -48,7 +48,8 @@ M.setup_python = function()
   if vim.fn.has('unix') == 1 then
     -- Try multiple common Python paths in order of preference
     local python_paths = {
-      vim.fn.expand('$HOME/.pyenv/versions/neovim3/bin/python'),
+      vim.fn.expand('$HOME/.local/share/nvim-venv/bin/python'),  -- venv (for systems without pyenv)
+      vim.fn.expand('$HOME/.pyenv/versions/neovim3/bin/python'), -- pyenv
       vim.fn.expand('$HOME/.virtualenvs/neovim3/bin/python'),
       vim.fn.expand('$HOME/venv/neovim3/bin/python'),
     }

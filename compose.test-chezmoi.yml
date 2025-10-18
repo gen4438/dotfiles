@@ -1,0 +1,47 @@
+# Docker Compose configuration for testing chezmoi setup
+# This provides an easy way to test chezmoi in a clean Ubuntu environment
+#
+# Usage:
+#   1. Copy .env.example to .env and configure your settings
+#   2. Run: docker compose -f compose.test-chezmoi.yml run --rm chezmoi-test
+#   3. If CHEZMOI_REPO_URL is set in .env, chezmoi will initialize automatically
+#
+# The .env file is automatically loaded by Docker Compose and values are
+# available as environment variables inside the container.
+
+services:
+  chezmoi-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-chezmoi
+    image: chezmoi-test:latest
+    container_name: chezmoi-test
+
+    # Keep container running for interactive testing
+    stdin_open: true
+    tty: true
+
+    # Environment variables for chezmoi configuration
+    # These are loaded from .env file (Docker Compose loads it automatically)
+    # You can also override them with: docker compose run -e VAR=value
+    environment:
+      # Git configuration (required for chezmoi)
+      - GIT_NAME=${TEST_GIT_NAME:-Test User}
+      - GIT_EMAIL=${TEST_GIT_EMAIL:-test@example.com}
+
+      # GitHub token for API access (avoids rate limits)
+      # Set this to avoid GitHub API rate limits during testing
+      # Do NOT commit your actual token - use .env file or export it
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+      # Chezmoi repository URL
+      # Set this to your actual repository URL when testing
+      - CHEZMOI_REPO_URL=${CHEZMOI_REPO_URL:-}
+
+      # Optional: Pre-configure chezmoi data for non-interactive testing
+      # These bypass the prompts in .chezmoi.toml.tmpl
+      - CHEZMOI_DATA_GIT_NAME=${TEST_GIT_NAME:-Test User}
+      - CHEZMOI_DATA_GIT_EMAIL=${TEST_GIT_EMAIL:-test@example.com}
+      - CHEZMOI_DATA_SSH_IDENTITY_FILE=${TEST_SSH_IDENTITY_FILE:-}
+      - CHEZMOI_DATA_AGE_IDENTITY=${TEST_AGE_IDENTITY:-~/.config/chezmoi/key.txt}
+      - CHEZMOI_DATA_AGE_RECIPIENT=${TEST_AGE_RECIPIENT:-age1lnt3hvd436d02uaen8nelcn6aywephrx7lx6ctxjyeyqwv82x59s8kk7dx}
