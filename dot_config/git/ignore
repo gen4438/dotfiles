@@ -146,3 +146,4 @@ cscope.out
 cscope.in.out
 cscope.po.out
 cscope.files
+**/.claude/settings.local.json
