@@ -5,8 +5,5 @@
     "type": "command",
     "command": "printf '\\e[38;5;40m%s\\e[0m@\\e[38;5;34m%s\\e[0m:\\e[38;5;82m%s\\e[0m' \"$(whoami)\" \"$(hostname -s)\" \"$(pwd)\""
   },
-  "alwaysThinkingEnabled": false,
-  "feedbackSurveyState": {
-    "lastShownTime": 2069451551000
-  }
+  "alwaysThinkingEnabled": false
 }
