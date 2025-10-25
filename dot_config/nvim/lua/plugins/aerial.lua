@@ -93,12 +93,88 @@ return {
       local aerial = require("aerial")
       aerial.setup(opts)
 
+      -- 再帰的に子孫シンボルを収集する関数
+      local function collect_descendants(item, result)
+        table.insert(result, item)
+        if item.children then
+          for _, child in ipairs(item.children) do
+            collect_descendants(child, result)
+          end
+        end
+      end
+
+      -- シンボルが折りたたまれているかチェックする関数
+      local function is_symbol_folded(item)
+        -- 子要素があり、かつ折りたたまれている場合
+        -- Aerialでは collapsed フラグまたは fold_state で管理される
+        if item.children and #item.children > 0 then
+          -- collapsed フラグがあればそれを使用
+          if item.collapsed ~= nil then
+            return item.collapsed
+          end
+          -- または、iter({ skip_hidden = true }) で子が見えないかチェック
+          -- 簡易的に: 子がいるのに次の表示行に子が現れない = 折りたたまれている
+          return true -- デフォルトは折りたたまれているとみなす
+        end
+        return false
+      end
+
+      -- 表示行番号から実際のシンボルを取得する関数（折りたたみ状態を考慮）
+      local function get_symbols_by_display_lines(source_bufnr, start_line, end_line)
+        local data = require("aerial.data")
+        local bufdata = data.get_or_create(source_bufnr)
+        local selected_symbols = {}
+        local display_line = 1
+        local visible_items = {}
+
+        -- まず表示されている全シンボルのリストを作成
+        for _, item in bufdata:iter({ skip_hidden = true }) do
+          visible_items[item] = display_line
+          if display_line >= start_line and display_line <= end_line then
+            table.insert(selected_symbols, item)
+          end
+          if display_line > end_line then
+            break
+          end
+          display_line = display_line + 1
+        end
+
+        -- 選択されたシンボルを処理
+        local all_symbols = {}
+        for _, symbol in ipairs(selected_symbols) do
+          -- 子要素があるか確認
+          local has_visible_children = false
+          if symbol.children then
+            for _, child in ipairs(symbol.children) do
+              if visible_items[child] then
+                has_visible_children = true
+                break
+              end
+            end
+          end
+
+          -- 子要素が表示されていない（折りたたまれている）場合のみ子孫を含める
+          if symbol.children and #symbol.children > 0 and not has_visible_children then
+            collect_descendants(symbol, all_symbols)
+          else
+            -- 展開されている、または子要素がない場合は自分自身のみ
+            table.insert(all_symbols, symbol)
+          end
+        end
+
+        return all_symbols
+      end
+
       -- Markdownヘッダーレベルを変更する関数
-      local function change_header_level_in_source(aerial_line, increment, visual_mode, visual_end_line)
+      local function change_header_level_in_source(symbols, increment)
+        if #symbols == 0 then
+          return 0
+        end
+
         local util = require("aerial.util")
         local aerial_bufnr = vim.api.nvim_get_current_buf()
         local source_bufnr = util.get_source_buffer(aerial_bufnr)
-        
+
         if not source_bufnr then
           vim.notify("Could not find source buffer", vim.log.levels.ERROR)
           return 0
@@ -106,42 +182,22 @@ return {
 
         local current_win = vim.api.nvim_get_current_win()
         local current_pos = vim.api.nvim_win_get_cursor(current_win)
-        
-        local data = require("aerial.data")
-        local bufdata = data.get_or_create(source_bufnr)
-        local selected_items = {}
-
-        -- 選択されたシンボルを収集
-        if visual_mode then
-          for _, item, i in bufdata:iter({ skip_hidden = false }) do
-            if i >= aerial_line and i <= visual_end_line then
-              table.insert(selected_items, item)
-            end
-          end
-        else
-          for _, item, i in bufdata:iter({ skip_hidden = false }) do
-            if i == aerial_line then
-              table.insert(selected_items, item)
-              break
-            end
-          end
-        end
 
         -- 変更を準備
         local changes = {}
-        for _, item in ipairs(selected_items) do
+        for _, item in ipairs(symbols) do
           if item and item.lnum then
             local ok, lines = pcall(vim.api.nvim_buf_get_lines, source_bufnr, item.lnum - 1, item.lnum, false)
             if ok and #lines > 0 then
               local source_line = lines[1]
               local new_line
-              
+
               if increment then
                 new_line = "#" .. source_line
               else
                 new_line = source_line:match("^##") and source_line:sub(2) or source_line
               end
-              
+
               if new_line ~= source_line then
                 table.insert(changes, { lnum = item.lnum, new_line = new_line })
               end
@@ -153,10 +209,13 @@ return {
           return 0
         end
 
+        -- 行番号の降順でソート（下から上に変更することで行番号ずれを防ぐ）
+        table.sort(changes, function(a, b) return a.lnum > b.lnum end)
+
         -- 変更を適用
         local success_count = 0
         local source_win = util.get_source_win(current_win)
-        
+
         if not source_win then
           -- 直接バッファを編集
           for _, change in ipairs(changes) do
@@ -184,8 +243,11 @@ return {
           end
         end
 
+        -- シンボル再取得を遅延実行（バッファ更新の完了を待つ）
         if success_count > 0 then
-          pcall(aerial.refetch_symbols, source_bufnr)
+          vim.defer_fn(function()
+            pcall(aerial.refetch_symbols, source_bufnr)
+          end, 50)
         end
 
         return success_count
@@ -255,20 +317,38 @@ return {
 
       -- ビジュアルモード用のヘルパー関数（ローカルスコープ）
       local function aerial_visual_helper(increment)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-        
-        vim.defer_fn(function()
-          local win = vim.api.nvim_get_current_win()
-          local cur_pos = vim.api.nvim_win_get_cursor(win)
-          local start_line = vim.fn.line("'<")
-          local end_line = vim.fn.line("'>")
+        local util = require("aerial.util")
+        local aerial_bufnr = vim.api.nvim_get_current_buf()
+        local source_bufnr = util.get_source_buffer(aerial_bufnr)
 
+        if not source_bufnr then
+          vim.notify("Could not find source buffer", vim.log.levels.ERROR)
+          return
+        end
+
+        -- visual mode中にカーソル位置を取得
+        local start_pos = vim.fn.getpos("v")
+        local end_pos = vim.fn.getpos(".")
+
+        -- 開始と終了を正規化（小さい方が開始）
+        local start_line = math.min(start_pos[2], end_pos[2])
+        local end_line = math.max(start_pos[2], end_pos[2])
+
+        -- visual modeを抜ける
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+
+        vim.defer_fn(function()
           if start_line <= 0 or end_line <= 0 then
             vim.notify("Invalid selection range", vim.log.levels.ERROR)
             return
           end
 
-          local success_count = change_header_level_in_source(start_line, increment, true, end_line)
+          local win = vim.api.nvim_get_current_win()
+          local cur_pos = vim.api.nvim_win_get_cursor(win)
+
+          -- 表示行番号から実際のシンボル（子孫含む）を取得
+          local symbols = get_symbols_by_display_lines(source_bufnr, start_line, end_line)
+          local success_count = change_header_level_in_source(symbols, increment)
 
           if vim.api.nvim_win_is_valid(win) then
             vim.api.nvim_win_set_cursor(win, cur_pos)
@@ -297,9 +377,22 @@ return {
 
           -- ノーマルモード: ヘッダーレベル変更
           vim.keymap.set("n", ">>", function()
+            local util = require("aerial.util")
+            local aerial_bufnr = vim.api.nvim_get_current_buf()
+            local source_bufnr = util.get_source_buffer(aerial_bufnr)
+
+            if not source_bufnr then
+              vim.notify("Could not find source buffer", vim.log.levels.ERROR)
+              return
+            end
+
             local win = vim.api.nvim_get_current_win()
             local cur_pos = vim.api.nvim_win_get_cursor(win)
-            local success_count = change_header_level_in_source(cur_pos[1], true, false)
+            local current_line = cur_pos[1]
+
+            -- 現在の表示行からシンボルを取得
+            local symbols = get_symbols_by_display_lines(source_bufnr, current_line, current_line)
+            local success_count = change_header_level_in_source(symbols, true)
 
             if vim.api.nvim_win_is_valid(win) then
               vim.api.nvim_win_set_cursor(win, cur_pos)
@@ -311,9 +404,22 @@ return {
           end, { buffer = bufnr, desc = "ヘッダーレベルを下げる (#を追加)" })
 
           vim.keymap.set("n", "<<", function()
+            local util = require("aerial.util")
+            local aerial_bufnr = vim.api.nvim_get_current_buf()
+            local source_bufnr = util.get_source_buffer(aerial_bufnr)
+
+            if not source_bufnr then
+              vim.notify("Could not find source buffer", vim.log.levels.ERROR)
+              return
+            end
+
             local win = vim.api.nvim_get_current_win()
             local cur_pos = vim.api.nvim_win_get_cursor(win)
-            local success_count = change_header_level_in_source(cur_pos[1], false, false)
+            local current_line = cur_pos[1]
+
+            -- 現在の表示行からシンボルを取得
+            local symbols = get_symbols_by_display_lines(source_bufnr, current_line, current_line)
+            local success_count = change_header_level_in_source(symbols, false)
 
             if vim.api.nvim_win_is_valid(win) then
               vim.api.nvim_win_set_cursor(win, cur_pos)
@@ -324,17 +430,7 @@ return {
             end
           end, { buffer = bufnr, desc = "ヘッダーレベルを上げる (#を削除)" })
 
-          -- ビジュアルモード用コマンド作成（バッファローカル）
-          local cmd_down = "AerialVisualHeaderDown_" .. bufnr
-          local cmd_up = "AerialVisualHeaderUp_" .. bufnr
-          
-          vim.api.nvim_buf_create_user_command(bufnr, cmd_down:match("_(%d+)$") and cmd_down:sub(1, -string.len("_" .. bufnr) - 1) or cmd_down, function()
-            aerial_visual_helper(true)
-          end, {})
-
-          vim.api.nvim_buf_create_user_command(bufnr, cmd_up:match("_(%d+)$") and cmd_up:sub(1, -string.len("_" .. bufnr) - 1) or cmd_up, function()
-            aerial_visual_helper(false)
-          end, {})
+          -- ビジュアルモード用（直接マッピング）
 
           -- ビジュアルモードマッピング
           vim.keymap.set("x", ">>", function()

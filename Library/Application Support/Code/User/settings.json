@@ -133,5 +133,6 @@
   "workbench.colorCustomizations": {},
   "workbench.colorTheme": "GitHub Dark High Contrast",
   "workbench.externalBrowser": "edge",
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.iconTheme": "material-icon-theme",
+  "git.confirmSync": false
 }
