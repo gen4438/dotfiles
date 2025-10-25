@@ -19,6 +19,7 @@ alias ..="cd ../"
 alias ...="cd ../../"
 alias ....="cd ../../../"
 alias .....="cd ../../../../"
+alias cdgit='cd "$(git rev-parse --show-toplevel)"'
 alias less='less -R'
 alias gd="pushd"
 alias bd="popd"
