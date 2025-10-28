@@ -1,6 +1,7 @@
 return {
   {
     "gen4438/memo.nvim",
+    dependencies = { "ibhagwan/fzf-lua" },
     opts = {
       -- Main directory for memos
       -- Uses MEMO_DIR environment variable if set, otherwise ~/Documents/my-notes
