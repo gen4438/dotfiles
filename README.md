@@ -85,8 +85,14 @@ The repository uses two complementary update mechanisms:
 
 #### 2. Manual Tool Updates
 
-##### Linux/macOS (using Makefile)
+##### Using Makefile (Linux/macOS/Windows)
 Navigate to the chezmoi source directory and use the included Makefile:
+
+**Note**: On Windows, you need `make` installed. Options include:
+- Git for Windows (Git Bash) - use `make` or `mingw32-make`
+- MSYS2/MinGW - includes make package
+- WSL - full Linux compatibility
+- Chocolatey: `choco install make`
 
 ```bash
 # Enter chezmoi source directory
@@ -117,7 +123,7 @@ make neovim-health
 make update-neovim-all
 ```
 
-##### Windows (using PowerShell)
+##### Windows (using PowerShell - alternative)
 Navigate to the chezmoi source directory and use the PowerShell script:
 
 ```powershell
@@ -188,7 +194,9 @@ Use the manual update commands periodically to keep everything current.
 
 ## Convenience Commands
 
-This repository includes a Makefile with shortcuts for common operations:
+This repository includes a cross-platform Makefile with shortcuts for common operations.
+
+**Requirements**: `make` must be installed. On Windows, use Git Bash, MSYS2, WSL, or install via Chocolatey.
 
 ```bash
 make help              # Show all available commands
