@@ -78,13 +78,13 @@ vim.keymap.set('i', '<c-o><c-s>', '<c-x>s', { desc = "Spell completion" })
 
 -- File path yanking
 vim.keymap.set('n', 'yn', function() vim.fn.setreg('+', vim.fn.expand('%:t')) end, { desc = "Yank filename" })
-vim.keymap.set('n', 'yp', function() 
+vim.keymap.set('n', 'yp', function()
   vscode.call('copyFilePath')
 end, { desc = "Yank full path" })
-vim.keymap.set('n', 'yr', function() 
+vim.keymap.set('n', 'yr', function()
   vscode.call('copyRelativeFilePath')
 end, { desc = "Yank relative path" })
-vim.keymap.set('n', 'yd', function() 
+vim.keymap.set('n', 'yd', function()
   vscode.call('copyFilePath')
   local full_path = vim.fn.getreg('+')
   local dir_path = vim.fn.fnamemodify(full_path, ':h')
@@ -477,3 +477,22 @@ end, { desc = "Trigger inline edit explicitly" })
 vim.keymap.set('n', '<c-j>', function()
   vscode.call('editor.action.inlineSuggest.commit')
 end, { desc = "Commit inline suggestion" })
+
+
+-- ============================================================================
+-- VSCode Integration - Folding
+-- ============================================================================
+
+-- カーソル位置の折りたたみ/展開
+vim.keymap.set('n', 'zc', function() vscode.action('editor.fold') end, { silent = true })
+vim.keymap.set('n', 'zo', function() vscode.action('editor.unfold') end, { silent = true })
+
+-- すべて折りたたむ/展開
+vim.keymap.set('n', 'zM', function() vscode.action('editor.foldAll') end, { silent = true })
+vim.keymap.set('n', 'zR', function() vscode.action('editor.unfoldAll') end, { silent = true })
+
+-- （お好み）VS Code の「レベル折りたたみ」コマンド
+-- zm / zr を VS Code 流にエミュレートしたいなら、foldLevelN を使う
+vim.keymap.set('n', 'z1', function() vscode.action('editor.foldLevel1') end, { silent = true })
+vim.keymap.set('n', 'z2', function() vscode.action('editor.foldLevel2') end, { silent = true })
+-- 必要に応じて z3..z9 も同様に
