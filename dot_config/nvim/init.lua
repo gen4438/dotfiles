@@ -7,7 +7,7 @@ if vim.g.vscode then
   require("config.base")
   require("config.environment").setup()
   require("config.options")
-  require("config.autocmds")
+  require("_vscode.config.autocmds-vscode") -- VSCode専用のautocmdsを読み込む
   require("_vscode.config.keymaps-vscode") -- VSCode専用のキーマップを読み込む
   -- require("config.commands")
   -- require("config.filetypes")

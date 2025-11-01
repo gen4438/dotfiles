@@ -19,6 +19,9 @@ function M.setup()
     vim.opt.signcolumn = "no" -- サインカラムを非表示
     vim.opt.foldcolumn = "0" -- フォールドカラムを非表示
 
+    vim.opt.spell = false -- スペルチェックを無効化
+    vim.diagnostic.disable()  -- 診断表示を無効化
+
     -- カーソルライン・カラムの調整
     vim.opt.cursorline = false -- VSCodeがカーソルライン表示を管理
     vim.opt.cursorcolumn = false
