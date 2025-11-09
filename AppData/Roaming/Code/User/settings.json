@@ -28,6 +28,7 @@
     "asvetliakov.vscode-neovim": 1
   },
   "git.autofetch": true,
+  "git.confirmSync": false,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.editor.temporalContext.enabled": true,
@@ -52,6 +53,9 @@
   "remote.SSH.remotePlatform": {
     "minis": "linux"
   },
+  "settingsSync.ignoredExtensions": [
+    "smcpeak.default-keys-windows"
+  ],
   "settingsSync.ignoredSettings": [
     "remote.SSH.configFile",
     "remote.SSH.remotePlatform",
