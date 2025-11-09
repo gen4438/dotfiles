@@ -167,8 +167,8 @@ end, { desc = "Toggle panel" })
 
 -- Buffer/Editor operations with VSCode API
 vim.keymap.set('n', 'sq', function()
-  vscode.call('workbench.action.closeGroup')
-end, { desc = "Close current split/group" })
+  vscode.call('workbench.action.closeActiveEditor')
+end, { desc = "Close editor" })
 
 vim.keymap.set('n', 'sn', function()
   vscode.call('workbench.action.nextEditor')
@@ -243,12 +243,12 @@ vim.keymap.set('n', 'sP', function()
 end, { desc = "Previous editor" })
 
 vim.keymap.set('n', 'sc', function()
-  vscode.call('workbench.action.closeActiveEditor')
-end, { desc = "Close editor" })
+  vscode.call('workbench.action.closeOtherEditors')
+end, { desc = "Close other editors" })
 
 vim.keymap.set('n', 'sC', function()
-  vscode.call('workbench.action.closeActiveEditor')
-end, { desc = "Close editor" })
+  vscode.call('workbench.action.closeGroup')
+end, { desc = "Close current split/group" })
 
 -- ============================================================================
 -- VSCode Integration - Problems Navigation (replaces quickfix)
