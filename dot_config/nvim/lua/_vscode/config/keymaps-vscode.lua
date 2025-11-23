@@ -335,19 +335,30 @@ vim.keymap.set('n', ';ff', function()
 end, { desc = "Quick open files" })
 
 vim.keymap.set('n', ';fe', function()
-  -- Save current clipboard content
-  local saved_clipboard = vim.fn.getreg('+')
-  local saved_regtype = vim.fn.getregtype('+')
-
   -- Use VSCode's copyRelativeFilePath for reliable path handling in devcontainer
   vscode.call('copyRelativeFilePath')
-  local relative_path = vim.fn.getreg('+')
-  local parent = vim.fn.fnamemodify(relative_path, ':h')
 
-  -- Restore clipboard content
-  vim.fn.setreg('+', saved_clipboard, saved_regtype)
+  -- Schedule the rest to run after clipboard is updated
+  vim.schedule(function()
+    -- Try multiple registers as VSCode might write to different ones
+    local relative_path = vim.fn.getreg('+')  -- Try system clipboard first
+    if relative_path == '' or relative_path:match('^vscode%-remote://') or relative_path:match('^note://') then
+      relative_path = vim.fn.getreg('"')  -- Fallback to default register
+    end
+    if relative_path == '' or relative_path:match('^vscode%-remote://') or relative_path:match('^note://') then
+      relative_path = vim.fn.getreg('*')  -- Fallback to selection register
+    end
 
-  vscode.call('workbench.action.quickOpen', { args = { parent .. '/' } })
+    -- Extract parent directory
+    local parent = vim.fn.fnamemodify(relative_path, ':h')
+
+    -- If parent is '.', it means we're at the root, so use empty string
+    if parent == '.' or parent == '' then
+      parent = ''
+    end
+
+    vscode.call('workbench.action.quickOpen', { args = { parent .. '/' } })
+  end)
 end, { desc = "Quick open files in parent directory (relative to project root)" })
 
 vim.keymap.set('n', ';fg', function()

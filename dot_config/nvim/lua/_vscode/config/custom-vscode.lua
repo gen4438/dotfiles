@@ -20,7 +20,10 @@ function M.setup()
     vim.opt.foldcolumn = "0" -- フォールドカラムを非表示
 
     vim.opt.spell = false -- スペルチェックを無効化
-    vim.diagnostic.disable()  -- 診断表示を無効化
+    -- 診断はVSCodeが管理するため、Neovim側では無効化
+    if vim.fn.has('nvim-0.10') == 1 then
+        vim.diagnostic.enable(false)  -- Neovim 0.10+
+    end
 
     -- カーソルライン・カラムの調整
     vim.opt.cursorline = false -- VSCodeがカーソルライン表示を管理
