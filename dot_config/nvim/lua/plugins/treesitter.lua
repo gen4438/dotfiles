@@ -42,6 +42,18 @@ return {
           end
         end)(),
       }
+
+      -- 大きいファイルで無効化されたtreesitterを手動で有効化するキーマップ
+      vim.keymap.set('n', '<leader>ts', function()
+        vim.bo.syntax = 'on'
+        vim.b.large_file = nil
+        local ok, _ = pcall(vim.cmd, 'TSBufEnable highlight')
+        if ok then
+          vim.notify('Treesitter enabled', vim.log.levels.INFO)
+        else
+          vim.notify('Treesitter not available', vim.log.levels.WARN)
+        end
+      end, { desc = 'Enable Treesitter for current buffer' })
     end,
   },
 

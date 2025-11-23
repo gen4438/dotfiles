@@ -160,20 +160,20 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("BufReadPre", {
   group = general_group,
   pattern = "*",
-  callback = function()
+  callback = function(args)
     local max_filesize = 100 * 1024 -- 100KB
     local filename = vim.fn.expand("<afile>")
     local filesize = vim.fn.getfsize(filename)
-    
+
     if filesize > max_filesize or filesize == -2 then
-      vim.opt_local.eventignore:append({
-        "FileType",
-        "Syntax",
-        "BufReadPost",
-        "BufReadPre",
-      })
-      vim.opt_local.undolevels = -1
-      vim.cmd("syntax clear")
+      local bufnr = args.buf
+      -- バッファローカルオプションのみで最適化（他のバッファに影響しない）
+      vim.bo[bufnr].swapfile = false
+      vim.bo[bufnr].undolevels = -1
+      vim.bo[bufnr].syntax = "off"
+
+      -- 大きいファイル用のフラグを設定（treesitter等が参照可能）
+      vim.b[bufnr].large_file = true
     end
   end,
   desc = "Optimize for large files",
