@@ -709,7 +709,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -736,7 +735,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -763,7 +761,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -790,7 +787,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -817,7 +813,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -844,7 +839,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -871,7 +865,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -898,7 +891,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -930,7 +922,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -957,7 +948,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -984,7 +974,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1011,7 +1000,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1038,7 +1026,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1065,7 +1052,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1092,7 +1078,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1119,7 +1104,6 @@
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.googlecode\\.iterm2",
                                             "^com\\.microsoft\\.VSCode"
-
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -1175,6 +1159,27 @@
                         "product_id": 641,
                         "vendor_id": 1452
                     },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "caps_lock" },
+                            "to": [{ "key_code": "left_command" }]
+                        },
+                        {
+                            "from": { "key_code": "left_command" },
+                            "to": [{ "key_code": "left_option" }]
+                        },
+                        {
+                            "from": { "key_code": "left_control" },
+                            "to": [{ "key_code": "caps_lock" }]
+                        },
+                        {
+                            "from": { "key_code": "left_option" },
+                            "to": [{ "key_code": "left_control" }]
+                        }
+                    ]
+                },
+                {
+                    "identifiers": { "is_keyboard": true },
                     "simple_modifications": [
                         {
                             "from": { "key_code": "caps_lock" },
