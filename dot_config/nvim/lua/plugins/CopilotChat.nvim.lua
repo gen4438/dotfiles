@@ -353,6 +353,8 @@ return {
 
     init = function()
       vim.api.nvim_create_augroup("MyCopilotChat", { clear = true })
+
+
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = 'copilot-*',
         group = 'MyCopilotChat',
@@ -381,6 +383,15 @@ return {
           vim.keymap.set('n', '<c-s>', ':CopilotChatSave ', { buffer = true, remap = false })
           -- <c-o> to load chat
           vim.keymap.set('n', '<c-o>', ':CopilotChatLoad ', { buffer = true, remap = false })
+
+          -- reset後にredraw!を実行して描画崩れを修正
+          vim.keymap.set({ 'n', 'i' }, '<c-c><c-l>', function()
+            require('CopilotChat').reset()
+            vim.cmd('stopinsert')
+            vim.schedule(function()
+              vim.cmd('redraw!')
+            end)
+          end, { buffer = true, remap = false, desc = 'CopilotChat Reset with redraw' })
         end
 
       })
