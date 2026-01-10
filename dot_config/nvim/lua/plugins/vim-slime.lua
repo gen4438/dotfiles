@@ -27,6 +27,7 @@ return {
       '<space>a',
       '<space>i',
       '<space>e',
+      'y<space>e',
     },
 
     init = function()
@@ -129,6 +130,8 @@ return {
         vim.api.nvim_set_keymap('n', '<Space>a', ':lua handle_keymap_space_a()<CR>', { noremap = true })
         -- スクリプト実行
         vim.api.nvim_set_keymap('n', '<Space>e', ':lua handle_keymap_space_e()<CR>', { noremap = true })
+        -- スクリプト実行コマンドをヤンク
+        vim.api.nvim_set_keymap('n', 'y<Space>e', ':lua handle_keymap_space_e_yank()<CR>', { noremap = true })
       end
 
       -- キーマップ実行時の処理関数
@@ -170,8 +173,8 @@ return {
         end
       end
 
-      -- キーマップ実行時の処理関数
-      function handle_keymap_space_e()
+      -- コマンド生成関数
+      local function get_command_for_space_e()
         local filetype = vim.bo.filetype
         local cmd = ""
 
@@ -195,6 +198,14 @@ return {
           cmd = 'clear; cargo run'
         end
 
+        return cmd
+      end
+
+      -- キーマップ実行時の処理関数
+      function handle_keymap_space_e()
+        local filetype = vim.bo.filetype
+        local cmd = get_command_for_space_e()
+
         if cmd ~= "" and (filetype == "python" or filetype == "ipynb") then
           -- python
           vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]]) -- ctrl-u to clear the line
@@ -202,6 +213,21 @@ return {
         elseif cmd ~= "" then
           -- python 以外
           vim.cmd('SlimeSend0 "\\x15' .. cmd .. '\\n"')
+        end
+      end
+
+      -- スクリプト実行コマンドをヤンク
+      function handle_keymap_space_e_yank()
+        local cmd = get_command_for_space_e()
+
+        if cmd ~= "" then
+          -- コマンドを無名レジスタにヤンク
+          vim.fn.setreg('"', cmd)
+          -- + レジスタ（システムクリップボード）にもコピー
+          vim.fn.setreg('+', cmd)
+          print('Yanked: ' .. cmd)
+        else
+          print('No command for this filetype')
         end
       end
 
