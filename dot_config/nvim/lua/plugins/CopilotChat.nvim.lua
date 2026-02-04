@@ -31,7 +31,7 @@ return {
           zindex = 1,             -- determines if window is on top or below other floating windows
         },
 
-        auto_insert_mode = true, -- Automatically enter insert mode when opening window and on new prompt
+        auto_insert_mode = false, -- Automatically enter insert mode when opening window and on new prompt
 
         -- Static config starts here (can be configured only via setup function)
         debug = false,                                                      -- Enable debug logging (same as 'log_level = 'debug')
