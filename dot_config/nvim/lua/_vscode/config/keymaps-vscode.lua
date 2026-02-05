@@ -500,6 +500,14 @@ end, { desc = "Commit inline suggestion" })
 
 
 -- ============================================================================
+-- VSCode Integration - Editor Toggles
+-- ============================================================================
+
+vim.keymap.set('n', '<Space>w', function()
+  vscode.call('editor.action.toggleWordWrap')
+end, { desc = "Toggle word wrap" })
+
+-- ============================================================================
 -- VSCode Integration - Folding
 -- ============================================================================
 
