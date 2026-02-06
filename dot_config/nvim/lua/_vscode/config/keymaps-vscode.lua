@@ -247,8 +247,8 @@ vim.keymap.set('n', 'sc', function()
 end, { desc = "Close other editors" })
 
 vim.keymap.set('n', 'sC', function()
-  vscode.call('workbench.action.closeGroup')
-end, { desc = "Close current split/group" })
+  vscode.call('workbench.action.closeEditorsInGroup')
+end, { desc = "Close editors in group" })
 
 -- ============================================================================
 -- VSCode Integration - Problems Navigation (replaces quickfix)

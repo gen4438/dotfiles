@@ -12,6 +12,7 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "chat.agent.maxRequests": 50,
+  "claudeCode.selectedModel": "default",
   "code-runner.enableAppInsights": false,
   "code-runner.runInTerminal": true,
   "containers.containerClient": "com.microsoft.visualstudio.containers.docker",
@@ -28,6 +29,8 @@
     "asvetliakov.vscode-neovim": 1
   },
   "git.autofetch": true,
+  "git.blame.editorDecoration.enabled": false,
+  "git.blame.statusBarItem.enabled": true,
   "git.confirmSync": false,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
@@ -44,12 +47,14 @@
   "github.copilot.nextEditSuggestions.enabled": true,
   "githubPullRequests.experimental.useQuickChat": true,
   "gitlens.telemetry.enabled": false,
+  "makefile.configureOnOpen": true,
   "path-intellisense.autoSlashAfterDirectory": true,
   "path-intellisense.showHiddenFiles": true,
   "python.analysis.addHoverSummaries": true,
   "python.analysis.typeCheckingMode": "standard",
   "python.languageServer": "Pylance",
   "redhat.telemetry.enabled": false,
+  "remote.autoForwardPortsSource": "hybrid",
   "remote.SSH.remotePlatform": {
     "minis": "linux"
   },
@@ -133,7 +138,6 @@
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
   "workbench.colorCustomizations": {},
-  "workbench.colorTheme": "GitHub Dark High Contrast",
   "workbench.externalBrowser": "edge",
   "workbench.iconTheme": "material-icon-theme"
 }
