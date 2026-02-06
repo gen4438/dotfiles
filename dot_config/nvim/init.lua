@@ -8,18 +8,17 @@ if vim.g.vscode then
   require("config.environment").setup()
   require("config.options")
   require("_vscode.config.autocmds-vscode") -- VSCode専用のautocmdsを読み込む
-  require("_vscode.config.keymaps-vscode") -- VSCode専用のキーマップを読み込む
+  require("_vscode.config.keymaps-vscode")  -- VSCode専用のキーマップを読み込む
   -- require("config.commands")
   -- require("config.filetypes")
   require("config.colorscheme_pre")
   require("config.lazy")
   require("config.colorscheme_post")
   require("config.custom")
-  require("_vscode.config.custom-vscode").setup()  -- VSCode固有の最適化を最後に実行
-  return -- VSCode環境ではここで終了
+  require("_vscode.config.custom-vscode").setup() -- VSCode固有の最適化を最後に実行
+  return                                          -- VSCode環境ではここで終了
 end
 
--- 通常のNeovim環境での設定（VSCode以外）
 -- Basic Vim functionality and settings
 require("config.base")
 

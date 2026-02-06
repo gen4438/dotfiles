@@ -5,5 +5,9 @@
     "type": "command",
     "command": "printf '\\e[38;5;40m%s\\e[0m@\\e[38;5;34m%s\\e[0m:\\e[38;5;82m%s\\e[0m' \"$(whoami)\" \"$(hostname -s)\" \"$(pwd)\""
   },
-  "alwaysThinkingEnabled": false
+  "enabledPlugins": {
+    "ralph-loop@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true
 }

@@ -16,7 +16,15 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
-local plugin_dir = vim.g.vscode and "_vscode/plugins" or "plugins"
+local os = vim.loop.os_uname().sysname
+local plugin_dir
+if vim.g.vscode then
+  plugin_dir = "_vscode/plugins"
+elseif os == "Windows_NT" then
+  plugin_dir = "_windows/plugins"
+else
+  plugin_dir = "plugins"
+end
 
 require("lazy").setup({
   spec = {
