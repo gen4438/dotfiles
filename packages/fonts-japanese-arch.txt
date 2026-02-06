@@ -1,0 +1,3 @@
+# Japanese fonts for Arch-based distributions
+
+noto-fonts-cjk

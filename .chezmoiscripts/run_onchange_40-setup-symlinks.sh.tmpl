@@ -1,10 +1,14 @@
 {{ template "shebang-bash.tmpl" . }}
 # Create symlinks for executables in .local/share to .local/bin
 # This script runs when the content changes
+# This script is refactored to use common libraries
 
 set -e
 
-echo "🔗 Setting up symlinks for external tools..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+
+log_info "Setting up symlinks for external tools..."
 
 # Ensure .local/bin directory exists
 mkdir -p "$HOME/.local/bin"
@@ -12,26 +16,28 @@ mkdir -p "$HOME/.local/bin"
 # Create symlinks for tmux-xpanes (only for bash - zsh uses zplug)
 # Check if not using zsh as the default shell
 if [[ "$SHELL" != *"zsh"* ]] && [[ -f "$HOME/.local/share/tmux-xpanes/bin/xpanes" ]]; then
-    echo "Creating symlink: xpanes"
+    log_step "Creating symlinks for tmux-xpanes..."
+
     ln -sf "$HOME/.local/share/tmux-xpanes/bin/xpanes" "$HOME/.local/bin/xpanes"
-    
+    log_info "Created symlink: xpanes"
+
     if [[ -f "$HOME/.local/share/tmux-xpanes/bin/tmux-xpanes" ]]; then
-        echo "Creating symlink: tmux-xpanes"
         ln -sf "$HOME/.local/share/tmux-xpanes/bin/tmux-xpanes" "$HOME/.local/bin/tmux-xpanes"
+        log_info "Created symlink: tmux-xpanes"
     else
         # Create symlink to xpanes if tmux-xpanes doesn't exist
-        echo "Creating symlink: tmux-xpanes -> xpanes"
         ln -sf "$HOME/.local/bin/xpanes" "$HOME/.local/bin/tmux-xpanes"
+        log_info "Created symlink: tmux-xpanes -> xpanes"
     fi
-    
-    echo "✅ tmux-xpanes symlinks created"
+
+    log_success "tmux-xpanes symlinks created"
 elif [[ "$SHELL" == *"zsh"* ]]; then
-    echo "⚠️ Using zsh - tmux-xpanes managed by zplug, skipping symlink creation"
+    log_info "Using zsh - tmux-xpanes managed by zplug, skipping symlink creation"
 else
-    echo "⚠️ tmux-xpanes not found in .local/share, skipping symlink creation"
+    log_warning "tmux-xpanes not found in .local/share, skipping symlink creation"
 fi
 
-echo "✅ Symlink setup completed"
+log_success "Symlink setup completed"
 
 # Hash to trigger updates when script changes
 # Script hash: {{ include ".chezmoiscripts/run_onchange_40-setup-symlinks.sh.tmpl" | sha256sum }}

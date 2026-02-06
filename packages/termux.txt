@@ -1,0 +1,45 @@
+# Packages for Termux (Android)
+
+# Build tools
+build-essential
+clang
+
+# Essential tools
+curl
+wget
+git
+vim
+
+# Shell
+zsh
+
+# Modern CLI tools
+ripgrep
+fd
+bat
+git-delta
+
+# Directory environment
+direnv
+
+# Termux specific
+termux-api
+
+# Python
+python
+
+# Node.js
+nodejs
+
+# Go language
+golang
+
+# Text editor
+neovim
+
+# GitHub CLI
+gh
+
+# Other utilities
+jq
+openssh

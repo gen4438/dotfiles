@@ -1,74 +1,64 @@
 {{ template "shebang-bash.tmpl" . }}
 # Setup development tools after package installation
+# This script is refactored to use common libraries
 # script hash: {{ include ".chezmoiscripts/run_once_after_20-setup-tools.sh.tmpl" | sha256sum }}
 
 set -e
 
-echo "Setting up development tools..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+{{ template "lib-pyenv.sh.tmpl" . }}
+{{ template "lib-nvm.sh.tmpl" . }}
+
+log_info "Setting up development tools..."
 
 # Setup fzf
-if [[ -d "$HOME/.fzf" ]]; then
-    echo "Checking fzf setup..."
+if check_directory "$HOME/.fzf"; then
+    log_step "Checking fzf setup..."
     # Check if fzf is already properly installed
     if [[ ! -f "$HOME/.fzf.bash" ]] || [[ ! -f "$HOME/.fzf.zsh" ]]; then
-        echo "Setting up fzf..."
+        log_running "Setting up fzf..."
         cd "$HOME/.fzf"
         ./install --all --no-update-rc
-        echo "✅ fzf setup completed"
+        log_success "fzf setup completed"
     else
-        echo "✅ fzf already configured"
+        log_success "fzf already configured"
     fi
 fi
 
-# Setup pyenv
-if [[ -d "$HOME/.pyenv" ]]; then
-    echo "Setting up pyenv..."
-    
-    # Initialize pyenv in current session
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
-        
-        # Install latest Python if none installed
-        if [[ -z "$(pyenv versions --bare)" ]]; then
-            echo "Installing latest Python version..."
-            LATEST_PYTHON=$(pyenv install --list | grep -E "^\s*3\.[0-9]+\.[0-9]+$" | tail -1 | xargs)
-            if [[ -n "$LATEST_PYTHON" ]]; then
-                pyenv install "$LATEST_PYTHON"
-                pyenv global "$LATEST_PYTHON"
-                echo "✅ Python $LATEST_PYTHON installed and set as global"
-            fi
-        fi
+# Setup pyenv and install Python
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up pyenv..."
+
+if pyenv_ensure_latest; then
+    log_success "pyenv setup completed"
+else
+    log_warning "Failed to setup pyenv"
+    log_info "pyenv may not be installed yet. Install it with:"
+    {{- if eq .chezmoi.os "darwin" }}
+    log_info "  brew install pyenv pyenv-virtualenv"
+    {{- else if eq .chezmoi.os "linux" }}
+    log_info "  chezmoi will install pyenv via externals to ~/.pyenv"
+    log_info "  Run 'chezmoi apply' again after system packages are installed"
+    {{- end }}
+fi
+{{- end }}
+
+# Setup nvm and install Node.js
+if check_directory "$HOME/.nvm"; then
+    log_step "Setting up nvm..."
+
+    if nvm_ensure_lts; then
+        log_success "nvm setup completed"
+    else
+        log_error "Failed to setup nvm"
     fi
 fi
-
-# Setup nvm
-if [[ -d "$HOME/.nvm" ]]; then
-    echo "Setting up nvm..."
-    
-    # Source nvm in current session
-    export NVM_DIR="$HOME/.nvm"
-    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
-    
-    if command -v nvm >/dev/null 2>&1; then
-        # Install latest LTS Node.js if none installed
-        if [[ -z "$(nvm list | grep -v 'N/A')" ]]; then
-            echo "Installing latest LTS Node.js..."
-            nvm install --lts
-            nvm use --lts
-            nvm alias default lts/*
-            echo "✅ Node.js LTS installed and set as default"
-        fi
-    fi
-fi
-
 
 # Setup zplug and install plugins (only for zsh users)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
 {{- if $shells.uses_zsh }}
-echo "Setting up zplug plugins..."
+log_step "Setting up zplug plugins..."
 
 # Platform-appropriate zplug detection
 {{- if eq .chezmoi.os "darwin" }}
@@ -93,19 +83,19 @@ fi
 {{- end }}
 
 if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
-    echo "Checking zplug plugins..."
-    
+    log_info "Checking zplug plugins..."
+
     # zplug requires zsh, so we run it in a zsh subshell
-    if command -v zsh >/dev/null 2>&1; then
+    if check_command zsh; then
         # Check if plugins are already installed by checking for a key plugin directory
         ZPLUG_REPOS_DIR="$ZPLUG_HOME/repos"
         if [[ ! -d "$ZPLUG_REPOS_DIR/sindresorhus/pure" ]] || [[ ! -d "$ZPLUG_REPOS_DIR/robbyrussell/oh-my-zsh" ]]; then
-            echo "Installing zplug plugins..."
+            log_running "Installing zplug plugins..."
             zsh -c "
                 export ZPLUG_HOME='$ZPLUG_HOME'
                 source '$ZPLUG_HOME/init.zsh'
                 zstyle ':zplug:tag' depth 1
-                
+
                 # Define plugins (matching .zshrc.tmpl)
                 zplug 'lib/completion', from:oh-my-zsh
                 zplug 'lib/directories', from:oh-my-zsh
@@ -125,72 +115,72 @@ if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
                 zplug 'rupa/z', use:z.sh
                 zplug 'greymd/tmux-xpanes'
                 zplug 'qoomon/zsh-lazyload'
-                
-                # Install plugins (ignore "no packages to install" error)
+
+                # Install plugins (ignore \"no packages to install\" error)
                 zplug install || [[ \$? -eq 1 && \$(zplug list | wc -l) -gt 0 ]]
             "
-            echo "✅ zplug plugins installed"
+            log_success "zplug plugins installed"
         else
-            echo "✅ zplug plugins already installed"
+            log_success "zplug plugins already installed"
         fi
     else
-        echo "⚠️ zsh not available, skipping zplug plugin installation"
+        log_warning "zsh not available, skipping zplug plugin installation"
     fi
 else
-    echo "⚠️ zplug not found, skipping plugin installation"
+    log_warning "zplug not found, skipping plugin installation"
 fi
 {{- else }}
-echo "⚠️ zsh not detected, skipping zplug plugin installation"
+log_info "zsh not detected, skipping zplug plugin installation"
 {{- end }}
 
 # Setup tmux plugin manager
-if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
-    echo "Checking tmux plugin manager..."
-    
+if check_directory "$HOME/.tmux/plugins/tpm"; then
+    log_step "Checking tmux plugin manager..."
+
     # Install tmux plugins if tmux is available
-    if command -v tmux >/dev/null 2>&1; then
+    if check_command tmux; then
         # Check if plugins are already installed by looking for common plugin directories
         if [[ ! -d "$HOME/.tmux/plugins/tmux-sensible" ]] && [[ ! -d "$HOME/.tmux/plugins/tmux-yank" ]]; then
-            echo "Installing tmux plugins..."
+            log_running "Installing tmux plugins..."
             # Set TMUX_PLUGIN_MANAGER_PATH for the install script
             export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
             # Run TPM install script
             "$HOME/.tmux/plugins/tpm/bin/install_plugins"
-            echo "✅ tmux plugins installed"
+            log_success "tmux plugins installed"
         else
-            echo "✅ tmux plugins already installed"
+            log_success "tmux plugins already installed"
         fi
     fi
 fi
 
 {{- if eq .chezmoi.os "darwin" }}
 # macOS specific setup
-echo "Setting up macOS specific tools..."
+log_step "Setting up macOS specific tools..."
 
 # Additional macOS-specific tools can be added here
 {{- end }}
 
 {{- if eq .chezmoi.os "linux" }}
 # Linux specific setup
-echo "Setting up Linux specific tools..."
+log_step "Setting up Linux specific tools..."
 
 # Setup direnv if available
-if command -v direnv >/dev/null 2>&1; then
-    echo "✅ direnv is available"
+if check_command direnv; then
+    log_success "direnv is available"
 fi
 {{- else if eq .chezmoi.os "android" }}
 # Android/Termux specific setup
-echo "Setting up Android/Termux specific tools..."
+log_step "Setting up Android/Termux specific tools..."
 
 # Termux-specific configurations can be added here
-echo "✅ Termux environment detected"
+log_success "Termux environment detected"
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
 # Windows specific setup (PowerShell)
-echo "Setting up Windows specific tools..."
+log_step "Setting up Windows specific tools..."
 
 # This will be handled in PowerShell scripts
 {{- end }}
 
-echo "✅ Development tools setup completed"
+log_success "Development tools setup completed"

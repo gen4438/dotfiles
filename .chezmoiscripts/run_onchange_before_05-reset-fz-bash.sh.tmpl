@@ -1,30 +1,85 @@
 {{ template "shebang-bash.tmpl" . }}
-# Reset fz.bash before external repository updates to prevent git conflicts (bash only)
+# Reset fz.bash to prevent potential git conflicts (bash only)
+# This script is refactored to use common libraries with proper error handling
+# Note: This runs AFTER chezmoi externals update, so it can't prevent conflicts during git pull
+# Its main purpose is to ensure fz.bash is clean before the patch script runs
 # fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") | sha256sum }}{{ end }}
+
+set -e
+
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
 
 FZ_DIR="$HOME/.local/share/fz"
 FZ_BASH_FILE="$FZ_DIR/fz.bash"
 
 # Only run this for bash users (zsh can use fz.sh directly)
-if [[ "${SHELL##*/}" == "bash" ]] && [[ -d "$FZ_DIR/.git" ]] && [[ -e "$FZ_BASH_FILE" ]]; then
-    echo "Resetting fz.bash before external updates..."
-    cd "$FZ_DIR"
-
-    # Only remove fz.bash if it's a symlink (to prevent git conflicts)
-    # Preserve regular files (bash-compatible versions created by after script)
-    if [[ -L "$FZ_BASH_FILE" ]]; then
-        echo "Removing fz.bash symlink to prevent git conflicts..."
-        rm -f "$FZ_BASH_FILE"
-    fi
-
-    # If it was tracked, reset to clean state
-    if git ls-files --error-unmatch fz.bash >/dev/null 2>&1; then
-        git checkout -- fz.bash 2>/dev/null || true
-        # Remove again if it's a symlink
-        if [[ -L "$FZ_BASH_FILE" ]]; then
-            rm -f "$FZ_BASH_FILE"
-        fi
-    fi
-    
-    cd - >/dev/null
+if [[ "${SHELL##*/}" != "bash" ]]; then
+    exit 0
 fi
+
+# Check if fz directory exists and is a git repository
+if [[ ! -d "$FZ_DIR/.git" ]]; then
+    # Not a git repository or doesn't exist, nothing to do
+    exit 0
+fi
+
+# Check if fz.bash exists
+if [[ ! -e "$FZ_BASH_FILE" ]] && [[ ! -L "$FZ_BASH_FILE" ]]; then
+    # fz.bash doesn't exist, nothing to do
+    exit 0
+fi
+
+log_step "Checking fz.bash state..."
+
+cd "$FZ_DIR" || exit 1
+
+# Check if fz.bash is tracked by git
+if git ls-files --error-unmatch fz.bash >/dev/null 2>&1; then
+    log_info "fz.bash is tracked by git"
+
+    # Check if it has local modifications
+    if ! git diff --quiet fz.bash 2>/dev/null; then
+        log_warning "fz.bash has local modifications"
+
+        # If it's our patched version (regular file), remove it so git can restore original
+        if [[ -f "$FZ_BASH_FILE" ]] && [[ ! -L "$FZ_BASH_FILE" ]]; then
+            log_running "Removing modified fz.bash to restore git version..."
+            if rm -f "$FZ_BASH_FILE"; then
+                log_info "Removed modified fz.bash"
+            else
+                log_error "Failed to remove fz.bash"
+                cd - >/dev/null
+                exit 1
+            fi
+        fi
+
+        # Restore original from git
+        if git checkout -- fz.bash 2>/dev/null; then
+            log_success "Restored fz.bash from git"
+        else
+            log_warning "Could not restore fz.bash from git"
+        fi
+    else
+        log_info "fz.bash is clean (no modifications)"
+    fi
+else
+    # fz.bash is not tracked by git
+    log_info "fz.bash is not tracked by git"
+
+    # If it's a symlink, remove it
+    if [[ -L "$FZ_BASH_FILE" ]]; then
+        log_running "Removing fz.bash symlink..."
+        if rm -f "$FZ_BASH_FILE"; then
+            log_info "Removed fz.bash symlink"
+        else
+            log_warning "Failed to remove fz.bash symlink"
+        fi
+    else
+        log_info "fz.bash is a regular file (will be recreated by patch script)"
+    fi
+fi
+
+cd - >/dev/null || true
+
+log_success "fz.bash reset completed"

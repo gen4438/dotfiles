@@ -1,34 +1,112 @@
 {{ template "shebang-bash.tmpl" . }}
 # Create bash-compatible version of fz.sh after external updates (bash only)
+# This script is refactored to use common libraries with proper error handling
 # fz.sh hash: {{ if stat (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") }}{{ include (joinPath .chezmoi.homeDir ".local/share/fz/fz.sh") | sha256sum }}{{ end }}
+
+set -e
+
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
 
 FZ_DIR="$HOME/.local/share/fz"
 FZ_SH_FILE="$FZ_DIR/fz.sh"
 FZ_BASH_FILE="$FZ_DIR/fz.bash"
 
 # Only run this for bash users (zsh can use fz.sh directly)
-if [[ "${SHELL##*/}" == "bash" ]] && [[ -f "$FZ_SH_FILE" ]]; then
-    # Check if update is needed
-    if [[ ! -e "$FZ_BASH_FILE" ]] || [[ -L "$FZ_BASH_FILE" ]] || [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
-        # Remove existing symlink if it exists
-        if [[ -L "$FZ_BASH_FILE" ]]; then
-            echo "Removing fz.bash symlink to create bash-compatible copy..."
-            rm "$FZ_BASH_FILE"
-        fi
-        
-        # Create bash-compatible copy
-        echo "Creating bash-compatible copy of fz.sh..."
-        
-        # Copy and patch for bash compatibility
-        cp "$FZ_SH_FILE" "$FZ_BASH_FILE"
-        
-        # Fix zsh-specific syntax for bash
-        sed -i 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE"
-        
-        echo "fz.bash created with bash compatibility fixes"
-    else
-        echo "fz.bash is up to date"
-    fi
-else
-    [[ "${SHELL##*/}" == "zsh" ]] && echo "Using zsh - fz.sh is used directly, skipping bash compatibility patch"
+if [[ "${SHELL##*/}" != "bash" ]]; then
+    log_info "Using zsh - fz.sh is used directly, skipping bash compatibility patch"
+    exit 0
 fi
+
+# Check if fz.sh exists
+if [[ ! -f "$FZ_SH_FILE" ]]; then
+    log_warning "fz.sh not found at $FZ_SH_FILE, skipping"
+    exit 0
+fi
+
+log_step "Checking fz.bash compatibility patch..."
+
+# Check if update is needed
+NEED_UPDATE=false
+
+if [[ ! -e "$FZ_BASH_FILE" ]]; then
+    log_info "fz.bash does not exist, will create"
+    NEED_UPDATE=true
+elif [[ -L "$FZ_BASH_FILE" ]]; then
+    log_info "fz.bash is a symlink, will replace with patched copy"
+    NEED_UPDATE=true
+elif [[ "$FZ_SH_FILE" -nt "$FZ_BASH_FILE" ]]; then
+    log_info "fz.sh is newer than fz.bash, will update"
+    NEED_UPDATE=true
+fi
+
+if [[ "$NEED_UPDATE" == "false" ]]; then
+    log_success "fz.bash is up to date"
+    exit 0
+fi
+
+# Remove existing symlink or file if it exists
+if [[ -e "$FZ_BASH_FILE" ]] || [[ -L "$FZ_BASH_FILE" ]]; then
+    log_running "Removing existing fz.bash..."
+    if rm -f "$FZ_BASH_FILE"; then
+        log_info "Removed existing fz.bash"
+    else
+        log_error "Failed to remove existing fz.bash"
+        exit 1
+    fi
+fi
+
+# Create bash-compatible copy
+log_running "Creating bash-compatible copy of fz.sh..."
+
+if ! cp "$FZ_SH_FILE" "$FZ_BASH_FILE"; then
+    log_error "Failed to copy fz.sh to fz.bash"
+    exit 1
+fi
+
+log_info "Copied fz.sh to fz.bash"
+
+# Fix zsh-specific syntax for bash
+# Use cross-platform sed (works on both Linux and macOS)
+log_running "Applying bash compatibility patch..."
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS: sed -i requires backup extension
+if sed -i '' 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE" 2>/dev/null; then
+    log_success "Bash compatibility patch applied"
+else
+    log_warning "sed failed, trying alternative method..."
+    # Fallback: use temporary file
+    if sed 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE" > "$FZ_BASH_FILE.tmp" && mv "$FZ_BASH_FILE.tmp" "$FZ_BASH_FILE"; then
+        log_success "Bash compatibility patch applied (fallback method)"
+    else
+        log_error "Failed to apply bash compatibility patch"
+        rm -f "$FZ_BASH_FILE.tmp"
+        exit 1
+    fi
+fi
+{{- else }}
+# Linux and others: standard sed -i
+if sed -i 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE" 2>/dev/null; then
+    log_success "Bash compatibility patch applied"
+else
+    log_warning "sed failed, trying alternative method..."
+    # Fallback: use temporary file
+    if sed 's/\${=fzf}/\${fzf}/g' "$FZ_BASH_FILE" > "$FZ_BASH_FILE.tmp" && mv "$FZ_BASH_FILE.tmp" "$FZ_BASH_FILE"; then
+        log_success "Bash compatibility patch applied (fallback method)"
+    else
+        log_error "Failed to apply bash compatibility patch"
+        rm -f "$FZ_BASH_FILE.tmp"
+        exit 1
+    fi
+fi
+{{- end }}
+
+# Verify the patch was applied
+if grep -q '\${fzf}' "$FZ_BASH_FILE" && ! grep -q '\${=fzf}' "$FZ_BASH_FILE"; then
+    log_success "fz.bash created and patched successfully"
+else
+    log_warning "Patch verification uncertain, but file was created"
+fi
+
+log_success "fz.bash setup completed"

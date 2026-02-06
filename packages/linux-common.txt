@@ -1,0 +1,26 @@
+# Common packages for all Linux distributions
+# These are essential tools needed across all systems
+
+# Development tools
+curl
+wget
+git
+vim
+
+# Shell
+zsh
+
+# CLI utilities
+jq
+
+# Directory environment
+direnv
+
+# Clipboard utilities (X11)
+xclip
+
+# System configuration tracking
+etckeeper
+
+# Encryption tool
+age

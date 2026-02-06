@@ -1,26 +1,36 @@
 {{ template "shebang-bash.tmpl" . }}
 # Initialize shell completions for various tools
 # This script runs only once during initial setup
+# This script is refactored to use common libraries
 
 set -e
 
-echo "Initializing shell completions..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+
+log_info "Initializing shell completions..."
 
 # Check if make is available
-if ! command -v make >/dev/null 2>&1; then
-    echo "⚠️ make is not installed, skipping completion initialization"
+if ! check_command make; then
+    log_warning "make is not installed, skipping completion initialization"
     exit 0
 fi
 
 # Run make update-completions from chezmoi source directory
 CHEZMOI_SOURCE_DIR="{{ .chezmoi.sourceDir }}"
-if [ -f "$CHEZMOI_SOURCE_DIR/Makefile" ]; then
+
+if [[ -f "$CHEZMOI_SOURCE_DIR/Makefile" ]]; then
+    log_running "Running make update-completions..."
     cd "$CHEZMOI_SOURCE_DIR"
-    make update-completions
+
+    if make update-completions; then
+        log_success "Shell completions initialization completed"
+        log_info "To update completions in the future, run: make update-completions"
+    else
+        log_error "Failed to update completions"
+        exit 1
+    fi
 else
-    echo "⚠️ Makefile not found in chezmoi source directory"
+    log_error "Makefile not found in chezmoi source directory"
     exit 1
 fi
-
-echo "✅ Shell completions initialization completed"
-echo "💡 To update completions in the future, run: make update-completions"

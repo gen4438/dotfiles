@@ -1,0 +1,165 @@
+# nvm library for chezmoi scripts
+# Provides helpers for nvm initialization and Node.js management
+
+# Initialize nvm in current session
+# Returns: 0 if successful, 1 if nvm not found
+nvm_init() {
+    if [[ ! -d "$HOME/.nvm" ]]; then
+        log_warning "nvm directory not found at $HOME/.nvm"
+        return 1
+    fi
+
+    export NVM_DIR="$HOME/.nvm"
+
+    if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+        log_error "nvm.sh not found at $NVM_DIR/nvm.sh"
+        return 1
+    fi
+
+    # Source nvm
+    \. "$NVM_DIR/nvm.sh"
+
+    if ! check_command nvm; then
+        log_error "nvm command not available after sourcing nvm.sh"
+        return 1
+    fi
+
+    return 0
+}
+
+# Check if any Node.js version is installed
+# Returns: 0 if at least one version is installed, 1 if none
+nvm_has_node_installed() {
+    if ! check_command nvm; then
+        return 1
+    fi
+
+    # Check if any version is installed (excluding "N/A" messages)
+    local installed=$(nvm list | grep -v 'N/A' | grep -v '^$' | wc -l)
+
+    if [[ $installed -gt 0 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Get current default Node.js version
+# Prints: Version string or empty if none
+nvm_get_default_version() {
+    if ! check_command nvm; then
+        return 1
+    fi
+
+    nvm version default 2>/dev/null || echo ""
+}
+
+# Install latest LTS Node.js
+# Returns: 0 if successful or already installed, 1 if failed
+nvm_install_lts() {
+    if ! check_command nvm; then
+        log_error "nvm not available"
+        return 1
+    fi
+
+    log_running "Installing latest LTS Node.js..."
+
+    if nvm install --lts; then
+        log_success "Node.js LTS installed successfully"
+
+        # Set as default
+        if nvm alias default lts/*; then
+            log_success "Set LTS as default Node.js version"
+        fi
+
+        return 0
+    else
+        log_error "Failed to install Node.js LTS"
+        return 1
+    fi
+}
+
+# Use LTS version
+# Returns: 0 if successful, 1 if failed
+nvm_use_lts() {
+    if ! check_command nvm; then
+        log_error "nvm not available"
+        return 1
+    fi
+
+    if nvm use --lts >/dev/null 2>&1; then
+        return 0
+    else
+        log_error "Failed to use LTS Node.js version"
+        return 1
+    fi
+}
+
+# Ensure LTS Node.js is installed and set as default
+# Returns: 0 if successful, 1 if failed
+nvm_ensure_lts() {
+    log_step "Ensuring Node.js LTS is available..."
+
+    if ! nvm_init; then
+        log_error "Failed to initialize nvm"
+        return 1
+    fi
+
+    if nvm_has_node_installed; then
+        local current=$(nvm_get_default_version)
+        log_info "Node.js is already installed (default: ${current:-none})"
+
+        # Try to use LTS
+        if nvm_use_lts; then
+            log_success "Using Node.js LTS"
+            return 0
+        fi
+    fi
+
+    # Install LTS if not installed or failed to use
+    if ! nvm_install_lts; then
+        return 1
+    fi
+
+    return 0
+}
+
+# Install global npm packages
+# Args: package1, package2, ...
+# Returns: 0 if successful, 1 if failed
+nvm_install_global_packages() {
+    local packages=("$@")
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        log_warning "No packages specified"
+        return 0
+    fi
+
+    if ! check_command npm; then
+        log_error "npm not available"
+        return 1
+    fi
+
+    log_running "Installing global npm packages: ${packages[*]}"
+
+    if npm install -g "${packages[@]}"; then
+        log_success "Global npm packages installed successfully"
+        return 0
+    else
+        log_error "Failed to install global npm packages"
+        return 1
+    fi
+}
+
+# Check if global npm package is installed
+# Args: package_name
+# Returns: 0 if installed, 1 if not
+nvm_is_global_package_installed() {
+    local package="$1"
+
+    if ! check_command npm; then
+        return 1
+    fi
+
+    npm list -g "$package" >/dev/null 2>&1
+}

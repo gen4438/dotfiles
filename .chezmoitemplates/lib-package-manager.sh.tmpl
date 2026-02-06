@@ -1,0 +1,151 @@
+# Package manager library for chezmoi scripts
+# Provides abstraction layer for different package managers
+
+# Detect package manager
+detect_package_manager() {
+    {{- if eq .chezmoi.os "linux" }}
+    {{- $distro := .chezmoi.osRelease.id }}
+    {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
+    echo "apt"
+    {{- else if or (eq $distro "almalinux") (eq $distro "rocky") (eq $distro "centos") (eq $distro "rhel") (eq $distro "fedora") }}
+    echo "dnf"
+    {{- else if or (eq $distro "arch") (eq $distro "manjaro") }}
+    echo "pacman"
+    {{- else if eq $distro "termux" }}
+    echo "pkg"
+    {{- else }}
+    echo "unknown"
+    {{- end }}
+    {{- else if eq .chezmoi.os "darwin" }}
+    echo "brew"
+    {{- else if eq .chezmoi.os "windows" }}
+    echo "winget"
+    {{- else }}
+    echo "unknown"
+    {{- end }}
+}
+
+# Update package database
+update_package_database() {
+    local pm=$(detect_package_manager)
+    log_running "Updating package database ($pm)..."
+
+    case "$pm" in
+        apt)
+            sudo -E apt update
+            ;;
+        dnf)
+            sudo -E dnf update -y
+            ;;
+        pacman)
+            sudo -E pacman -Syu --noconfirm
+            ;;
+        pkg)
+            pkg update
+            ;;
+        brew)
+            brew update
+            ;;
+        *)
+            log_warning "Unknown package manager, skipping update"
+            return 1
+            ;;
+    esac
+}
+
+# Install packages
+# Usage: install_packages package1 package2 package3
+install_packages() {
+    local pm=$(detect_package_manager)
+    local packages=("$@")
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        log_warning "No packages specified"
+        return 0
+    fi
+
+    log_running "Installing packages: ${packages[*]}"
+
+    case "$pm" in
+        apt)
+            sudo -E apt install -y "${packages[@]}"
+            ;;
+        dnf)
+            sudo -E dnf install -y "${packages[@]}"
+            ;;
+        pacman)
+            sudo -E pacman -S --noconfirm "${packages[@]}"
+            ;;
+        pkg)
+            pkg install -y "${packages[@]}"
+            ;;
+        brew)
+            brew install "${packages[@]}"
+            ;;
+        *)
+            log_error "Unknown package manager, cannot install packages"
+            return 1
+            ;;
+    esac
+
+    if [[ $? -eq 0 ]]; then
+        log_success "Packages installed successfully"
+        return 0
+    else
+        log_error "Failed to install packages"
+        return 1
+    fi
+}
+
+# Check if package is installed
+is_package_installed() {
+    local pm=$(detect_package_manager)
+    local package="$1"
+
+    case "$pm" in
+        apt)
+            dpkg -l "$package" 2>/dev/null | grep -q "^ii"
+            ;;
+        dnf)
+            rpm -q "$package" >/dev/null 2>&1
+            ;;
+        pacman)
+            pacman -Q "$package" >/dev/null 2>&1
+            ;;
+        pkg)
+            pkg list-installed "$package" >/dev/null 2>&1
+            ;;
+        brew)
+            brew list "$package" >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+# Install packages from file
+# Usage: install_packages_from_file filepath
+install_packages_from_file() {
+    local file="$1"
+    local packages=()
+
+    if [[ ! -f "$file" ]]; then
+        log_error "Package list file not found: $file"
+        return 1
+    fi
+
+    # Read packages from file (skip empty lines and comments)
+    while IFS= read -r line; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+        packages+=("$line")
+    done < "$file"
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        log_warning "No packages found in file: $file"
+        return 0
+    fi
+
+    install_packages "${packages[@]}"
+}

@@ -1,0 +1,5 @@
+# Japanese fonts for Ubuntu/Debian
+
+fonts-takao
+fonts-ipafont
+fonts-ipaexfont

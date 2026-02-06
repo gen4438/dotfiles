@@ -1,9 +1,13 @@
 {{- if eq .chezmoi.os "windows" -}}
 # Windows-specific system settings and PATH configuration
+# This script is refactored to use common libraries
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Configuring Windows-specific settings..."
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Configuring Windows-specific settings..."
 
 # Function to add directory to PATH
 function Add-ToPath {
@@ -16,15 +20,15 @@ function Add-ToPath {
         $pathEntries = $currentPath -split ';' | Where-Object { $_ -ne '' }
 
         if ($NewPath -notin $pathEntries) {
-            Write-Host "Adding $NewPath to user PATH"
+            Log-Running "Adding $NewPath to user PATH"
             $newUserPath = ($pathEntries + $NewPath) -join ';'
             [System.Environment]::SetEnvironmentVariable('PATH', $newUserPath, [System.EnvironmentVariableTarget]::User)
-            Write-Host "✅ Added $NewPath to PATH"
+            Log-Success "Added $NewPath to PATH"
         } else {
-            Write-Host "✅ $NewPath is already in PATH"
+            Log-Success "$NewPath is already in PATH"
         }
     } else {
-        Write-Host "⏳ Directory $NewPath does not exist yet, skipping"
+        Log-Info "Directory $NewPath does not exist yet, skipping"
     }
 }
 
@@ -32,11 +36,19 @@ function Add-ToPath {
 $userBinPath = "$env:USERPROFILE\bin"
 $localBinPath = "$env:USERPROFILE\.local\bin"
 
+Log-Step "Setting up user bin directories..."
+
 # Create directories if they don't exist
 @($userBinPath, $localBinPath) | ForEach-Object {
     if (-not (Test-Path $_)) {
-        New-Item -ItemType Directory -Path $_ -Force | Out-Null
-        Write-Host "✅ Created directory: $_"
+        try {
+            New-Item -ItemType Directory -Path $_ -Force | Out-Null
+            Log-Success "Created directory: $_"
+        } catch {
+            Log-Error "Failed to create directory ${_}: $($_.Exception.Message)"
+        }
+    } else {
+        Log-Info "Directory already exists: $_"
     }
 }
 
@@ -45,38 +57,44 @@ Add-ToPath $userBinPath
 Add-ToPath $localBinPath
 
 # Set DISPLAY environment variable for X11 forwarding
-[System.Environment]::SetEnvironmentVariable('DISPLAY', 'localhost:0', [System.EnvironmentVariableTarget]::User)
-Write-Host "✅ Set DISPLAY=localhost:0 for user environment"
-
-# Add MSYS2 and LLVM bin directories to PATH
-# Note: With Scoop, these packages automatically manage PATH, so manual addition is no longer needed
-# $extraPaths = @(
-#     "C:\msys64\usr\bin",
-#     "C:\Program Files\LLVM\bin"
-# )
-# $extraPaths | ForEach-Object { Add-ToPath $_ }
+Log-Step "Setting up X11 forwarding..."
+try {
+    [System.Environment]::SetEnvironmentVariable('DISPLAY', 'localhost:0', [System.EnvironmentVariableTarget]::User)
+    Log-Success "Set DISPLAY=localhost:0 for user environment"
+} catch {
+    Log-Warning "Failed to set DISPLAY environment variable: $_"
+}
 
 # Apply keyboard repeat rate settings
 $regFile = "{{ .chezmoi.sourceDir }}\scripts\windows\key_speed.reg"
+
 if (Test-Path $regFile) {
+    Log-Step "Applying keyboard repeat rate settings..."
     try {
-        Write-Host "Applying keyboard repeat rate settings..."
         Start-Process -FilePath "reg" -ArgumentList "import", "`"$regFile`"" -Wait -NoNewWindow
-        Write-Host "✅ Keyboard settings applied"
+        Log-Success "Keyboard settings applied"
     } catch {
-        Write-Warning "❌ Failed to apply keyboard settings: $_"
+        Log-Warning "Failed to apply keyboard settings: $_"
     }
 } else {
-    Write-Warning "⏳ Registry file not found: $regFile"
+    Log-Info "Registry file not found: $regFile (skipping keyboard settings)"
 }
 
 # Create PowerShell profile directory if it doesn't exist
+Log-Step "Setting up PowerShell profile directory..."
 $profileDir = Split-Path $PROFILE -Parent
+
 if (-not (Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
-    Write-Host "✅ Created PowerShell profile directory"
+    try {
+        New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+        Log-Success "Created PowerShell profile directory"
+    } catch {
+        Log-Error "Failed to create PowerShell profile directory: $_"
+    }
+} else {
+    Log-Success "PowerShell profile directory already exists"
 }
 
-Write-Host "✅ Windows settings configuration completed"
-Write-Host "📝 Note: You may need to restart your shell or log out/in for PATH changes to take effect"
+Log-Success "Windows settings configuration completed"
+Log-Info "Note: You may need to restart your shell or log out/in for PATH changes to take effect"
 {{- end }}

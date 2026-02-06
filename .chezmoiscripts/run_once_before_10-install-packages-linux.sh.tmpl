@@ -3,163 +3,111 @@
 {{- if not (eq $distro "termux") -}}
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Linux distributions
+# This script is refactored to use common libraries and external package lists
 
 set -e
 
-echo "Installing essential packages for {{ .chezmoi.osRelease.name }}..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+{{ template "lib-package-manager.sh.tmpl" . }}
 
+log_info "Installing essential packages for {{ .chezmoi.osRelease.name }}..."
+
+# Update package database
+update_package_database
+
+# Install common packages
+log_step "Installing common Linux packages..."
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-common.txt"
+
+# Install distribution-specific packages
 {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
-# Ubuntu/Debian
-# Update package lists
-sudo -E apt update
+log_step "Installing Ubuntu/Debian-specific packages..."
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-ubuntu.txt"
 
-# Install essential packages
-sudo -E apt install -y \
-    build-essential \
-    curl \
-    wget \
-    git \
-    vim \
-    zsh \
-    ripgrep \
-    fd-find \
-    bat \
-    direnv \
-    xclip \
-    jq \
-    etckeeper \
-    age \
-    python3-pip \
-    python3-venv \
-    pipx \
-    golang-go
-
-# Install build environment for pyenv
-sudo -E apt install -y make build-essential libssl-dev zlib1g-dev \
-    libbz2-dev libreadline-dev libsqlite3-dev curl git \
-    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
-
-# Install Neovim
-sudo -E add-apt-repository ppa:neovim-ppa/unstable -y
-sudo -E apt install -y neovim
-
-# Install Japanese fonts if GUI or X11 forwarding might be used
-if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || [ -n "$XDG_SESSION_TYPE" ]; then
-    echo "GUI support detected, installing Japanese fonts..."
-    sudo -E apt install -y fonts-takao fonts-ipafont fonts-ipaexfont
+# Install Neovim from PPA
+log_running "Adding Neovim PPA..."
+if sudo -E add-apt-repository ppa:neovim-ppa/unstable -y; then
+    sudo -E apt update
+    install_packages neovim
+else
+    log_warning "Failed to add Neovim PPA, trying to install from default repos..."
+    install_packages neovim || log_warning "Neovim installation failed"
 fi
 
 # GitHub CLI
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo -E dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-&& sudo -E chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo -E tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-&& sudo -E apt update \
-&& sudo -E apt install gh -y
+log_running "Installing GitHub CLI..."
+if ! check_command gh; then
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+        sudo -E dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+        sudo -E chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+        sudo -E tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+        sudo -E apt update && \
+        install_packages gh
+else
+    log_success "GitHub CLI is already installed"
+fi
 
 {{- else if or (eq $distro "almalinux") (eq $distro "rocky") (eq $distro "centos") (eq $distro "rhel") (eq $distro "fedora") }}
-# RedHat-based distributions
+log_step "Installing RedHat-based distribution packages..."
+
 # Enable EPEL repository for additional packages
 {{- if not (eq $distro "fedora") }}
-sudo -E dnf install -y epel-release
+if ! is_package_installed epel-release; then
+    log_running "Installing EPEL repository..."
+    install_packages epel-release
+fi
 {{- end }}
 
-# Update package lists
-sudo -E dnf update -y
-
-# Install essential packages
-sudo -E dnf install -y \
-    gcc \
-    gcc-c++ \
-    make \
-    curl \
-    wget \
-    git \
-    vim \
-    zsh \
-    ripgrep \
-    fd-find \
-    bat \
-    git-delta \
-    direnv \
-    xclip \
-    jq \
-    etckeeper \
-    age \
-    python3-pip \
-    python3-virtualenv \
-    pipx \
-    golang
-
-# Install build environment for pyenv
-sudo -E dnf install -y make gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-redhat.txt"
 
 # Install Neovim
-sudo -E dnf install -y neovim
-
-# Install Japanese fonts if GUI or X11 forwarding might be used
-if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || [ -n "$XDG_SESSION_TYPE" ]; then
-    echo "GUI support detected, installing Japanese fonts..."
-    sudo -E dnf install -y google-noto-sans-cjk-jp-fonts google-noto-serif-cjk-jp-fonts
-fi
+install_packages neovim
 
 # GitHub CLI
-sudo -E dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-sudo -E dnf install -y gh
+log_running "Installing GitHub CLI..."
+if ! check_command gh; then
+    sudo -E dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+    install_packages gh
+else
+    log_success "GitHub CLI is already installed"
+fi
 
 {{- else if or (eq $distro "arch") (eq $distro "manjaro") }}
-# Arch-based distributions
-# Update package database
-sudo -E pacman -Syu --noconfirm
+log_step "Installing Arch-based distribution packages..."
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-arch.txt"
 
-# Install essential packages
-sudo -E pacman -S --noconfirm \
-    base-devel \
-    curl \
-    wget \
-    git \
-    vim \
-    zsh \
-    ripgrep \
-    fd \
-    bat \
-    git-delta \
-    direnv \
-    xclip \
-    jq \
-    etckeeper \
-    age \
-    python-pip \
-    python-virtualenv \
-    python-pipx \
-    go
-
-# Install build environment for pyenv
-sudo -E pacman -S --noconfirm base-devel openssl zlib xz tk
-
-# Install Neovim
-sudo -E pacman -S --noconfirm neovim
-
-# Install Japanese fonts if GUI or X11 forwarding might be used
-if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || [ -n "$XDG_SESSION_TYPE" ]; then
-    echo "GUI support detected, installing Japanese fonts..."
-    sudo -E pacman -S --noconfirm noto-fonts-cjk
-fi
-
-# GitHub CLI
-sudo -E pacman -S --noconfirm github-cli
+# Install Neovim and GitHub CLI
+install_packages neovim github-cli
 
 {{- else }}
-echo "Warning: Unsupported distribution '{{ $distro }}'. Skipping package installation."
-echo "Please install packages manually."
+log_warning "Unsupported distribution '{{ $distro }}'"
+log_warning "Please install packages manually"
 exit 0
 {{- end }}
 
-# Install oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "Installing oh-my-zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+# Install Japanese fonts if GUI or X11 forwarding might be used
+if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" || -n "$XDG_SESSION_TYPE" ]]; then
+    log_step "GUI support detected, installing Japanese fonts..."
+    {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
+    install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/fonts-japanese-ubuntu.txt"
+    {{- else if or (eq $distro "almalinux") (eq $distro "rocky") (eq $distro "centos") (eq $distro "rhel") (eq $distro "fedora") }}
+    install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/fonts-japanese-redhat.txt"
+    {{- else if or (eq $distro "arch") (eq $distro "manjaro") }}
+    install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/fonts-japanese-arch.txt"
+    {{- end }}
 fi
 
-echo "✅ Essential packages installed successfully"
+# Install oh-my-zsh if not present
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    log_running "Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    log_success "oh-my-zsh installed successfully"
+else
+    log_success "oh-my-zsh is already installed"
+fi
+
+log_success "Essential packages installed successfully"
 {{- end }}
 {{- end }}

@@ -1,114 +1,83 @@
 {{- if eq .chezmoi.os "darwin" -}}
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for macOS development environment
+# This script is refactored to use common libraries and external Brewfile
 
 set -e
 
-echo "Installing essential packages for macOS..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+
+log_info "Installing essential packages for macOS..."
 
 # Install Homebrew if not present
-if ! command -v brew >/dev/null 2>&1; then
-    echo "Installing Homebrew..."
+if ! check_command brew; then
+    log_running "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
+
     # Add Homebrew to PATH for current session
     if [[ -f /opt/homebrew/bin/brew ]]; then
         # Apple Silicon
         eval "$(/opt/homebrew/bin/brew shellenv)"
+        log_info "Homebrew installed (Apple Silicon)"
     elif [[ -f /usr/local/bin/brew ]]; then
         # Intel
         eval "$(/usr/local/bin/brew shellenv)"
+        log_info "Homebrew installed (Intel)"
     fi
+
+    log_success "Homebrew installed successfully"
+else
+    log_success "Homebrew is already installed"
 fi
 
 # Update Homebrew
-brew update
-
-# Install essential packages using Homebrew Bundle
-brew bundle --file=/dev/stdin <<EOF
-# Core utilities
-brew "coreutils"
-brew "curl"
-brew "wget"
-brew "rsync"
-brew "unzip"
-brew "tree"
-brew "pwgen"
-
-# Development tools
-brew "git"
-brew "git-delta"
-brew "gh"
-brew "cmake"
-brew "ninja"
-brew "ctags"
-brew "pkg-config"
-
-# Programming languages and build dependencies
-brew "python"
-brew "node"
-brew "go"
-brew "lua"
-brew "luajit"
-brew "lua-language-server"
-brew "readline"
-brew "sqlite"
-brew "xz"
-brew "zlib"
-
-# Version managers
-brew "nvm"
-brew "pyenv"
-brew "pyenv-virtualenv"
-
-# Text editors and terminal tools
-brew "neovim"
-brew "vim"
-brew "tmux"
-brew "byobu"
-brew "gitmux"  # Git status for tmux/byobu
-
-# Modern CLI tools
-brew "bat"
-brew "fd"
-brew "fzf"
-brew "ripgrep"
-brew "jq"
-brew "direnv"
-brew "emojify"
-
-# Shell enhancements
-brew "zsh"
-brew "bash-completion"
-brew "zsh-completions"
-brew "zplug"
-brew "zimfw"
-
-# macOS specific tools
-brew "mas"  # Mac App Store CLI
-
-# GUI applications (Cask)
-cask "rectangle"  # Window management
-cask "karabiner-elements"  # Keyboard customization
-cask "flameshot"  # Screenshot tool
-cask "hammerspoon"  # macOS automation
-cask "vlc"  # Media player
-cask "rar"  # RAR archive utility
-cask "xquartz"  # X11 for macOS
-
-# Fonts (Cask)
-cask "font-fantasque-sans-mono-nerd-font"  # Nerd Font
-cask "font-hack-nerd-font"  # Nerd Font
-EOF
-
-# Install fzf key bindings and fuzzy completion
-$(brew --prefix)/opt/fzf/install --all
-
-# Install oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "Installing oh-my-zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+log_running "Updating Homebrew..."
+if brew update; then
+    log_success "Homebrew updated"
+else
+    log_warning "Failed to update Homebrew, continuing anyway..."
 fi
 
-echo "✅ Essential packages installed successfully"
+# Install packages from Brewfile
+BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
+
+if [[ -f "$BREWFILE" ]]; then
+    log_step "Installing packages from Brewfile..."
+
+    if brew bundle --file="$BREWFILE"; then
+        log_success "Packages installed from Brewfile"
+    else
+        log_error "Failed to install packages from Brewfile"
+        exit 1
+    fi
+else
+    log_error "Brewfile not found at: $BREWFILE"
+    exit 1
+fi
+
+# Install fzf key bindings and fuzzy completion
+if check_command fzf; then
+    log_step "Setting up fzf key bindings..."
+
+    FZF_PREFIX=$(brew --prefix fzf 2>/dev/null || echo "/opt/homebrew/opt/fzf")
+
+    if [[ -f "$FZF_PREFIX/install" ]]; then
+        "$FZF_PREFIX/install" --all --no-update-rc
+        log_success "fzf key bindings installed"
+    else
+        log_warning "fzf install script not found at $FZF_PREFIX"
+    fi
+fi
+
+# Install oh-my-zsh
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    log_running "Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    log_success "oh-my-zsh installed successfully"
+else
+    log_success "oh-my-zsh is already installed"
+fi
+
+log_success "Essential packages installed successfully"
 {{- end }}

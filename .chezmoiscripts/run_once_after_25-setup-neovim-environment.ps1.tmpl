@@ -1,63 +1,90 @@
+{{- if eq .chezmoi.os "windows" -}}
 # Setup Neovim Python and Node.js environments for Windows
 # This script runs once to set up Neovim-specific dependencies
+# This script is refactored to use common libraries
 # script hash: {{ include ".chezmoiscripts/run_once_after_25-setup-neovim-environment.ps1.tmpl" | sha256sum }}
 
-Write-Host "[SETUP] Setting up Neovim environment for Windows..." -ForegroundColor Cyan
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Setting up Neovim environment for Windows..."
 
 # Setup Python environment for Neovim
-if (Get-Command python.exe -ErrorAction SilentlyContinue) {
-    Write-Host "[PYTHON] Setting up Python packages for Neovim..." -ForegroundColor Yellow
-    
+if (Test-Command python.exe) {
+    Log-Step "Setting up Python packages for Neovim..."
+
     # Check if packages are already installed
     $pythonCheck = python.exe -c "import pynvim, neovim" 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Installing Python packages for Neovim..." -ForegroundColor Blue
-        python.exe -m pip install --user --upgrade pip
-        python.exe -m pip install --user --upgrade neovim pynvim
-        Write-Host "[OK] Python packages for Neovim installed" -ForegroundColor Green
+        Log-Running "Installing Python packages for Neovim..."
+        try {
+            python.exe -m pip install --user --upgrade pip
+            python.exe -m pip install --user --upgrade neovim pynvim
+            Log-Success "Python packages for Neovim installed"
+        } catch {
+            Log-Error "Failed to install Python packages: $_"
+        }
     } else {
-        Write-Host "[OK] Python packages for Neovim already installed" -ForegroundColor Green
+        Log-Success "Python packages for Neovim already installed"
     }
-    
+
     # Get Python path for Neovim config
-    $pythonPath = python.exe -c "import sys; print(sys.executable)"
-    Write-Host "[OK] Neovim Python environment configured at: $pythonPath" -ForegroundColor Green
+    try {
+        $pythonPath = python.exe -c "import sys; print(sys.executable)"
+        Log-Success "Neovim Python environment configured at: $pythonPath"
+    } catch {
+        Log-Warning "Could not determine Python path"
+    }
 } else {
-    Write-Host "[WARN] Python not found in PATH" -ForegroundColor Red
+    Log-Warning "Python not found in PATH"
+    Log-Info "Install Python with: scoop install python"
 }
 
 # Setup Node.js environment for Neovim
-if (Get-Command npm -ErrorAction SilentlyContinue) {
-    Write-Host "[NODE] Setting up Node.js packages for Neovim..." -ForegroundColor Yellow
-    
+if (Test-Command npm) {
+    Log-Step "Setting up Node.js packages for Neovim..."
+
     # Check if neovim package is already installed
     $npmCheck = npm list -g neovim 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Installing Node.js packages for Neovim..." -ForegroundColor Blue
-        npm install -g neovim tree-sitter-cli
-        Write-Host "[OK] Neovim Node.js package installed" -ForegroundColor Green
+        Log-Running "Installing Node.js packages for Neovim..."
+        try {
+            npm install -g neovim tree-sitter-cli
+            Log-Success "Neovim Node.js packages installed"
+        } catch {
+            Log-Error "Failed to install Node.js packages: $_"
+        }
     } else {
-        Write-Host "[OK] Neovim Node.js package already installed" -ForegroundColor Green
+        Log-Success "Neovim Node.js package already installed"
     }
 } else {
-    Write-Host "[WARN] npm not found in PATH" -ForegroundColor Red
+    Log-Warning "npm not found in PATH"
+    Log-Info "Install Node.js with: scoop install nodejs-lts"
 }
 
 # Install Neovim providers health check
-if (Get-Command nvim -ErrorAction SilentlyContinue) {
-    Write-Host "[CHECK] Checking Neovim providers..." -ForegroundColor Yellow
-    
+if (Test-Command nvim) {
+    Log-Step "Checking Neovim providers..."
+
     # Create a temporary vimrc to suppress warnings during health check
     $tempVimrc = New-TemporaryFile
     Set-Content -Path $tempVimrc -Value "set noloadplugins"
-    
+
     # Run health check for providers
-    $healthOutput = nvim -u $tempVimrc.FullName --headless "+checkhealth provider" "+qa" 2>&1
-    $healthOutput | Select-String -Pattern "(python3|node|OK|WARNING|ERROR)" | ForEach-Object { Write-Host $_.Line }
-    
-    Remove-Item -Path $tempVimrc -Force
+    try {
+        $healthOutput = nvim -u $tempVimrc.FullName --headless "+checkhealth provider" "+qa" 2>&1
+        $healthOutput | Select-String -Pattern "(python3|node|OK|WARNING|ERROR)" | ForEach-Object {
+            Write-Host $_.Line
+        }
+    } catch {
+        Log-Warning "Could not run Neovim health check: $_"
+    }
+
+    Remove-Item -Path $tempVimrc -Force -ErrorAction SilentlyContinue
 } else {
-    Write-Host "[WARN] Neovim not found in PATH" -ForegroundColor Red
+    Log-Warning "Neovim not found in PATH"
+    Log-Info "Install Neovim with: scoop install neovim"
 }
 
-Write-Host "[DONE] Neovim environment setup completed" -ForegroundColor Green
+Log-Success "Neovim environment setup completed"
+{{- end }}

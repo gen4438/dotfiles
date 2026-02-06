@@ -1,0 +1,44 @@
+# Logging library for Windows PowerShell scripts
+# Provides consistent logging output with icons and colors
+
+function Log-Info {
+    param([string]$Message)
+    Write-Host "ℹ️  $Message" -ForegroundColor Cyan
+}
+
+function Log-Success {
+    param([string]$Message)
+    Write-Host "✅ $Message" -ForegroundColor Green
+}
+
+function Log-Warning {
+    param([string]$Message)
+    Write-Host "⚠️  $Message" -ForegroundColor Yellow
+}
+
+function Log-Error {
+    param([string]$Message)
+    Write-Host "❌ $Message" -ForegroundColor Red
+}
+
+function Log-Step {
+    param([string]$Message)
+    Write-Host "📝 $Message" -ForegroundColor Blue
+}
+
+function Log-Running {
+    param([string]$Message)
+    Write-Host "🔄 $Message" -ForegroundColor Magenta
+}
+
+# Check if command exists
+function Test-Command {
+    param([string]$CommandName)
+    return [bool](Get-Command $CommandName -ErrorAction SilentlyContinue)
+}
+
+# Check if directory exists
+function Test-DirectoryExists {
+    param([string]$Path)
+    return Test-Path -Path $Path -PathType Container
+}

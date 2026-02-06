@@ -1,37 +1,26 @@
 {{- if eq .chezmoi.os "android" -}}
 {{ template "shebang-bash.tmpl" . }}
-# Install essential packages for Termux
+# Install essential packages for Termux (Android)
+# This script is refactored to use common libraries and external package lists
 
 set -e
 
-echo "Installing essential packages for Termux..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+{{ template "lib-package-manager.sh.tmpl" . }}
 
-# Update package lists
-pkg update -y
+log_info "Installing essential packages for Termux..."
 
-# Install essential packages
-pkg install -y \
-    build-essential \
-    curl \
-    wget \
-    git \
-    vim \
-    zsh \
-    ripgrep \
-    fd \
-    bat \
-    git-delta \
-    direnv \
-    termux-api \
-    jq \
-    python \
-    nodejs \
-    golang \
-    neovim \
-    gh
+# Update package database
+update_package_database
 
-# Install additional development tools
-pkg install -y \
+# Install packages from file
+log_step "Installing Termux packages..."
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/termux.txt"
+
+# Install additional development libraries
+log_step "Installing development libraries..."
+install_packages \
     clang \
     make \
     pkg-config \
@@ -44,15 +33,25 @@ pkg install -y \
     libxslt
 
 # Setup storage access (only if not already configured)
-if [ ! -d "$HOME/storage" ]; then
-    termux-setup-storage
+if [[ ! -d "$HOME/storage" ]]; then
+    log_running "Setting up storage access..."
+    if termux-setup-storage; then
+        log_success "Storage access configured"
+    else
+        log_warning "Failed to setup storage access (may require manual permission)"
+    fi
+else
+    log_success "Storage access already configured"
 fi
 
 # Install oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "Installing oh-my-zsh..."
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    log_running "Installing oh-my-zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    log_success "oh-my-zsh installed successfully"
+else
+    log_success "oh-my-zsh is already installed"
 fi
 
-echo "✅ Essential packages installed successfully for Termux"
+log_success "Essential packages installed successfully for Termux"
 {{- end }}

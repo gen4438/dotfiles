@@ -1,0 +1,32 @@
+# Packages for macOS (via Homebrew)
+
+# Essential tools
+curl
+wget
+git
+vim
+
+# Shell
+zsh
+
+# Modern CLI tools
+ripgrep
+fd
+bat
+delta
+
+# Development tools
+direnv
+jq
+age
+
+# Python and Node.js (via Homebrew)
+pyenv
+pyenv-virtualenv
+nvm
+
+# Go language
+go
+
+# GitHub CLI
+gh

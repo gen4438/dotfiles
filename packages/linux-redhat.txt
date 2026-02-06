@@ -1,0 +1,33 @@
+# Packages for RedHat-based distributions (AlmaLinux, Rocky, CentOS, RHEL, Fedora)
+
+# Build tools
+gcc
+gcc-c++
+make
+
+# Modern CLI tools
+ripgrep
+fd-find
+bat
+git-delta
+
+# Python development
+python3-pip
+python3-virtualenv
+pipx
+
+# Go language
+golang
+
+# Pyenv build dependencies
+gcc
+zlib-devel
+bzip2
+bzip2-devel
+readline-devel
+sqlite
+sqlite-devel
+openssl-devel
+tk-devel
+libffi-devel
+xz-devel

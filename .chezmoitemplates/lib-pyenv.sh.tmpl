@@ -1,0 +1,280 @@
+# pyenv library for chezmoi scripts
+# Provides helpers for pyenv initialization and Python management
+# Cross-platform support (Linux with local install, macOS with Homebrew)
+
+# Initialize pyenv in current session
+# Returns: 0 if successful, 1 if pyenv not found
+pyenv_init() {
+    # Check if pyenv is already in PATH (e.g., from Homebrew on macOS)
+    if check_command pyenv; then
+        # pyenv is already available, just initialize
+        export PYENV_ROOT="$(pyenv root)"
+        eval "$(pyenv init -)"
+        log_info "pyenv initialized (system installation detected)"
+        return 0
+    fi
+
+    # Check for local installation (Linux, chezmoi externals)
+    if [[ -d "$HOME/.pyenv" ]]; then
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+
+        if check_command pyenv; then
+            eval "$(pyenv init -)"
+            log_info "pyenv initialized (local installation at $PYENV_ROOT)"
+            return 0
+        else
+            log_error "pyenv directory exists but command not found"
+            return 1
+        fi
+    fi
+
+    # pyenv not found
+    log_warning "pyenv not found (neither in PATH nor at $HOME/.pyenv)"
+    return 1
+}
+
+# Get latest stable Python version
+# Prints: Version string (e.g., "3.12.1")
+pyenv_get_latest_version() {
+    if ! check_command pyenv; then
+        log_error "pyenv not available"
+        return 1
+    fi
+
+    local latest=$(pyenv install --list | grep -E "^\s*3\.[0-9]+\.[0-9]+$" | tail -1 | xargs)
+
+    if [[ -z "$latest" ]]; then
+        log_error "Could not determine latest Python version"
+        return 1
+    fi
+
+    echo "$latest"
+}
+
+# Get currently set global Python version
+# Prints: Version string or empty if none
+pyenv_get_global_version() {
+    if ! check_command pyenv; then
+        return 1
+    fi
+
+    pyenv global 2>/dev/null || echo ""
+}
+
+# Check if a Python version is installed
+# Args: version (e.g., "3.12.1")
+# Returns: 0 if installed, 1 if not
+pyenv_is_version_installed() {
+    local version="$1"
+
+    if ! check_command pyenv; then
+        return 1
+    fi
+
+    pyenv versions --bare | grep -q "^${version}$"
+}
+
+# Install Python version if not already installed
+# Args: version (e.g., "3.12.1")
+# Returns: 0 if successful or already installed, 1 if failed
+pyenv_install_version() {
+    local version="$1"
+
+    if [[ -z "$version" ]]; then
+        log_error "No Python version specified"
+        return 1
+    fi
+
+    if ! check_command pyenv; then
+        log_error "pyenv not available"
+        return 1
+    fi
+
+    if pyenv_is_version_installed "$version"; then
+        log_info "Python $version is already installed"
+        return 0
+    fi
+
+    log_running "Installing Python $version..."
+
+    if pyenv install "$version"; then
+        log_success "Python $version installed successfully"
+        return 0
+    else
+        log_error "Failed to install Python $version"
+        log_error "Check build dependencies: libssl-dev, zlib1g-dev, libbz2-dev, libreadline-dev, etc."
+        return 1
+    fi
+}
+
+# Set global Python version
+# Args: version (e.g., "3.12.1")
+# Returns: 0 if successful, 1 if failed
+pyenv_set_global_version() {
+    local version="$1"
+
+    if [[ -z "$version" ]]; then
+        log_error "No Python version specified"
+        return 1
+    fi
+
+    if ! check_command pyenv; then
+        log_error "pyenv not available"
+        return 1
+    fi
+
+    if ! pyenv_is_version_installed "$version"; then
+        log_error "Python $version is not installed"
+        return 1
+    fi
+
+    if pyenv global "$version"; then
+        log_success "Set global Python version to $version"
+        return 0
+    else
+        log_error "Failed to set global Python version"
+        return 1
+    fi
+}
+
+# Ensure latest Python version is installed and set as global
+# This is the main entry point for setting up Python
+# Returns: 0 if successful, 1 if failed
+pyenv_ensure_latest() {
+    log_step "Ensuring latest Python version is available..."
+
+    # Initialize pyenv first
+    if ! pyenv_init; then
+        log_error "Failed to initialize pyenv"
+        log_error "Install pyenv first:"
+        log_error "  - Linux: chezmoi will install via externals to ~/.pyenv"
+        log_error "  - macOS: brew install pyenv"
+        log_error "  - Windows: Use system Python instead"
+        return 1
+    fi
+
+    # Get latest version
+    local latest=$(pyenv_get_latest_version)
+    if [[ -z "$latest" ]]; then
+        log_error "Could not determine latest Python version"
+        return 1
+    fi
+
+    local current=$(pyenv_get_global_version)
+
+    if [[ "$current" == "$latest" ]]; then
+        log_success "Python $current is already the latest version"
+        return 0
+    fi
+
+    log_info "Latest Python version: $latest (current: ${current:-none})"
+
+    # Install latest Python
+    if ! pyenv_install_version "$latest"; then
+        return 1
+    fi
+
+    # Set as global
+    if ! pyenv_set_global_version "$latest"; then
+        return 1
+    fi
+
+    log_success "Python $latest is now ready"
+    return 0
+}
+
+# Create or recreate pyenv virtualenv
+# Args: base_version (e.g., "3.12.1"), venv_name (e.g., "neovim3")
+# Returns: 0 if successful, 1 if failed
+pyenv_create_virtualenv() {
+    local base_version="$1"
+    local venv_name="$2"
+
+    if [[ -z "$base_version" || -z "$venv_name" ]]; then
+        log_error "Base version and virtualenv name are required"
+        return 1
+    fi
+
+    if ! check_command pyenv; then
+        log_error "pyenv not available"
+        return 1
+    fi
+
+    # Ensure pyenv is initialized
+    if [[ -z "$PYENV_ROOT" ]]; then
+        if ! pyenv_init; then
+            log_error "Failed to initialize pyenv"
+            return 1
+        fi
+    fi
+
+    # Check if virtualenv already exists
+    if pyenv versions | grep -q "$venv_name"; then
+        log_info "Virtual environment '$venv_name' already exists"
+
+        # Check if it's based on the correct Python version
+        if [[ -d "$PYENV_ROOT/versions/$base_version/envs/$venv_name" ]]; then
+            log_success "Virtual environment '$venv_name' is already using Python $base_version"
+            return 0
+        else
+            log_running "Recreating '$venv_name' with Python $base_version..."
+            pyenv uninstall -f "$venv_name" || true
+        fi
+    fi
+
+    log_running "Creating virtual environment '$venv_name' with Python $base_version..."
+
+    if pyenv virtualenv "$base_version" "$venv_name"; then
+        log_success "Virtual environment '$venv_name' created successfully"
+        return 0
+    else
+        log_error "Failed to create virtual environment '$venv_name'"
+        return 1
+    fi
+}
+
+# Install packages in a pyenv virtualenv
+# Args: venv_name, package1, package2, ...
+# Returns: 0 if successful, 1 if failed
+pyenv_venv_install_packages() {
+    local venv_name="$1"
+    shift
+    local packages=("$@")
+
+    if [[ -z "$venv_name" ]]; then
+        log_error "Virtual environment name is required"
+        return 1
+    fi
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        log_warning "No packages specified"
+        return 0
+    fi
+
+    if ! check_command pyenv; then
+        log_error "pyenv not available"
+        return 1
+    fi
+
+    log_running "Installing packages in '$venv_name': ${packages[*]}"
+
+    # Activate virtualenv and install packages
+    if pyenv activate "$venv_name"; then
+        pip install --upgrade pip
+        pip install --upgrade "${packages[@]}"
+        local result=$?
+        pyenv deactivate
+
+        if [[ $result -eq 0 ]]; then
+            log_success "Packages installed successfully in '$venv_name'"
+            return 0
+        else
+            log_error "Failed to install packages in '$venv_name'"
+            return 1
+        fi
+    else
+        log_error "Failed to activate virtual environment '$venv_name'"
+        return 1
+    fi
+}

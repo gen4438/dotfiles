@@ -1,0 +1,32 @@
+# Packages for Ubuntu/Debian-based distributions
+
+# Build essentials
+build-essential
+
+# Modern CLI tools (available in Ubuntu repos)
+ripgrep
+fd-find
+bat
+
+# Python development
+python3-pip
+python3-venv
+pipx
+
+# Go language
+golang-go
+
+# Pyenv build dependencies
+make
+libssl-dev
+zlib1g-dev
+libbz2-dev
+libreadline-dev
+libsqlite3-dev
+libncursesw5-dev
+xz-utils
+tk-dev
+libxml2-dev
+libxmlsec1-dev
+libffi-dev
+liblzma-dev

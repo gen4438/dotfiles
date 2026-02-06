@@ -1,0 +1,4 @@
+# Japanese fonts for RedHat-based distributions
+
+google-noto-sans-cjk-jp-fonts
+google-noto-serif-cjk-jp-fonts

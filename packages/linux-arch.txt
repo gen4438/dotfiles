@@ -1,0 +1,24 @@
+# Packages for Arch-based distributions (Arch, Manjaro)
+
+# Build tools
+base-devel
+
+# Modern CLI tools
+ripgrep
+fd
+bat
+git-delta
+
+# Python development
+python-pip
+python-virtualenv
+python-pipx
+
+# Go language
+go
+
+# Pyenv build dependencies (most are in base-devel)
+openssl
+zlib
+xz
+tk

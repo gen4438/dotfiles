@@ -1,247 +1,167 @@
 {{ template "shebang-bash.tmpl" . }}
 # Update development tools and runtimes
-# This script focuses on runtime configuration and plugin updates
+# This script runs on every chezmoi apply to keep tools up-to-date
+# This script is refactored to use common libraries
 # Git repositories are automatically updated by chezmoi external management
 
 set -e
 
-echo "🔄 Updating development tools..."
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+{{ template "lib-pyenv.sh.tmpl" . }}
+{{ template "lib-nvm.sh.tmpl" . }}
 
-# Note: External git repositories (.fzf, .pyenv, .nvm, etc.) are automatically 
+log_info "Updating development tools..."
+
+# Note: External git repositories (.fzf, .pyenv, .nvm, etc.) are automatically
 # updated by chezmoi external with refreshPeriod = "168h" (weekly)
-echo "📦 External repositories are managed by chezmoi and updated weekly"
+log_info "External repositories are managed by chezmoi and updated weekly"
 
 # Update pyenv and install latest Python
 {{- if ne .chezmoi.os "android" }}
-if [[ -d "$HOME/.pyenv" ]]; then
-    echo "🐍 Updating pyenv and Python..."
-    
-    # pyenv repositories are updated automatically by chezmoi external (Linux)
-    # On macOS, pyenv is managed by Homebrew
-    {{- if ne .chezmoi.os "darwin" }}
-    echo "🐍 pyenv repositories are managed by chezmoi external with weekly updates"
-    {{- end }}
-    
-    # Initialize pyenv in current session
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
-        
+{{- if ne .chezmoi.os "windows" }}
+log_step "Updating pyenv and Python..."
+
+{{- if ne .chezmoi.os "darwin" }}
+log_info "pyenv repositories are managed by chezmoi external with weekly updates"
+{{- end }}
+
+if pyenv_init; then
         # Get latest stable Python version
-        LATEST_PYTHON=$(pyenv install --list | grep -E "^\s*3\.[0-9]+\.[0-9]+$" | tail -1 | xargs)
-        CURRENT_PYTHON=$(pyenv global)
-        
+        latest_python=$(pyenv_get_latest_version)
+        current_python=$(pyenv_get_global_version)
+
         # Install latest Python if not already installed
-        if [[ -n "$LATEST_PYTHON" ]] && [[ "$LATEST_PYTHON" != "$CURRENT_PYTHON" ]]; then
-            echo "Installing Python $LATEST_PYTHON (current: $CURRENT_PYTHON)..."
-            pyenv install -s "$LATEST_PYTHON"
-            pyenv global "$LATEST_PYTHON"
-            echo "✅ Python updated to $LATEST_PYTHON"
-            
-            # Update pip
-            pip install --upgrade pip
+        if [[ -n "$latest_python" && "$latest_python" != "$current_python" ]]; then
+            log_info "Latest Python: $latest_python (current: $current_python)"
+
+            if pyenv_install_version "$latest_python"; then
+                if pyenv_set_global_version "$latest_python"; then
+                    log_success "Python updated to $latest_python"
+
+                    # Update pip
+                    pip install --upgrade pip
+                else
+                    log_error "Failed to set global Python version"
+                fi
+            else
+                log_error "Failed to install Python $latest_python"
+            fi
         else
-            echo "✅ Python is up to date ($CURRENT_PYTHON)"
+            log_success "Python is up to date ($current_python)"
         fi
-        
+
         # Always check and update neovim3 environment if needed
         if pyenv versions | grep -q "neovim3"; then
-            # Get current neovim3 Python base version
-            # Check if virtualenv is based on current latest Python
-            if [[ -d "$PYENV_ROOT/versions/$LATEST_PYTHON/envs/neovim3" ]]; then
-                echo "✅ neovim3 already using Python $LATEST_PYTHON"
+            # Check if neovim3 is using the latest Python
+            if [[ -d "$PYENV_ROOT/versions/$latest_python/envs/neovim3" ]]; then
+                log_success "neovim3 already using Python $latest_python"
             else
-                # Find which Python version neovim3 is currently using
-                NEOVIM_PYTHON=$(find "$PYENV_ROOT/versions" -name "neovim3" -type d 2>/dev/null | head -1 | sed 's|.*/versions/||' | sed 's|/.*||')
-                
-                if [[ -n "$NEOVIM_PYTHON" && "$NEOVIM_PYTHON" != "$LATEST_PYTHON" ]]; then
-                    echo "🔄 Recreating neovim3 virtual environment (current: $NEOVIM_PYTHON, latest: $LATEST_PYTHON)..."
-                    
-                    # Delete old virtual environment
-                    pyenv uninstall -f neovim3
-                    
-                    # Create new virtual environment with latest Python
-                    pyenv virtualenv "$LATEST_PYTHON" neovim3
-                    
-                    # Install Neovim Python packages
-                    pyenv activate neovim3
-                    pip install --upgrade pip
-                    pip install --upgrade neovim coverage pynvim
-                    pyenv deactivate
-                    
-                    echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
+                log_running "Recreating neovim3 virtual environment with Python $latest_python..."
+
+                # Delete old virtual environment
+                pyenv uninstall -f neovim3
+
+                # Create new virtual environment with latest Python
+                if pyenv_create_virtualenv "$latest_python" "neovim3"; then
+                    if pyenv_venv_install_packages "neovim3" neovim coverage pynvim; then
+                        log_success "neovim3 environment recreated with Python $latest_python"
+                    else
+                        log_error "Failed to install packages in neovim3"
+                    fi
                 else
-                    echo "⚠️ Could not determine neovim3 Python version, recreating..."
-                    pyenv uninstall -f neovim3
-                    pyenv virtualenv "$LATEST_PYTHON" neovim3
-                    pyenv activate neovim3
-                    pip install --upgrade pip
-                    pip install --upgrade neovim coverage pynvim
-                    pyenv deactivate
-                    echo "✅ neovim3 environment recreated with Python $LATEST_PYTHON"
+                    log_error "Failed to recreate neovim3 environment"
                 fi
             fi
         else
-            echo "📝 Creating neovim3 virtual environment with Python $LATEST_PYTHON..."
-            pyenv virtualenv "$LATEST_PYTHON" neovim3
-            pyenv activate neovim3
-            pip install --upgrade pip
-            pip install --upgrade neovim coverage pynvim
-            pyenv deactivate
-            echo "✅ neovim3 environment created with Python $LATEST_PYTHON"
-        fi
-    fi
-fi
-{{- else }}
-echo "🐍 Android/Termux: Using system Python (pkg install python)"
-echo "📦 Android/Termux: Using system Node.js (pkg install nodejs)"
-echo "📝 Installing Neovim packages globally..."
-
-# Install Neovim Python packages globally
-if command -v python3 >/dev/null 2>&1; then
-    python3 -m pip install --user --upgrade neovim pynvim
-    echo "✅ Neovim Python packages installed/updated"
-fi
-
-# Install Neovim Node.js packages globally
-if command -v npm >/dev/null 2>&1; then
-    npm install -g neovim
-    echo "✅ Neovim Node.js package installed/updated"
-fi
-{{- end }}
-
-# Update nvm and install latest Node.js LTS
-{{- if ne .chezmoi.os "android" }}
-if [[ -d "$HOME/.nvm" ]]; then
-    echo "📦 Updating nvm and Node.js..."
-    
-    # nvm repository is updated automatically by chezmoi external (Linux)
-    # On macOS, nvm is managed by Homebrew
-    {{- if ne .chezmoi.os "darwin" }}
-    echo "📦 nvm repository is managed by chezmoi external with weekly updates"
-    {{- end }}
-    # Source nvm in current session
-    export NVM_DIR="$HOME/.nvm"
-    [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
-    
-    if command -v nvm >/dev/null 2>&1; then
-        # Install latest LTS and reinstall packages from current default
-        CURRENT_NODE=$(nvm version default 2>/dev/null || echo "none")
-        
-        echo "Installing latest LTS Node.js (current: $CURRENT_NODE)..."
-        if [[ "$CURRENT_NODE" != "none" ]]; then
-            nvm install --lts --reinstall-packages-from=default
-        else
-            nvm install --lts
-        fi
-        
-        nvm use --lts
-        nvm alias default lts/*
-        
-        NEW_NODE=$(nvm current)
-        echo "✅ Node.js updated to $NEW_NODE"
-        
-        # Update npm
-        npm install -g npm@latest
-        
-        # Ensure neovim package is installed/updated
-        echo "📝 Checking Neovim Node.js package..."
-        if npm list -g neovim --depth=0 >/dev/null 2>&1; then
-            echo "Updating neovim package..."
-            npm update -g neovim
-            echo "✅ Neovim Node.js package updated"
-        else
-            echo "Installing neovim package..."
-            npm install -g neovim
-            echo "✅ Neovim Node.js package installed"
-        fi
-    fi
-fi
-{{- end }}
-
-# Configure fzf (repository updated automatically by chezmoi external)
-if [[ -d "$HOME/.fzf" ]]; then
-    echo "🔍 Configuring fzf..."
-    cd "$HOME/.fzf"
-    ./install --all
-    echo "✅ fzf configured"
-fi
-
-# Note: z, fz, tmux-xpanes repositories are updated automatically by chezmoi external
-# For bash users: managed at .local/share/* (chezmoi external)
-# For zsh users: managed via zim plugins
-echo "📁 External tools (z, fz, tmux-xpanes) are managed by chezmoi external with weekly updates"
-
-# Note: z, fz, tmux-xpanes for zsh are managed by zim
-
-# Update tmux plugins (TPM repository updated automatically by chezmoi external)
-if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
-    echo "🖥️  Updating tmux plugins..."
-    
-    # Update all plugins
-    if command -v tmux >/dev/null 2>&1; then
-        # Set TMUX_PLUGIN_MANAGER_PATH for the update script
-        export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
-        "$HOME/.tmux/plugins/tpm/bin/update_plugins" all
-        echo "✅ tmux plugins updated"
-    fi
-fi
-
-
-# Update zim plugins (only for zsh users and when running in zsh-compatible environment)
-{{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
-{{- if $shells.uses_zsh }}
-# Skip zim updates if running in bash environment
-if [[ -n "$BASH_VERSION" ]] && [[ -z "$ZSH_VERSION" ]]; then
-    echo "⚠️ Running in bash environment, skipping zim plugin updates (zim is zsh-only)"
-elif command -v zsh >/dev/null 2>&1; then
-    echo "🔌 Updating zim plugins..."
-    
-    # Check if zimfw is available and set up environment
-    if [[ -f "$HOME/.zim/zimfw.zsh" ]]; then
-        # Only run if current shell is zsh or if zsh users are detected
-        if [[ -n "$ZSH_VERSION" ]] || [[ "$0" == *"zsh"* ]] || command -v zsh >/dev/null 2>&1; then
-            zsh -c "
-                export ZIM_HOME='$HOME/.zim'
-                source '$HOME/.zim/zimfw.zsh'
-                zimfw update
-            " 2>/dev/null
-            if [[ $? -eq 0 ]]; then
-                echo "✅ zim plugins updated"
+            log_step "Creating neovim3 virtual environment with Python $latest_python..."
+            if pyenv_create_virtualenv "$latest_python" "neovim3"; then
+                if pyenv_venv_install_packages "neovim3" neovim coverage pynvim; then
+                    log_success "neovim3 environment created with Python $latest_python"
+                else
+                    log_error "Failed to install packages in neovim3"
+                fi
             else
-                echo "⚠️ zim update failed, may not be needed in current environment"
+                log_error "Failed to create neovim3 environment"
+            fi
+        fi
+else
+    log_warning "pyenv not available, skipping Python update"
+fi
+{{- end }}
+{{- else }}
+log_info "Android/Termux: Using system Python (pkg install python)"
+log_info "Android/Termux: Using system Node.js (pkg install nodejs)"
+log_step "Installing Neovim packages globally..."
+
+# For Termux, install packages globally
+if check_command pip; then
+    pip install --upgrade --user pynvim neovim
+    log_success "Python packages for Neovim installed"
+fi
+
+if check_command npm; then
+    npm install -g neovim
+    log_success "Node.js package for Neovim installed"
+fi
+{{- end }}
+
+# Update nvm and Node.js
+{{- if ne .chezmoi.os "android" }}
+{{- if ne .chezmoi.os "windows" }}
+log_step "Updating nvm and Node.js..."
+
+{{- if ne .chezmoi.os "darwin" }}
+log_info "nvm repositories are managed by chezmoi external with weekly updates"
+{{- end }}
+
+if nvm_init; then
+        # Install/update to latest LTS if not using LTS
+        current_version=$(nvm_get_default_version)
+
+        if [[ -n "$current_version" ]]; then
+            log_info "Current default Node.js: $current_version"
+
+            # Check if there's a newer LTS version
+            log_running "Checking for newer LTS version..."
+            if nvm install --lts; then
+                if nvm alias default lts/*; then
+                    new_version=$(nvm_get_default_version)
+                    if [[ "$new_version" != "$current_version" ]]; then
+                        log_success "Node.js updated to $new_version"
+                    else
+                        log_success "Node.js is up to date ($current_version)"
+                    fi
+                fi
+            else
+                log_error "Failed to install/update Node.js LTS"
             fi
         else
-            echo "⚠️ zsh environment not available, skipping zim updates"
+            # No default version set, install LTS
+            if nvm_ensure_lts; then
+                log_success "Node.js LTS installed"
+            else
+                log_error "Failed to install Node.js LTS"
+            fi
         fi
-    else
-        echo "⚠️ zim not found, skipping plugin updates"
-    fi
+
+        # Ensure neovim package is installed
+        if nvm_use_lts; then
+            if ! nvm_is_global_package_installed neovim; then
+                log_running "Installing Neovim Node.js package..."
+                if nvm_install_global_packages neovim tree-sitter-cli; then
+                    log_success "Neovim Node.js packages installed"
+                else
+                    log_error "Failed to install Neovim Node.js packages"
+                fi
+            else
+                log_success "Neovim Node.js package is installed"
+            fi
+        fi
 else
-    echo "⚠️ zsh not available, skipping zim plugin updates"
+    log_warning "nvm not available, skipping Node.js update"
 fi
-{{- else }}
-echo "⚠️ zsh not detected, skipping zim plugin updates"
+{{- end }}
 {{- end }}
 
-# Update Neovim plugins
-if command -v nvim >/dev/null 2>&1; then
-    echo "📝 Updating Neovim plugins..."
-    
-    # Update Lazy.nvim plugins, TreeSitter parsers, and CoC extensions
-    nvim --headless "+Lazy! sync" "+TSUpdateSync" "+CocUpdateSync" +qa
-    
-    echo "✅ Neovim plugins updated"
-fi
-
-# Update shell completions
-echo "🔧 Updating shell completions..."
-# Note: Shell completions are managed by separate scripts if they exist
-# This is a placeholder for future completion update functionality
-
-echo "✅ All development tools updated successfully!"
-
-# Hash to trigger updates when script changes
-# Script hash: {{ include ".chezmoiscripts/run_after_30-update-development-tools.sh.tmpl" | sha256sum }}
+log_success "Development tools update completed"

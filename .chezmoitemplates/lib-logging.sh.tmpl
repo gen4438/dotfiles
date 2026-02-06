@@ -1,0 +1,47 @@
+# Logging library for chezmoi scripts
+# Provides consistent logging output with icons and colors
+
+# Log levels
+log_info() {
+    echo "ℹ️  $*"
+}
+
+log_success() {
+    echo "✅ $*"
+}
+
+log_warning() {
+    echo "⚠️  $*"
+}
+
+log_error() {
+    echo "❌ $*" >&2
+}
+
+log_step() {
+    echo "📝 $*"
+}
+
+log_running() {
+    echo "🔄 $*"
+}
+
+# Check command existence
+check_command() {
+    local cmd="$1"
+    if command -v "$cmd" >/dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Check if directory exists
+check_directory() {
+    local dir="$1"
+    if [[ -d "$dir" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}

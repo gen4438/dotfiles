@@ -1,63 +1,130 @@
 {{- if eq .chezmoi.os "windows" -}}
 # Install essential packages for Windows development environment
+# This script is refactored to use common libraries
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Installing essential packages for Windows..."
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Installing essential packages for Windows..."
 
 # Install Scoop if not already installed
-if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing Scoop package manager..."
+if (-not (Test-Command scoop)) {
+    Log-Running "Installing Scoop package manager..."
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
     Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+    if (Test-Command scoop) {
+        Log-Success "Scoop installed successfully"
+    } else {
+        Log-Error "Failed to install Scoop"
+        exit 1
+    }
+} else {
+    Log-Success "Scoop is already installed"
 }
 
 # Read scoop packages configuration
 $packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\scoop.json"
+
+if (-not (Test-Path $packageFile)) {
+    Log-Error "Package configuration not found: $packageFile"
+    exit 1
+}
+
 $config = Get-Content $packageFile | ConvertFrom-Json
 
 # Add required buckets
-Write-Host "Adding Scoop buckets..."
+Log-Step "Adding Scoop buckets..."
+$bucketsAdded = 0
+$bucketsFailed = 0
+
 foreach ($bucket in $config.buckets) {
     try {
-        scoop bucket add $bucket
-        Write-Host "✅ Added bucket: $bucket"
+        $existingBuckets = scoop bucket list
+        if ($bucket -in $existingBuckets.Name) {
+            Log-Success "Bucket already added: $bucket"
+        } else {
+            scoop bucket add $bucket | Out-Null
+            Log-Success "Added bucket: $bucket"
+            $bucketsAdded++
+        }
     } catch {
-        Write-Warning "❌ Failed to add bucket $bucket : $_"
+        Log-Warning "Failed to add bucket $bucket : $_"
+        $bucketsFailed++
     }
+}
+
+if ($bucketsAdded -gt 0) {
+    Log-Info "Added $bucketsAdded new bucket(s)"
+}
+if ($bucketsFailed -gt 0) {
+    Log-Warning "Failed to add $bucketsFailed bucket(s)"
 }
 
 # Install packages
-Write-Host "Installing packages with Scoop..."
+Log-Step "Installing packages with Scoop..."
+$appsInstalled = 0
+$appsFailed = 0
+
 foreach ($app in $config.apps) {
     try {
-        scoop install $app
-        Write-Host "✅ $app installed successfully"
+        $installedApps = scoop list
+        if ($app -in $installedApps.Name) {
+            Log-Info "$app is already installed"
+        } else {
+            Log-Running "Installing $app..."
+            scoop install $app | Out-Null
+            Log-Success "$app installed successfully"
+            $appsInstalled++
+        }
     } catch {
-        Write-Warning "❌ Failed to install $app : $_"
+        Log-Warning "Failed to install $app : $_"
+        $appsFailed++
     }
+}
+
+Log-Info "Installed $appsInstalled new package(s)"
+if ($appsFailed -gt 0) {
+    Log-Warning "Failed to install $appsFailed package(s)"
 }
 
 # Enable PowerShell execution policy for current user
-Write-Host "Setting PowerShell execution policy..."
+Log-Step "Setting PowerShell execution policy..."
 try {
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-    Write-Host "✅ PowerShell execution policy set successfully"
+    Log-Success "PowerShell execution policy set successfully"
 } catch {
-    Write-Warning "❌ Failed to set PowerShell execution policy: $_"
+    Log-Warning "Failed to set PowerShell execution policy: $_"
 }
 
 # Install PowerShell modules
-Write-Host "Installing PowerShell modules..."
+Log-Step "Installing PowerShell modules..."
 $modules = @("PSReadLine", "posh-git", "Terminal-Icons")
+$modulesInstalled = 0
+$modulesFailed = 0
+
 foreach ($module in $modules) {
     try {
-        Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber
-        Write-Host "✅ $module installed successfully"
+        if (Get-Module -ListAvailable -Name $module) {
+            Log-Info "$module is already installed"
+        } else {
+            Log-Running "Installing $module..."
+            Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber
+            Log-Success "$module installed successfully"
+            $modulesInstalled++
+        }
     } catch {
-        Write-Warning "❌ Failed to install $module`: $_"
+        Log-Warning "Failed to install ${module}: $_"
+        $modulesFailed++
     }
 }
 
-Write-Host "✅ Essential packages installation completed"
+Log-Info "Installed $modulesInstalled new PowerShell module(s)"
+if ($modulesFailed -gt 0) {
+    Log-Warning "Failed to install $modulesFailed module(s)"
+}
+
+Log-Success "Essential packages installation completed"
 {{- end }}
