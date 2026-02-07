@@ -1,0 +1,101 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Update Neovim plugins and environment packages automatically for Windows
+# This script runs after chezmoi apply
+
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Step "Updating Neovim environment..."
+
+# Update Python packages for Neovim
+if (Test-Command python.exe) {
+    Log-Running "Updating Python packages for Neovim..."
+    try {
+        python.exe -m pip install --user --upgrade pip
+        python.exe -m pip install --user --upgrade neovim pynvim coverage
+        Log-Success "Neovim Python packages updated"
+    } catch {
+        Log-Warning "Failed to update Neovim Python packages: $_"
+    }
+} else {
+    Log-Warning "Python not found, skipping Python package updates"
+}
+
+# Update Node.js packages for Neovim
+if (Test-Command npm) {
+    Log-Running "Updating Node.js packages for Neovim..."
+    try {
+        npm update -g neovim tree-sitter-cli
+        if ($LASTEXITCODE -ne 0) {
+            # If update fails, try install
+            npm install -g neovim tree-sitter-cli
+        }
+        Log-Success "Neovim Node.js packages updated"
+    } catch {
+        Log-Warning "Failed to update Neovim Node.js packages: $_"
+    }
+} else {
+    Log-Warning "npm not found, skipping Node.js package updates"
+}
+
+# Update Neovim plugins
+if (Test-Command nvim) {
+    Log-Running "Updating Neovim plugins..."
+
+    # Update Lazy.nvim plugins
+    Log-Info "Updating Lazy.nvim plugins..."
+    try {
+        nvim --headless "+Lazy! sync" +qa 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Log-Success "Lazy.nvim plugins updated"
+        } else {
+            Log-Warning "Failed to update Lazy.nvim plugins"
+        }
+    } catch {
+        Log-Warning "Failed to update Lazy.nvim plugins: $_"
+    }
+
+    # Update Mason LSP servers
+    Log-Info "Updating Mason LSP servers..."
+    try {
+        nvim --headless "+MasonUpdate" +qa 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Log-Success "Mason LSP servers updated"
+        } else {
+            Log-Warning "Failed to update Mason LSP servers"
+        }
+    } catch {
+        Log-Warning "Failed to update Mason LSP servers: $_"
+    }
+
+    # Update coc.nvim extensions
+    Log-Info "Updating coc.nvim extensions..."
+    try {
+        nvim --headless "+CocUpdate" +qa 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Log-Success "coc.nvim extensions updated"
+        } else {
+            Log-Warning "Failed to update coc.nvim extensions"
+        }
+    } catch {
+        Log-Warning "Failed to update coc.nvim extensions: $_"
+    }
+
+    # Update treesitter parsers
+    Log-Info "Updating treesitter parsers..."
+    try {
+        nvim --headless "+TSUpdate" +qa 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Log-Success "treesitter parsers updated"
+        } else {
+            Log-Warning "Failed to update treesitter parsers"
+        }
+    } catch {
+        Log-Warning "Failed to update treesitter parsers: $_"
+    }
+} else {
+    Log-Warning "Neovim not found, skipping plugin updates"
+}
+
+Log-Success "Neovim environment update completed!"
+{{- end }}

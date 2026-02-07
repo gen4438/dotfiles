@@ -1,0 +1,136 @@
+{{ template "shebang-bash.tmpl" . }}
+# Update Neovim plugins and environment packages automatically
+# This script runs after chezmoi apply
+
+set -e
+
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+{{ template "lib-pyenv.sh.tmpl" . }}
+{{ template "lib-nvm.sh.tmpl" . }}
+
+log_step "Updating Neovim environment..."
+
+# Update Python packages for Neovim
+{{- if ne .chezmoi.os "android" }}
+{{- if ne .chezmoi.os "windows" }}
+if pyenv_init; then
+    log_running "Updating Python packages for Neovim..."
+
+    # Check if neovim3 virtualenv exists
+    if pyenv versions 2>/dev/null | grep -q "neovim3"; then
+        # Update packages in Neovim virtual environment
+        if pyenv_venv_install_packages "neovim3" --upgrade pip neovim coverage pynvim; then
+            log_success "Neovim Python packages updated"
+        else
+            log_warning "Failed to update Neovim Python packages"
+        fi
+    else
+        log_warning "Neovim Python environment not found. Run setup script first."
+    fi
+elif [[ -d "$HOME/.local/share/nvim-venv" ]]; then
+    # Use existing venv
+    log_running "Updating Python packages in venv..."
+    if "$HOME/.local/share/nvim-venv/bin/pip" install --upgrade pynvim neovim coverage; then
+        log_success "Neovim Python packages updated"
+    else
+        log_warning "Failed to update Neovim Python packages"
+    fi
+fi
+{{- end }}
+{{- else }}
+# Android/Termux: Use venv
+log_running "Updating Python packages for Neovim (Termux)..."
+if [[ -d "$HOME/.local/share/nvim-venv" ]]; then
+    if "$HOME/.local/share/nvim-venv/bin/pip" install --upgrade pynvim neovim coverage; then
+        log_success "Neovim Python packages updated"
+    else
+        log_warning "Failed to update Neovim Python packages"
+    fi
+elif check_command pip; then
+    # Fallback to user install
+    if pip install --upgrade --user pynvim neovim coverage; then
+        log_success "Neovim Python packages updated (user install)"
+    else
+        log_warning "Failed to update Neovim Python packages"
+    fi
+fi
+{{- end }}
+
+# Update Node.js packages for Neovim
+{{- if ne .chezmoi.os "android" }}
+{{- if ne .chezmoi.os "windows" }}
+if nvm_init; then
+    log_running "Updating Node.js packages for Neovim..."
+
+    # Use LTS version
+    if nvm_use_lts; then
+        # Update Neovim and tree-sitter-cli packages
+        if nvm_install_global_packages neovim tree-sitter-cli; then
+            log_success "Neovim Node.js packages updated"
+        else
+            log_warning "Failed to update Neovim Node.js packages"
+        fi
+    fi
+elif check_command npm; then
+    # Fallback to system npm
+    log_running "Updating Node.js packages with system npm..."
+    if npm update -g neovim tree-sitter-cli 2>/dev/null || npm install -g neovim tree-sitter-cli 2>/dev/null; then
+        log_success "Neovim Node.js packages updated"
+    else
+        log_warning "Failed to update Neovim Node.js packages"
+    fi
+fi
+{{- end }}
+{{- else }}
+# Android/Termux: Use system npm
+if check_command npm; then
+    log_running "Updating Node.js packages for Neovim (Termux)..."
+    if npm update -g neovim tree-sitter-cli 2>/dev/null || npm install -g neovim tree-sitter-cli 2>/dev/null; then
+        log_success "Neovim Node.js packages updated"
+    else
+        log_warning "Failed to update Neovim Node.js packages"
+    fi
+fi
+{{- end }}
+
+# Update Neovim plugins
+if check_command nvim; then
+    log_running "Updating Neovim plugins..."
+
+    # Update Lazy.nvim plugins
+    log_info "Updating Lazy.nvim plugins..."
+    if nvim --headless "+Lazy! sync" +qa 2>/dev/null; then
+        log_success "Lazy.nvim plugins updated"
+    else
+        log_warning "Failed to update Lazy.nvim plugins"
+    fi
+
+    # Update Mason LSP servers
+    log_info "Updating Mason LSP servers..."
+    if nvim --headless "+MasonUpdate" +qa 2>/dev/null; then
+        log_success "Mason LSP servers updated"
+    else
+        log_warning "Failed to update Mason LSP servers"
+    fi
+
+    # Update coc.nvim extensions
+    log_info "Updating coc.nvim extensions..."
+    if nvim --headless "+CocUpdate" +qa 2>/dev/null; then
+        log_success "coc.nvim extensions updated"
+    else
+        log_warning "Failed to update coc.nvim extensions"
+    fi
+
+    # Update treesitter parsers
+    log_info "Updating treesitter parsers..."
+    if nvim --headless "+TSUpdate" +qa 2>/dev/null; then
+        log_success "treesitter parsers updated"
+    else
+        log_warning "Failed to update treesitter parsers"
+    fi
+else
+    log_warning "Neovim not found, skipping plugin updates"
+fi
+
+log_success "Neovim environment update completed!"
