@@ -51,8 +51,10 @@ return {
         prompts = {
           CommitJp = {
             prompt =
-            '##git://diff/staged\n\nコミットメッセージを作成してください。Commitizen の規約に従ってください。タイトルは最大50文字にし、メッセージは72文字で改行してください。メッセージ全体を `gitcommit` 言語を指定してコードブロックで囲ってください。日本語で記載してください。',
-            context = 'git:staged',
+            'コミットメッセージを作成してください。Commitizen の規約に従ってください。タイトルは最大50文字にし、メッセージは72文字で改行してください。メッセージ全体を gitcommit コードブロックで囲ってください。日本語で記載してください。',
+            resources = {
+              'gitdiff:staged',
+            },
           },
           -- custom prompt
           -- https://github.com/f/awesome-chatgpt-prompts
@@ -435,16 +437,22 @@ return {
             return
           end
 
-          -- Check if there are any messages with non-empty content
-          local has_messages = false
+          -- Check if there are any meaningful user messages
+          -- Exclude auto-generated commit prompt messages
+          local has_user_messages = false
           for _, message in ipairs(messages) do
-            if message.content and message.content ~= "" then
-              has_messages = true
-              break
+            if message.role == "user" and message.content and message.content ~= "" then
+              -- Skip if it's a git diff prompt or gitdiff command
+              local is_git_prompt = message.content:match("^##git://diff/staged")
+                  or message.content:match("^> #gitdiff:")
+              if not is_git_prompt then
+                has_user_messages = true
+                break
+              end
             end
           end
 
-          if has_messages then
+          if has_user_messages then
             local timestamp = os.date('%Y%m%d_%H%M%S')
             vim.cmd('silent! CopilotChatSave auto_save_' .. timestamp)
           end
