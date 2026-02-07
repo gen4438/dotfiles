@@ -202,3 +202,10 @@ Documents/**
 Documents/WindowsPowerShell/**
 !Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 {{- end }}
+
+
+# ==============================================================================
+# Others
+# ==============================================================================
+**/.git/
+**/lazy-lock.json
