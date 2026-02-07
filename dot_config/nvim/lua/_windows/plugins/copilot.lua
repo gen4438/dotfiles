@@ -6,12 +6,10 @@ return {
     event = "InsertEnter",
     config = function()
       -- ハイライト設定（github/copilot.vim から移行）
-      vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#FF5555', ctermfg = 8 })
-
       require("copilot").setup({
         panel = {
           enabled = true,
-          auto_refresh = false,
+          auto_refresh = true,
           keymap = {
             jump_prev = "[[",
             jump_next = "]]",
@@ -26,16 +24,17 @@ return {
         },
         suggestion = {
           enabled = true,
-          auto_trigger = false,
+          auto_trigger = true,
           hide_during_completion = true,
-          debounce = 75,
+          debounce = 15,
+          trigger_on_accept = true,
           keymap = {
-            accept = "<C-j>",       -- github/copilot.vim から移行
-            accept_word = "<C-w>",  -- github/copilot.vim から移行
-            accept_line = "<C-l>",  -- github/copilot.vim から移行
-            next = "<M-]>",
-            prev = "<M-[>",
-            dismiss = "<C-]>"
+            accept = "<C-j>",
+            accept_word = "<C-w>",
+            accept_line = "<C-l>",
+            next = "<c-f>",
+            dismiss = "<C-]>",
+            toggle_auto_trigger = false,
           }
         },
         filetypes = {
@@ -72,15 +71,6 @@ return {
         mode = "n",
         silent = true,
         desc = "Open Copilot panel"
-      },
-      {
-        "<c-k><c-k>",
-        function()
-          require("copilot.suggestion").next()
-        end,
-        mode = "i",
-        silent = true,
-        desc = "Trigger Copilot suggestion"
       },
     }
   },

@@ -77,20 +77,20 @@ return {
   --   ft = { 'markdown' },
   -- },
 
-  -- markdown で クリップボードの画像を貼り付け
-  {
-    'img-paste-devs/img-paste.vim',
-    lazy = true,
-    ft = { 'markdown' },
-    config = function()
-      -- " there are some defaults for image directory and image name, you can change them
-      vim.g.mdip_imgdir = 'img'
-      vim.g.mdip_imgname = 'image'
-    end,
-    keys = {
-      { "<leader>p", ":call mdip#MarkdownClipboardImage()<CR>", mode = "n", noremap = true, silent = true, desc = "Paste image from clipboard" }
-    }
-  },
+  -- -- markdown で クリップボードの画像を貼り付け
+  -- {
+  --   'img-paste-devs/img-paste.vim',
+  --   lazy = true,
+  --   ft = { 'markdown' },
+  --   config = function()
+  --     -- " there are some defaults for image directory and image name, you can change them
+  --     vim.g.mdip_imgdir = 'img'
+  --     vim.g.mdip_imgname = 'image'
+  --   end,
+  --   keys = {
+  --     { "<leader>p", ":call mdip#MarkdownClipboardImage()<CR>", mode = "n", noremap = true, silent = true, desc = "Paste image from clipboard" }
+  --   }
+  -- },
 
   -- code fence の中身を編集
   -- AckslD/nvim-FeMaco.lua
