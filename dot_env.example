@@ -1,4 +1,5 @@
 EDITOR=nvim
+GITHUB_TOKEN=
 
 # rootless-docker
 # DOCKER_HOST=unix:///run/user/${UID}/docker.sock
