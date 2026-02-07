@@ -426,9 +426,28 @@ return {
         pattern = 'copilot-*',
         group = 'MyCopilotChat',
         callback = function()
-          -- Auto-save with timestamp
-          local timestamp = os.date('%Y%m%d_%H%M%S')
-          vim.cmd('silent! CopilotChatSave auto_save_' .. timestamp)
+          -- Only save if there are actual messages with content
+          local ok, messages = pcall(function()
+            return require("CopilotChat").chat:get_messages()
+          end)
+
+          if not ok or not messages then
+            return
+          end
+
+          -- Check if there are any messages with non-empty content
+          local has_messages = false
+          for _, message in ipairs(messages) do
+            if message.content and message.content ~= "" then
+              has_messages = true
+              break
+            end
+          end
+
+          if has_messages then
+            local timestamp = os.date('%Y%m%d_%H%M%S')
+            vim.cmd('silent! CopilotChatSave auto_save_' .. timestamp)
+          end
         end
       })
     end,
