@@ -12,11 +12,16 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "chat.agent.maxRequests": 50,
+  "chat.viewSessions.orientation": "stacked",
+  "claudeCode.allowDangerouslySkipPermissions": true,
+  "claudeCode.preferredLocation": "panel",
+  "claudeCode.selectedModel": "default",
   "code-runner.enableAppInsights": false,
   "code-runner.runInTerminal": true,
   "database-client.autoSync": true,
   "database-client.telemetry.usesOnlineServices": false,
   "dev.containers.forwardWSLServices": false,
+  "diffEditor.codeLens": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "editor.cursorStyle": "block",
   "editor.scrollBeyondLastLine": false,
@@ -25,9 +30,11 @@
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
   },
+  "geminicodeassist.enableTelemetry": false,
   "git.autofetch": true,
   "git.blame.editorDecoration.enabled": false,
   "git.blame.statusBarItem.enabled": true,
+  "git.confirmSync": false,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.editor.temporalContext.enabled": true,
@@ -38,10 +45,15 @@
   "github.copilot.chat.languageContext.typescript.enabled": true,
   "github.copilot.chat.notebook.followCellExecution.enabled": true,
   "github.copilot.enable": {
-    "markdown": true
+    "*": true,
+    "markdown": true,
+    "plaintext": true,
+    "scminput": false
   },
   "github.copilot.nextEditSuggestions.enabled": true,
   "githubPullRequests.experimental.useQuickChat": true,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "gitlens.telemetry.enabled": false,
   "makefile.configureOnOpen": true,
   "path-intellisense.autoSlashAfterDirectory": true,
@@ -54,6 +66,7 @@
   "remote.SSH.remotePlatform": {
     "minis": "linux"
   },
+  "settingsSync.ignoredExtensions": ["smcpeak.default-keys-windows"],
   "settingsSync.ignoredSettings": [
     "remote.SSH.configFile",
     "remote.SSH.remotePlatform",
@@ -131,8 +144,6 @@
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
   "workbench.colorCustomizations": {},
-  "workbench.colorTheme": "GitHub Dark High Contrast",
   "workbench.externalBrowser": "edge",
-  "workbench.iconTheme": "material-icon-theme",
-  "git.confirmSync": false
+  "workbench.iconTheme": "material-icon-theme"
 }
