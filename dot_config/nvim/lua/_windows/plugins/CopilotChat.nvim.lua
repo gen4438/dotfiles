@@ -6,7 +6,7 @@ return {
     dependencies = {
       { "nvim-lua/plenary.nvim" } -- for curl, log wrapper
     },
-    build = "make tiktoken",      -- Only on MacOS or Linux
+    -- build = "make tiktoken",      -- Disabled on Windows (make command not available)
 
     config = function()
       local select = require('CopilotChat.select')
