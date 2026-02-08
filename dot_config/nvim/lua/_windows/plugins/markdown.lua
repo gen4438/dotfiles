@@ -93,9 +93,9 @@ return {
   },
 
   -- code fence の中身を編集
-  -- AckslD/nvim-FeMaco.lua
+  -- AckslD/nvim-FeMaco.lua (using fork with nvim-treesitter 1.0 compatibility)
   {
-    'AckslD/nvim-FeMaco.lua',
+    'gen4438/nvim-FeMaco.lua',
     lazy = true,
     ft = { 'markdown' },
     dependencies = { "nvim-treesitter/nvim-treesitter" },

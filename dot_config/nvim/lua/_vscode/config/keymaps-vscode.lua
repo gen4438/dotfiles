@@ -489,7 +489,7 @@ vim.keymap.set('i', '<c-j>', function()
 end, { desc = "Commit inline suggestion" })
 
 -- Trigger inline edit explicitly
-vim.keymap.set('n', '<c-m>', function()
+vim.keymap.set('n', '<c-c>', function()
   vscode.call('editor.action.inlineSuggest.triggerInlineEditExplicit')
 end, { desc = "Trigger inline edit explicitly" })
 
