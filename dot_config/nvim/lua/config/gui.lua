@@ -21,3 +21,14 @@ end
 vim.api.nvim_set_keymap('n', '<C-S-->', ':lua gui_update_font_size(1)<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-->', ':lua gui_update_font_size(-1)<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-0>', ':lua gui_reset_font_size()<CR>', { noremap = true, silent = true })
+
+-- Neovide: Windows でアニメーションを無効化
+if vim.g.neovide and vim.fn.has('win32') == 1 then
+  vim.g.neovide_cursor_animation_length = 0
+  vim.g.neovide_cursor_trail_size = 0
+  vim.g.neovide_cursor_animate_in_insert_mode = false
+  vim.g.neovide_cursor_animate_command_line = false
+  vim.g.neovide_scroll_animation_length = 0
+  vim.g.neovide_position_animation_length = 0
+  vim.g.neovide_cursor_vfx_mode = ""
+end
