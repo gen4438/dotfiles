@@ -52,10 +52,5 @@ require("config.lazy")
 -- Post-plugin setup (theme management, custom highlights)
 require("config.colorscheme_post")
 
--- GUI frontend settings (Neovide etc.)
-if vim.g.neovide then
-  require("config.gui")
-end
-
 -- User customizations (loaded last to allow overrides)
 require("config.custom")
