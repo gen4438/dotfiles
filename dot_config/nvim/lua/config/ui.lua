@@ -177,6 +177,22 @@ M.setup_toggle_keymaps = function()
   vim.keymap.set('n', '<Space>w', ':setlocal wrap!<CR>', { desc = "Toggle wrap" })
 end
 
+-- Neovide: Windows でアニメーションを無効化
+M.setup_neovide = function()
+  if not vim.g.neovide then
+    return
+  end
+  if vim.fn.has('win32') == 1 then
+    vim.g.neovide_cursor_animation_length = 0
+    vim.g.neovide_cursor_trail_size = 0
+    vim.g.neovide_cursor_animate_in_insert_mode = false
+    vim.g.neovide_cursor_animate_command_line = false
+    vim.g.neovide_scroll_animation_length = 0
+    vim.g.neovide_position_animation_length = 0
+    vim.g.neovide_cursor_vfx_mode = ""
+  end
+end
+
 -- Main setup function
 M.setup = function()
   M.setup_colors()
@@ -184,7 +200,8 @@ M.setup = function()
   M.setup_ui_elements()
   M.setup_gui_keymaps()
   M.setup_toggle_keymaps()
-  
+  M.setup_neovide()
+
   -- Load local UI configuration if it exists
   -- This allows overriding font settings and other UI preferences
   local local_ui_config = vim.fn.stdpath("config") .. "ui.local.lua"
