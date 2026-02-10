@@ -142,10 +142,15 @@ M.setup_gui_keymaps = function()
     vim.keymap.set('n', '<C-S-->', function() M.change_font_size(1) end, { desc = "Increase font size" })
     vim.keymap.set('n', '<C-->', function() M.change_font_size(-1) end, { desc = "Decrease font size" })
     vim.keymap.set('n', '<C-0>', M.reset_font_size, { desc = "Reset font size" })
-    
     -- Alternative font size controls for different keyboards
     vim.keymap.set('n', '<C-ScrollWheelUp>', function() M.change_font_size(1) end, { desc = "Increase font size" })
     vim.keymap.set('n', '<C-ScrollWheelDown>', function() M.change_font_size(-1) end, { desc = "Decrease font size" })
+
+    -- copy and paste
+    local function copy() vim.cmd([[normal! "+y]]) end
+    local function paste() vim.api.nvim_paste(vim.fun.getreg('+'), true, -1) end
+    vim.keymap.set('v', '<c-s-c>', copy, { silent = true, desc = "Copy to clipboard" })
+    vim.keymap.set({'n', 'i', 'x', 'c', 't' }, '<c-s-v>', paste, { silent = true, desc = "Paste from clipboard" })
   end
 end
 
