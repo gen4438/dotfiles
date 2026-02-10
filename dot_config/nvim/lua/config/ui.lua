@@ -148,7 +148,7 @@ M.setup_gui_keymaps = function()
 
     -- copy and paste
     local function copy() vim.cmd([[normal! "+y]]) end
-    local function paste() vim.api.nvim_paste(vim.fun.getreg('+'), true, -1) end
+    local function paste() vim.api.nvim_paste(vim.fn.getreg('+'), true, -1) end
     vim.keymap.set('v', '<c-s-c>', copy, { silent = true, desc = "Copy to clipboard" })
     vim.keymap.set({'n', 'i', 'x', 'c', 't' }, '<c-s-v>', paste, { silent = true, desc = "Paste from clipboard" })
   end
