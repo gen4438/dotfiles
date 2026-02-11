@@ -92,3 +92,15 @@ stty -ixon
 
 # Cargo environment is now handled in shell_common.tmpl
 # PATH cleanup is now handled in shell_common.tmpl
+
+# Task Master aliases added on 10/27/2025
+alias tm='task-master'
+alias taskmaster='task-master'
+
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
