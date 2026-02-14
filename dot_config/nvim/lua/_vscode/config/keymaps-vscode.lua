@@ -547,8 +547,8 @@ vim.api.nvim_create_autocmd({ 'FileType' }, {
     map("n", "^", function() vscode.action('oil-code.openParent') end)
     map("n", "_", function() vscode.action('oil-code.openCwd') end)
     map("n", "<CR>", function() vscode.action('oil-code.select') end)
-    map("n", "<C-t>", function() vscode.action('oil-code.selectTab') end)
-    map("n", "<C-l>", function() vscode.action('oil-code.refresh') end)
+    -- map("n", "<C-t>", function() vscode.action('oil-code.selectTab') end)
+    -- map("n", "<C-l>", function() vscode.action('oil-code.refresh') end)
     map("n", "`", function() vscode.action('oil-code.cd') end)
   end,
 })

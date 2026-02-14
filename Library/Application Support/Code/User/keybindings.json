@@ -388,5 +388,19 @@
     "command": "-cursorWordEndRight",
     "key": "alt+right",
     "when": "textInputFocus"
+  },
+  {
+    "key": "ctrl+alt+l",
+    "command": "claude-vscode.focus",
+    "when": "editorTextFocus && !config.claudeCode.useTerminal"
+  },
+  {
+    "key": "cmd+escape",
+    "command": "-claude-vscode.focus",
+    "when": "editorTextFocus && !config.claudeCode.useTerminal"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-workbench.action.quickOpen"
   }
 ]
