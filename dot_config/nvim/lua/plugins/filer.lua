@@ -28,6 +28,14 @@ return {
     'stevearc/oil.nvim',
     ---@module 'oil'
     ---@type oil.SetupOpts
+
+    lazy = true,
+    keys = {
+      { "-", ":Oil<CR>", mode = "n", desc = "Open parent directory" },
+    },
+    event = "BufEnter",
+    cmd = "Oil",
+
     opts = {
       -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
       -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
@@ -88,6 +96,7 @@ return {
       -- Set to `false` to remove a keymap
       -- See :help oil-actions for a list of all available actions
       keymaps = {
+
         ["g?"] = { "actions.show_help", mode = "n" },
         ["<CR>"] = "actions.select",
         ["<C-s>"] = { "actions.select", opts = { vertical = true } },
@@ -243,8 +252,6 @@ return {
       keymaps_help = {
         border = "rounded",
       },
-
-
     },
     -- Optional dependencies
     -- dependencies = { { "echasnovski/mini.icons", opts = {} } },
