@@ -170,6 +170,11 @@ vim.keymap.set('n', 'sq', function()
   vscode.call('workbench.action.closeActiveEditor')
 end, { desc = "Close editor" })
 
+-- Close editor with Ctrl+W
+vim.keymap.set('i', '<c-w>', function()
+  vscode.call('workbench.action.closeActiveEditor')
+end, { desc = "Close editor" })
+
 vim.keymap.set('n', 'sn', function()
   vscode.call('workbench.action.nextEditor')
 end, { desc = "Next editor" })

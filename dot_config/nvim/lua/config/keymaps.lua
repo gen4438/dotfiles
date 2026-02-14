@@ -198,6 +198,7 @@ vim.keymap.set('n', '<c-k><c-t>', ':Colors<CR>', { desc = "Choose colorscheme" }
 vim.keymap.set('n', ']b', ':bn<CR>', { desc = "Next buffer" })
 vim.keymap.set('n', '[b', ':bp<CR>', { desc = "Previous buffer" })
 vim.keymap.set('n', 'sq', ':bp<CR>:bd #<CR>', { desc = "Close current buffer" })
+vim.keymap.set('n', 'sc', '<cmd>%bd|e#|bd#<CR>', { desc = "Close all other buffers" })
 
 -- Window management (s prefix)
 vim.keymap.set('n', 's', '<Nop>', opts)  -- Disable 's' to use as prefix
@@ -246,7 +247,7 @@ vim.keymap.set('n', '<c-pageup>', ':tabprevious<CR>', { desc = "Previous tab" })
 vim.keymap.set('n', 'sT', ':tab split<CR>', { desc = "Open in new tab" })
 vim.keymap.set('n', 'sN', ':tabnext<CR>', { desc = "Next tab" })
 vim.keymap.set('n', 'sP', ':tabprevious<CR>', { desc = "Previous tab" })
-vim.keymap.set('n', 'sc', ':tabclose<CR>', { desc = "Close tab" })
+-- vim.keymap.set('n', 'sc', ':tabclose<CR>', { desc = "Close tab" })
 vim.keymap.set('n', 'sC', ':tabclose<CR>', { desc = "Close tab" })
 
 -- Quickfix and location list navigation
