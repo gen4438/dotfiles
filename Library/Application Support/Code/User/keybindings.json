@@ -331,5 +331,80 @@
     "command": "-workbench.action.terminal.paste",
     "key": "ctrl+v",
     "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported || terminalFocus && terminalHasBeenCreated && terminalProcessSupported"
+  },
+  {
+    "command": "-cursorWordLeft",
+    "key": "alt+left",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "-cursorHome",
+    "key": "cmd+left",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "-cursorEnd",
+    "key": "cmd+right",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "japaneseWordHandler.cursorWordStartLeft",
+    "key": "cmd+left",
+    "when": "editorTextFocus"
+  },
+  {
+    "command": "-japaneseWordHandler.cursorWordStartLeft",
+    "key": "alt+left",
+    "when": "editorTextFocus"
+  },
+  {
+    "command": "japaneseWordHandler.cursorWordEndRight",
+    "key": "cmd+right",
+    "when": "editorTextFocus"
+  },
+  {
+    "command": "-japaneseWordHandler.cursorWordEndRight",
+    "key": "alt+right",
+    "when": "editorTextFocus"
+  },
+  {
+    "command": "cursorWordLeft",
+    "key": "cmd+left",
+    "when": "textInputFocus && !accessibilityModeEnabled"
+  },
+  {
+    "command": "-cursorWordLeft",
+    "key": "ctrl+left",
+    "when": "textInputFocus && !accessibilityModeEnabled"
+  },
+  {
+    "command": "cursorWordLeftSelect",
+    "key": "shift+cmd+left",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "-cursorWordLeftSelect",
+    "key": "shift+alt+left",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "cursorWordEndRightSelect",
+    "key": "ctrl+shift+cmd",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "-cursorWordEndRightSelect",
+    "key": "shift+alt+right",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "cursorWordEndRight",
+    "key": "cmd+right",
+    "when": "textInputFocus"
+  },
+  {
+    "command": "-cursorWordEndRight",
+    "key": "alt+right",
+    "when": "textInputFocus"
   }
 ]

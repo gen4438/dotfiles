@@ -11,11 +11,13 @@
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "chat.agent.maxRequests": 50,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "chat.viewSessions.orientation": "stacked",
   "claudeCode.allowDangerouslySkipPermissions": true,
   "claudeCode.preferredLocation": "panel",
-  "claudeCode.selectedModel": "default",
+  "claudeCode.selectedModel": "sonnet",
   "code-runner.enableAppInsights": false,
   "code-runner.runInTerminal": true,
   "database-client.autoSync": true,
@@ -31,12 +33,18 @@
     "asvetliakov.vscode-neovim": 1
   },
   "geminicodeassist.enableTelemetry": false,
+  "geminicodeassist.project": "starry-goal-pdpsm",
   "git.autofetch": true,
   "git.blame.editorDecoration.enabled": false,
   "git.blame.statusBarItem.enabled": true,
   "git.confirmSync": false,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "コミットメッセージは日本語で書いてください。commitizenの規約に従ってください。"
+    },
+  ],
   "github.copilot.chat.editor.temporalContext.enabled": true,
   "github.copilot.chat.edits.temporalContext.enabled": true,
   "github.copilot.chat.generateTests.codeLens": true,
@@ -55,6 +63,20 @@
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "gitlens.telemetry.enabled": false,
+  "gitlens.views.branches.branches.layout": "list",
+  "gitlens.views.scm.grouped.hiddenViews": {
+    "branches": false,
+    "commits": false,
+    "contributors": false,
+    "fileHistory": false,
+    "launchpad": false,
+    "remotes": false,
+    "repositories": true,
+    "searchAndCompare": false,
+    "stashes": false,
+    "tags": false,
+    "worktrees": true
+  },
   "makefile.configureOnOpen": true,
   "path-intellisense.autoSlashAfterDirectory": true,
   "path-intellisense.showHiddenFiles": true,
@@ -66,7 +88,9 @@
   "remote.SSH.remotePlatform": {
     "minis": "linux"
   },
-  "settingsSync.ignoredExtensions": ["smcpeak.default-keys-windows"],
+  "settingsSync.ignoredExtensions": [
+    "smcpeak.default-keys-windows"
+  ],
   "settingsSync.ignoredSettings": [
     "remote.SSH.configFile",
     "remote.SSH.remotePlatform",
@@ -144,6 +168,8 @@
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
   "workbench.colorCustomizations": {},
-  "workbench.externalBrowser": "edge",
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.editor.wrapTabs": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.list.defaultFindMode": "filter",
+  "workbench.tree.indent": 20
 }
