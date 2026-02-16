@@ -61,6 +61,14 @@ local coc_setup = function()
   -- other plugins before putting this into your config
   local opts = { silent = true, noremap = true, expr = true, replace_keycodes = false }
   keyset("i", "<TAB>", function()
+    -- NES (Copilot Next Edit Suggestion) を優先チェック
+    local bufnr = vim.api.nvim_get_current_buf()
+    if vim.b[bufnr].nes_state then
+      local nes = require("copilot-lsp.nes")
+      local _ = nes.walk_cursor_start_edit()
+          or (nes.apply_pending_nes() and nes.walk_cursor_end_edit())
+      return ""
+    end
     if vim.fn['coc#pum#visible']() ~= 0 then
       return vim.fn['coc#pum#next'](1)
     elseif check_back_space() then

@@ -13,23 +13,42 @@ return {
       -- これにより NES 機能が利用可能になる
       vim.lsp.enable("copilot_ls")
 
+      -- Normal mode: Tab で NES サジェストを適用
+      -- 1回目の Tab: サジェストの開始位置にジャンプ
+      -- 2回目の Tab（開始位置にいる場合）: サジェストを適用して終了位置にジャンプ
       vim.keymap.set("n", "<tab>", function()
         local bufnr = vim.api.nvim_get_current_buf()
-        local state = vim.b[bufnr].nes_state
-        if state then
-          -- Try to jump to the start of the suggestion edit.
-          -- If already at the start, then apply the pending suggestion and jump to the end of the edit.
-          local _ = require("copilot-lsp.nes").walk_cursor_start_edit()
-              or (
-                require("copilot-lsp.nes").apply_pending_nes()
-                and require("copilot-lsp.nes").walk_cursor_end_edit()
-              )
+        if vim.b[bufnr].nes_state then
+          local nes = require("copilot-lsp.nes")
+          local _ = nes.walk_cursor_start_edit()
+              or (nes.apply_pending_nes() and nes.walk_cursor_end_edit())
           return nil
         else
-          -- Resolving the terminal's inability to distinguish between `TAB` and `<C-i>` in normal mode
+          -- ターミナルが TAB と <C-i> を区別できない問題を回避
           return "<C-i>"
         end
       end, { desc = "Accept Copilot NES suggestion", expr = true })
+
+      -- Normal mode: Esc Esc で NES サジェストをキャンセル + 検索ハイライト消去
+      -- keymaps.lua の <Esc><Esc> をオーバーライドして NES クリアを追加
+      -- 注意: 単一 <Esc> をマップすると <Esc><Esc> と競合して timeoutlen 分の遅延が発生するため、
+      --       <Esc><Esc> にまとめている
+      vim.keymap.set("n", "<esc><esc>", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        if vim.b[bufnr].nes_state then
+          require("copilot-lsp.nes").clear()
+        end
+        vim.cmd("nohlsearch")
+      end, { desc = "Clear NES and search highlight" })
+
+      -- Insert mode: Esc で NES サジェストをキャンセルしてノーマルモードへ
+      vim.keymap.set("i", "<esc>", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        if vim.b[bufnr].nes_state then
+          require("copilot-lsp.nes").clear()
+        end
+        return "<esc>"
+      end, { expr = true, desc = "Clear NES and exit insert mode" })
     end,
     config = function()
       -- copilot-lsp 固有の設定
@@ -86,9 +105,9 @@ return {
         nes = {
           enabled = true, -- requires copilot-lsp as a dependency
           auto_trigger = true,
-          accept_and_goto = "<tab>",
+          accept_and_goto = false, -- Tab で手動処理（copilot-lsp.nes 経由）
           accept = false,
-          dismiss = false,
+          dismiss = false, -- Esc で手動処理（copilot-lsp.nes.clear 経由）
         },
         filetypes = {
           -- github/copilot.vim の設定を移行
