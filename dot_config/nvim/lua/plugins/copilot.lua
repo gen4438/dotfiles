@@ -103,7 +103,7 @@ return {
           }
         },
         nes = {
-          enabled = true, -- requires copilot-lsp as a dependency
+          enabled = false, -- requires copilot-lsp as a dependency
           auto_trigger = true,
           accept_and_goto = false, -- Tab で手動処理（copilot-lsp.nes 経由）
           accept = false,
