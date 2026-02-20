@@ -277,7 +277,7 @@ return {
     branch = "release",
     event = { "BufReadPre", "BufNewFile" },
     cmd = {
-      "CocInstall", "CocUninstall", "CocUpdate", "CocUpdateSync",
+      "CocInstall", "CocUninstall", "CocUpdate", "CocUpdateSync", "CocConfig",
       "CocList", "CocNext", "CocPrev", "CocAction", "Format", "Fold", "OR"
     },
     config = coc_setup,
