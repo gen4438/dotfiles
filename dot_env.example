@@ -1,5 +1,5 @@
 EDITOR=nvim
-GITHUB_TOKEN=
+GITHUB_TOKEN=$(gh auth token -h github.com)
 
 # rootless-docker
 # DOCKER_HOST=unix:///run/user/${UID}/docker.sock
