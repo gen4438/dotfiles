@@ -183,4 +183,19 @@ log_step "Setting up Windows specific tools..."
 # This will be handled in PowerShell scripts
 {{- end }}
 
+# Setup uv (Python package manager)
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up uv..."
+if check_command uv; then
+    log_success "uv is already installed"
+else
+    log_running "Installing uv..."
+    if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+        log_success "uv installed successfully"
+    else
+        log_warning "Failed to install uv"
+    fi
+fi
+{{- end }}
+
 log_success "Development tools setup completed"

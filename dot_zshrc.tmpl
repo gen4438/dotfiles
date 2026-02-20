@@ -143,7 +143,7 @@ zstyle ':completion:*:*:*:*:*' file-patterns '*:all-files' '.*:hidden-files'
 
 # Add vi mode indicator and environment info to prompt
 # Vi mode indicator is handled here for consistency (not in byobu prompt)
-export PROMPT='$(vi_mode_prompt_info)$(show_virtual_env)$(show_nvm_version)'"${PROMPT//$'\n'/}"
+export PROMPT='$(vi_mode_prompt_info)$(show_dev_env)'"${PROMPT//$'\n'/}"
 
 # Performance profiling results - uncomment to show profiling data
 # zprof

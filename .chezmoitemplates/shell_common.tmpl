@@ -163,16 +163,16 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Python (pyenv) - standard initialization with prompt control
-export PYENV_ROOT="$HOME/.pyenv"
-add_to_path "$PYENV_ROOT/bin"
-if command -v pyenv &> /dev/null; then
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
+# Python (pyenv) - disabled by default, use direnv + uv instead
+# export PYENV_ROOT="$HOME/.pyenv"
+# add_to_path "$PYENV_ROOT/bin"
+# if command -v pyenv &> /dev/null; then
+#     eval "$(pyenv init -)"
+#     eval "$(pyenv virtualenv-init -)"
+# fi
 
 # Disable automatic prompt modification - we'll handle it ourselves
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 {{- end }}
 
@@ -183,13 +183,12 @@ add_to_path "$HOME/.poetry/bin"
 export PIPENV_SKIP_LOCK=true
 
 {{- if ne .chezmoi.os "android" }}
-# Remove specific pyenv shims to use system versions
-# These commands work better with system versions rather than pyenv-managed ones
-for cmd in black blackd grip rg gettext envsubst rst2man.py; do
-    if command -v "/usr/bin/$cmd" >/dev/null 2>&1 && [[ -f "$HOME/.pyenv/shims/$cmd" ]]; then
-        rm -f "$HOME/.pyenv/shims/$cmd"
-    fi
-done
+# Remove specific pyenv shims to use system versions (disabled with pyenv)
+# for cmd in black blackd grip rg gettext envsubst rst2man.py; do
+#     if command -v "/usr/bin/$cmd" >/dev/null 2>&1 && [[ -f "$HOME/.pyenv/shims/$cmd" ]]; then
+#         rm -f "$HOME/.pyenv/shims/$cmd"
+#     fi
+# done
 {{- end }}
 
 # Kubernetes plugins (Krew)
@@ -282,20 +281,35 @@ fi
 remove_path_duplicates
 
 # Shared prompt functions for bash and zsh
-# Show Python virtual environment (when using direnv or explicit venv activation)
-show_virtual_env() {
-    # Python venv environment (explicit activation)
-    if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
-        echo "($(basename "$VIRTUAL_ENV"))"
-    # pyenv environment (when managed by direnv)
-    elif [[ -n "$DIRENV_DIR" ]] && command -v pyenv >/dev/null 2>&1 && [[ "$(pyenv version-name)" != "system" ]]; then
-        echo "($(pyenv version-name))"
-    fi
-}
+# Show active development environment in prompt
+show_dev_env() {
+    local parts=""
 
-# Show Node.js version when using nvm with direnv
-show_nvm_version() {
-    if [[ -n "$DIRENV_NVM_VERSION" && -n "$DIRENV_DIR" ]]; then
-        echo "(nvm-$(node --version))"
+    # Python environment detection (uv / pyenv / virtualenv / venv)
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        local venv_name
+        venv_name="$(basename "$VIRTUAL_ENV")"
+        if [[ -n "$UV_ACTIVE" ]]; then
+            parts+="(uv:${venv_name})"
+        elif [[ -n "$POETRY_ACTIVE" ]]; then
+            parts+="(poetry:${venv_name})"
+        elif [[ "$venv_name" == ".venv" || "$venv_name" == "venv" ]]; then
+            parts+="(venv)"
+        else
+            parts+="(${venv_name})"
+        fi
+    elif command -v pyenv >/dev/null 2>&1; then
+        local pyver
+        pyver="$(pyenv version-name 2>/dev/null)"
+        if [[ -n "$pyver" && "$pyver" != "system" ]]; then
+            parts+="(pyenv:${pyver})"
+        fi
     fi
+
+    # Node.js environment (nvm via direnv)
+    if [[ -n "$DIRENV_NVM_VERSION" && -n "$DIRENV_DIR" ]]; then
+        parts+="(nvm:$(node --version 2>/dev/null))"
+    fi
+
+    [[ -n "$parts" ]] && echo "$parts"
 }
