@@ -206,10 +206,29 @@ if check_command uv; then
 else
     log_running "Installing uv..."
     if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+        # Ensure uv is on PATH for subsequent commands
+        export PATH="$HOME/.local/bin:$PATH"
         log_success "uv installed successfully"
     else
         log_warning "Failed to install uv"
     fi
+fi
+
+# Install uv tools
+if check_command uv; then
+    log_step "Installing uv tools..."
+    for tool in ruff ipython; do
+        if uv tool list 2>/dev/null | grep -q "^${tool} "; then
+            log_success "${tool} is already installed"
+        else
+            log_running "Installing ${tool}..."
+            if uv tool install "${tool}"; then
+                log_success "${tool} installed successfully"
+            else
+                log_warning "Failed to install ${tool}"
+            fi
+        fi
+    done
 fi
 {{- end }}
 
