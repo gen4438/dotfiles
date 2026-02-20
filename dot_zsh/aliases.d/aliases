@@ -17,6 +17,10 @@ alias 3='cd +3'
 alias 4='cd +4'
 alias 5='cd +5'
 
+# Task Master
+alias tm='task-master'
+alias taskmaster='task-master'
+
 # Plugin management (if using zplug)
 if command -v zplug &> /dev/null; then
     alias zplug-update='zplug update'

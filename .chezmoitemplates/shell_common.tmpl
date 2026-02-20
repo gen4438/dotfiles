@@ -191,6 +191,14 @@ export PIPENV_SKIP_LOCK=true
 # done
 {{- end }}
 
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+add_to_path "$PNPM_HOME"
+
+# luarocks
+export LUAROCKS_HOME="$HOME/.luarocks"
+add_to_path "$LUAROCKS_HOME/bin"
+
 # Kubernetes plugins (Krew)
 add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
 

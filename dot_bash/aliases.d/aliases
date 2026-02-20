@@ -118,6 +118,10 @@ if [[ -f "/sys/devices/platform/lg-laptop/battery_care_limit" ]]; then
 fi
 
 # Application-Specific Settings
+# Task Master
+alias tm='task-master'
+alias taskmaster='task-master'
+
 alias wine='LC_ALL=ja_JP.UTF-8 wine'
 alias lsync='lsyncd -delay 1 -nodaemon -rsyncssh'
 alias marp_watch='marp -w --html'
