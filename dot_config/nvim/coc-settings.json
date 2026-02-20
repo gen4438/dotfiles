@@ -48,6 +48,7 @@
   "python.linting.mypyEnabled": true,
   "python.linting.pydocstyleEnabled": true,
   "python.formatting.provider": "ruff",
+  "python.formatting.ruffArgs": ["--silent"],
   "pydocstring.formatter": "google",
   "pyright.disableProgressNotifications": true,
 
