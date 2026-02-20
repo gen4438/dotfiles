@@ -135,11 +135,9 @@ fi
 # Load byobu prompt if available
 [ -r "$BYOBU_CONFIG_DIR/prompt" ] && . "$BYOBU_CONFIG_DIR/prompt"
 
-# Override oh-my-zsh completion settings (must be at end)
+# Override completion settings (must be at end)
 setopt GLOB_DOTS
-zstyle ':completion:*' menu select=0  # Show list on first tab, select on second tab
 zstyle ':completion:*' special-dirs false
-zstyle ':completion:*:*:*:*:*' file-patterns '*:all-files' '.*:hidden-files'
 
 # Add vi mode indicator and environment info to prompt
 # Vi mode indicator is handled here for consistency (not in byobu prompt)

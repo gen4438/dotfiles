@@ -307,7 +307,7 @@ show_dev_env() {
         else
             parts+="(${venv_name})"
         fi
-    elif command -v pyenv >/dev/null 2>&1; then
+    elif [[ -n "$PYENV_SHELL" ]]; then
         local pyver
         pyver="$(pyenv version-name 2>/dev/null)"
         if [[ -n "$pyver" && "$pyver" != "system" ]]; then

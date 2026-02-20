@@ -1,39 +1,16 @@
-# Completion behavior settings (inputrc equivalent)
-# Based on inputrc readline settings for consistent bash/zsh behavior
+# Completion behavior settings
+# fzf-tab に委譲するため、ここではベースの補完動作のみ設定
 
 # Completion options
-setopt AUTO_MENU              # Show completion menu on successive tab (show-all-if-ambiguous equivalent)
-setopt COMPLETE_IN_WORD       # Complete from both ends of word  
+setopt AUTO_MENU              # Show completion menu on successive tab
+setopt COMPLETE_IN_WORD       # Complete from both ends of word
 setopt ALWAYS_TO_END          # Move cursor to end after completion
-setopt NO_BEEP               # Disable bell (bell-style none equivalent)
+setopt NO_BEEP               # Disable bell
 # Note: LIST_ROWS_FIRST is set in zshrc.tmpl to override plugin settings
 
-# Case-insensitive completion (completion-ignore-case equivalent) - simplified for speed
+# Case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
 # Completion caching for better performance
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
-
-# Colored completion (colored-stats equivalent)
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-
-# Confirmation prompt for many completions (like bash)
-zstyle ':completion:*' list-prompt $'Display all %d possibilities? (y or n)\n'
-zstyle ':completion:*' select-prompt 'scrolling active: current selection at %p%s'
-
-# Set threshold for showing confirmation (default might be too high)
-zstyle ':completion:*' list-max-items 100
-
-# Menu completion display with common prefix first (menu-complete-display-prefix equivalent)
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' format '%B%F{blue}%d%f%b'
-
-# Default completion behavior: show list on first tab, select on second tab
-# This matches bash behavior more closely
-zstyle ':completion:*' menu select=0  # Start menu select only after manual trigger (second tab)
-zstyle ':completion:*' list-dirs-first true
-zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-
-# Layout settings (horizontal layout handled in zshrc.tmpl)
-zstyle ':completion:*' file-sort name
