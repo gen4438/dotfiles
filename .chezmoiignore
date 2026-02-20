@@ -70,6 +70,8 @@ Library/
 
 {{- if ne .chezmoi.os "linux" }}
 # Exclude Linux-specific files on non-Linux systems
+.xinitrc
+.xprofile
 .config/dconf/
 .config/gnome/
 .config/kde/
