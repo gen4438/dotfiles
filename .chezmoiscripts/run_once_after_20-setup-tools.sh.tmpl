@@ -183,6 +183,21 @@ log_step "Setting up Windows specific tools..."
 # This will be handled in PowerShell scripts
 {{- end }}
 
+# Setup gvm (Go Version Manager)
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up gvm..."
+if [[ -s "$HOME/.gvm/scripts/gvm" ]]; then
+    log_success "gvm is already installed"
+else
+    log_running "Installing gvm..."
+    if bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer) 2>&1; then
+        log_success "gvm installed successfully"
+    else
+        log_warning "Failed to install gvm"
+    fi
+fi
+{{- end }}
+
 # Setup uv (Python package manager)
 {{- if ne .chezmoi.os "windows" }}
 log_step "Setting up uv..."

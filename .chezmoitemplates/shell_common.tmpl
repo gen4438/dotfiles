@@ -140,9 +140,10 @@ add_to_path "$HOME/.local/bin"
 add_to_path "$HOME/bin"
 
 # Programming language specific configurations
-# Go
+# Go (gvm - Go Version Manager)
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 if command -v go &> /dev/null; then
-    export GOPATH="$HOME/go"
+    export GOPATH="${GOPATH:-$HOME/go}"
     add_to_path "$GOPATH/bin"
 fi
 
