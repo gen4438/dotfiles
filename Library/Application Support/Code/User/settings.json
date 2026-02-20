@@ -168,9 +168,12 @@
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
   "workbench.colorCustomizations": {},
-  "workbench.editor.wrapTabs": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.list.defaultFindMode": "filter",
   "workbench.tree.indent": 20,
-  "oil-code.disableVimKeymaps": true
+  "oil-code.disableVimKeymaps": true,
+  "oil-code.enableAlternateConfirmation": true,
+  "oil-code.disableOpenCwdNothingOpen": true,
+  "workbench.editor.wrapTabs": true,
+  "workbench.editor.tabSizing": "fixed"
 }
