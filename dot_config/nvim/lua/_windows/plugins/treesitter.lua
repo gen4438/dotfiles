@@ -13,13 +13,11 @@ return {
         install_dir = vim.fn.stdpath('data') .. '/site',
       }
 
-      -- パーサーの自動インストール (unix のみ、windows では重いためスキップ)
-      if vim.fn.has('unix') == 1 then
-        require('nvim-treesitter').install {
-          'bash', 'css', 'go', 'html', 'javascript', 'json', 'lua',
-          'markdown', 'markdown_inline', 'powershell', 'python', 'vim', 'vimdoc', 'yaml',
-        }
-      end
+      -- Windows では最小限のパーサーのみインストール
+      require('nvim-treesitter').install {
+        'css', 'go', 'html', 'javascript', 'json', 'lua',
+        'markdown', 'markdown_inline', 'powershell', 'python', 'vim', 'vimdoc', 'yaml',
+      }
 
       -- highlight と indent は vim.treesitter の標準機能を使用
       -- FileType autocmd で有効化
