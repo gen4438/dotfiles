@@ -74,7 +74,7 @@ if check_directory "$HOME/.nvm"; then
             # Check if neovim package is already installed
             if ! nvm_is_global_package_installed neovim; then
                 log_running "Installing Node.js packages for Neovim..."
-                if nvm_install_global_packages neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }}; then
+                if nvm_install_global_packages neovim; then
                     log_success "Neovim Node.js packages installed"
                 else
                     log_error "Failed to install Neovim Node.js packages"
@@ -100,8 +100,8 @@ elif check_command npm; then
     fi
 fi
 
-{{ if eq .chezmoi.os "linux" -}}
-# Install tree-sitter-cli via cargo on Linux
+{{- if ne .chezmoi.os "windows" }}
+# Install tree-sitter-cli via cargo
 if check_command cargo; then
     if ! check_command tree-sitter; then
         log_running "Installing tree-sitter-cli via cargo..."

@@ -149,7 +149,7 @@ if nvm_init; then
         if nvm_use_lts; then
             if ! nvm_is_global_package_installed neovim; then
                 log_running "Installing Neovim Node.js package..."
-                if nvm_install_global_packages neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }}; then
+                if nvm_install_global_packages neovim; then
                     log_success "Neovim Node.js packages installed"
                 else
                     log_error "Failed to install Neovim Node.js packages"
