@@ -149,7 +149,7 @@ if nvm_init; then
         if nvm_use_lts; then
             if ! nvm_is_global_package_installed neovim; then
                 log_running "Installing Neovim Node.js package..."
-                if nvm_install_global_packages neovim tree-sitter-cli; then
+                if nvm_install_global_packages neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }}; then
                     log_success "Neovim Node.js packages installed"
                 else
                     log_error "Failed to install Neovim Node.js packages"
@@ -162,6 +162,20 @@ else
     log_warning "nvm not available, skipping Node.js update"
 fi
 {{- end }}
+{{- end }}
+
+# Update Rust toolchain
+{{- if ne .chezmoi.os "windows" }}
+log_step "Updating Rust toolchain..."
+if check_command rustup; then
+    if rustup update; then
+        log_success "Rust toolchain updated"
+    else
+        log_warning "Failed to update Rust toolchain"
+    fi
+else
+    log_warning "rustup not found, skipping Rust update"
+fi
 {{- end }}
 
 log_success "Development tools update completed"

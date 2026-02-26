@@ -183,6 +183,25 @@ log_step "Setting up Windows specific tools..."
 # This will be handled in PowerShell scripts
 {{- end }}
 
+# Setup Rust (rustup + cargo)
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up Rust..."
+if check_command rustup; then
+    log_success "rustup is already installed"
+elif check_command cargo; then
+    log_success "cargo is already available (rustup not found)"
+else
+    log_running "Installing rustup..."
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        # Ensure cargo is on PATH for subsequent commands
+        export PATH="$HOME/.cargo/bin:$PATH"
+        log_success "rustup installed successfully"
+    else
+        log_warning "Failed to install rustup"
+    fi
+fi
+{{- end }}
+
 # Setup gvm (Go Version Manager)
 {{- if ne .chezmoi.os "windows" }}
 log_step "Setting up gvm..."

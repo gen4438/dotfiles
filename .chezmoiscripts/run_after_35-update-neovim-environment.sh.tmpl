@@ -65,8 +65,8 @@ if nvm_init; then
 
     # Use LTS version
     if nvm_use_lts; then
-        # Update Neovim and tree-sitter-cli packages
-        if nvm_install_global_packages neovim tree-sitter-cli; then
+        # Update Neovim packages
+        if nvm_install_global_packages neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }}; then
             log_success "Neovim Node.js packages updated"
         else
             log_warning "Failed to update Neovim Node.js packages"
@@ -75,7 +75,7 @@ if nvm_init; then
 elif check_command npm; then
     # Fallback to system npm
     log_running "Updating Node.js packages with system npm..."
-    if npm update -g neovim tree-sitter-cli 2>/dev/null || npm install -g neovim tree-sitter-cli 2>/dev/null; then
+    if npm update -g neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }} 2>/dev/null || npm install -g neovim{{ if ne .chezmoi.os "linux" }} tree-sitter-cli{{ end }} 2>/dev/null; then
         log_success "Neovim Node.js packages updated"
     else
         log_warning "Failed to update Neovim Node.js packages"
@@ -91,6 +91,20 @@ if check_command npm; then
     else
         log_warning "Failed to update Neovim Node.js packages"
     fi
+fi
+{{- end }}
+
+{{ if eq .chezmoi.os "linux" -}}
+# Update tree-sitter-cli via cargo on Linux
+if check_command cargo; then
+    log_running "Updating tree-sitter-cli via cargo..."
+    if cargo install tree-sitter-cli; then
+        log_success "tree-sitter-cli updated via cargo"
+    else
+        log_warning "Failed to update tree-sitter-cli via cargo"
+    fi
+else
+    log_warning "cargo not found, skipping tree-sitter-cli update"
 fi
 {{- end }}
 
