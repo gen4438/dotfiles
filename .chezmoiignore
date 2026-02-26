@@ -212,3 +212,8 @@ Documents/WindowsPowerShell/**
 # ==============================================================================
 **/.git/
 **/lazy-lock.json
+
+# Test files
+Dockerfile.test-chezmoi
+compose.test-chezmoi.yml
+test-entrypoint.sh
