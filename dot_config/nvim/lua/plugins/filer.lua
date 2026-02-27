@@ -30,7 +30,7 @@ return {
     ---@type oil.SetupOpts
     lazy = false,
     keys = {
-      { "-", ":Oil<CR>", mode = "n", desc = "Open parent directory" },
+      { "--", ":Oil<CR>", mode = "n", desc = "Open parent directory" },
     },
     cmd = "Oil",
     opts = {
