@@ -291,12 +291,27 @@ M.setup_windows_shell = function()
   end
 end
 
+-- Curl configuration for corporate proxy environments
+M.setup_curl = function()
+  if not M.is_windows() then
+    return
+  end
+
+  -- Use _curlrc in nvim config dir for --ssl-no-revoke
+  local curlrc_dir = vim.fn.stdpath('config')
+  local curlrc_path = curlrc_dir .. '/_curlrc'
+  if vim.fn.filereadable(curlrc_path) == 1 then
+    vim.env.CURL_HOME = curlrc_dir
+  end
+end
+
 -- Main setup function
 M.setup = function()
   M.setup_python()
   M.setup_nodejs()
   M.setup_clipboard()
   M.setup_env_vars()
+  M.setup_curl()
   M.setup_windows_shell()
 end
 
