@@ -537,7 +537,7 @@ map('n', 'z2', function() vscode.action('editor.foldLevel2') end, { silent = tru
 vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
   pattern = { "*" },
   callback = function()
-    map("n", "-", function() vscode.action('oil-code.open') end)
+    map("n", "--", function() vscode.action('oil-code.open') end)
   end,
 })
 
