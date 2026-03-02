@@ -284,8 +284,8 @@ return {
     't9md/vim-quickhl',
     lazy = true,
     keys = {
-      { "<space>m", "<Plug>(quickhl-manual-this)",  mode = { "n", "x" }, desc = "Highlight word/selection" },
-      { "<space>M", "<Plug>(quickhl-manual-reset)", mode = { "n", "x" }, desc = "Clear all highlights" },
+      { "<space>h", "<Plug>(quickhl-manual-this)",  mode = { "n", "x" }, desc = "Highlight word/selection" },
+      { "<space>H", "<Plug>(quickhl-manual-reset)", mode = { "n", "x" }, desc = "Clear all highlights" },
     }
   },
 
