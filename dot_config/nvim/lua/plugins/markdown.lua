@@ -110,7 +110,7 @@ return {
       },
     },
     keys = {
-      { '<Space>mdr', '<cmd>RenderMarkdown toggle<CR>', mode = 'n', desc = 'Toggle render-markdown' },
+      { '<Space>mr', '<cmd>RenderMarkdown toggle<CR>', mode = 'n', desc = 'Toggle render-markdown' },
     },
   },
 

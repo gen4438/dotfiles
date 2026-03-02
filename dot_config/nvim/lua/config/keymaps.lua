@@ -305,8 +305,8 @@ end
 vim.keymap.set('n', '<leader>fw', GoToFloatingWindow, { desc = "Go to floating window" })
 
 -- Markdown conceal level toggle (0 → 2 → 0)
-vim.keymap.set('n', '<Space>mdc', function()
+vim.keymap.set('n', '<Space>mc', function()
   local current = vim.wo.conceallevel
   vim.wo.conceallevel = current == 0 and 2 or 0
   vim.notify('conceallevel = ' .. vim.wo.conceallevel)
-end, { desc = "Toggle conceallevel (0/2)" })
+end, { desc = "Toggle conceallevel (0/2)", silent = true })
