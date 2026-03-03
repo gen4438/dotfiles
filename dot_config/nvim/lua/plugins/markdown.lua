@@ -108,6 +108,8 @@ return {
       win_options = {
         conceallevel = { rendered = 2, default = vim.api.nvim_get_option_value('conceallevel', {}) },
       },
+      -- カーソル行でもレンダリングを維持する
+      anti_conceal = { enabled = false },
     },
     keys = {
       { '<Space>mr', '<cmd>RenderMarkdown toggle<CR>', mode = 'n', desc = 'Toggle render-markdown' },
