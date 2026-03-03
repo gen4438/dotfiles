@@ -2,9 +2,9 @@
 
 # File Operations
 # Use trash-put for safer file deletion (if available)
-if command -v trash-put >/dev/null 2>&1; then
-    alias rm=trash-put
-fi
+# if command -v trash-put >/dev/null 2>&1; then
+#     alias rm=trash-put
+# fi
 
 # Interactive file operations for safety
 alias mv='mv -i'
