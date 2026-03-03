@@ -104,6 +104,8 @@ return {
     ---@module 'render-markdown'
     ---@type render.md.UserConfig
     opts = {
+      -- 起動時は無効にする（<Space>mr でトグル）
+      enabled = false,
       -- vim-markdown が conceal を制御するので render-markdown 側では変更しない
       win_options = {
         conceallevel = { rendered = 2, default = vim.api.nvim_get_option_value('conceallevel', {}) },

@@ -92,6 +92,32 @@ return {
     }
   },
 
+  -- Neovim 内で markdown を装飾表示
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    ft = { 'markdown' },
+    lazy = true,
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {
+      -- 起動時は無効にする（<Space>mr でトグル）
+      enabled = false,
+      -- vim-markdown が conceal を制御するので render-markdown 側では変更しない
+      win_options = {
+        conceallevel = { rendered = 2, default = vim.api.nvim_get_option_value('conceallevel', {}) },
+      },
+      -- カーソル行でもレンダリングを維持する
+      anti_conceal = { enabled = false },
+    },
+    keys = {
+      { '<Space>mr', '<cmd>RenderMarkdown toggle<CR>', mode = 'n', desc = 'Toggle render-markdown' },
+    },
+  },
+
   -- code fence の中身を編集
   -- AckslD/nvim-FeMaco.lua (using fork with nvim-treesitter 1.0 compatibility)
   {
