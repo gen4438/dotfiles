@@ -6,7 +6,7 @@ return {
     lazy = false,
     opts = {
       ensure_installed = {
-        "copilot-language-server",
+        -- "copilot-language-server",
       },
     },
     config = function(_, opts)
