@@ -14,10 +14,11 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "chat.agent.maxRequests": 200,
   "chat.viewSessions.orientation": "stacked",
   "claudeCode.allowDangerouslySkipPermissions": true,
   "claudeCode.preferredLocation": "panel",
-  "claudeCode.selectedModel": "sonnet",
+  "claudeCode.selectedModel": "default",
   "code-runner.enableAppInsights": false,
   "code-runner.runInTerminal": true,
   "database-client.autoSync": true,
@@ -39,6 +40,8 @@
   "git.blame.statusBarItem.enabled": true,
   "git.confirmSync": false,
   "github.copilot.chat.agent.thinkingTool": true,
+  "github.copilot.chat.anthropic.tools.websearch.enabled": true,
+  "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
@@ -78,6 +81,9 @@
     "worktrees": true
   },
   "makefile.configureOnOpen": true,
+  "oil-code.disableOpenCwdNothingOpen": true,
+  "oil-code.disableVimKeymaps": true,
+  "oil-code.enableAlternateConfirmation": true,
   "path-intellisense.autoSlashAfterDirectory": true,
   "path-intellisense.showHiddenFiles": true,
   "python.analysis.addHoverSummaries": true,
@@ -168,12 +174,9 @@
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
   "vscode-neovim.neovimInitVimPaths.win32": "~/AppData/Local/nvim/init.lua",
   "workbench.colorCustomizations": {},
+  "workbench.editor.tabSizing": "fixed",
+  "workbench.editor.wrapTabs": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.list.defaultFindMode": "filter",
-  "workbench.tree.indent": 20,
-  "oil-code.disableVimKeymaps": true,
-  "oil-code.enableAlternateConfirmation": true,
-  "oil-code.disableOpenCwdNothingOpen": true,
-  "workbench.editor.wrapTabs": true,
-  "workbench.editor.tabSizing": "fixed"
+  "workbench.tree.indent": 20
 }
