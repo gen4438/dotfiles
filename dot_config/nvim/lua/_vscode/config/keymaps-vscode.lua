@@ -256,6 +256,10 @@ map('n', 'sC', function()
   vscode.call('workbench.action.closeEditorsInGroup')
 end, { desc = "Close editors in group" })
 
+map('n', 'src', function()
+  vscode.call('workbench.action.closeEditorsToTheRight')
+end, { desc = "Close other editors" })
+
 -- ============================================================================
 -- VSCode Integration - Problems Navigation (replaces quickfix)
 -- ============================================================================
@@ -347,12 +351,12 @@ map('n', ';fe', function()
   -- Schedule the rest to run after clipboard is updated
   vim.schedule(function()
     -- Try multiple registers as VSCode might write to different ones
-    local relative_path = vim.fn.getreg('+')  -- Try system clipboard first
+    local relative_path = vim.fn.getreg('+') -- Try system clipboard first
     if relative_path == '' or relative_path:match('^vscode%-remote://') or relative_path:match('^note://') then
-      relative_path = vim.fn.getreg('"')  -- Fallback to default register
+      relative_path = vim.fn.getreg('"')     -- Fallback to default register
     end
     if relative_path == '' or relative_path:match('^vscode%-remote://') or relative_path:match('^note://') then
-      relative_path = vim.fn.getreg('*')  -- Fallback to selection register
+      relative_path = vim.fn.getreg('*') -- Fallback to selection register
     end
 
     -- Extract parent directory
