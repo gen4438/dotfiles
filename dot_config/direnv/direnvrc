@@ -1,26 +1,3 @@
-# use a certain pyenv version
-use_python() {
-    if [ -n "$(which pyenv)" ]; then
-        local pyversion=$1
-        pyenv local ${pyversion}
-    fi
-}
-
-layout_virtualenv() {
-    local pyversion=$1
-    local pvenv=$2
-    if [ -n "$(which pyenv virtualenv)" ]; then
-        pyenv virtualenv --force --quiet ${pyversion} ${pvenv}-${pyversion}
-    fi
-    pyenv local --unset
-}
-
-layout_activate() {
-    if [ -n "$(which pyenv)" ]; then
-        source $(pyenv root)/versions/$1/bin/activate
-    fi
-}
-
 # uv - Python project management with automatic venv
 layout_uv() {
   VIRTUAL_ENV=$(pwd)/.venv
@@ -47,13 +24,12 @@ layout_poetry() {
   PATH_add "$VIRTUAL_ENV/bin"
 }
 
-layout_nvm() {
-  local node_version=$1
+# Use mise to activate tool versions in a directory
+layout_mise() {
+  eval "$(mise activate bash --shims)"
+}
 
-  nvm_sh=~/.nvm/nvm.sh
-  if [[ -e $nvm_sh ]]; then
-    source $nvm_sh
-    nvm use $node_version
-    export DIRENV_NVM_VERSION=$node_version
-  fi
+# `use mise` in .envrc to activate mise-managed tools
+use_mise() {
+  direnv_load mise direnv exec
 }

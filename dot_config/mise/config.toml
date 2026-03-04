@@ -1,0 +1,11 @@
+[tools]
+python = "latest"
+node = "lts"
+go = "latest"
+rust = "stable"
+
+[settings]
+python.uv_venv_auto = true
+
+[env]
+VIRTUAL_ENV_DISABLE_PROMPT = "1"

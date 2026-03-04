@@ -6,36 +6,30 @@ set -e
 
 # Include common libraries
 {{ template "lib-logging.sh.tmpl" . }}
-{{ template "lib-pyenv.sh.tmpl" . }}
-{{ template "lib-nvm.sh.tmpl" . }}
 
 log_step "Updating Neovim environment..."
 
 # Update Python packages for Neovim
 {{- if ne .chezmoi.os "android" }}
 {{- if ne .chezmoi.os "windows" }}
-if pyenv_init; then
+NVIM_VENV_DIR="$HOME/.local/share/nvim-venv"
+if [[ -d "$NVIM_VENV_DIR" ]]; then
     log_running "Updating Python packages for Neovim..."
-
-    # Check if neovim3 virtualenv exists
-    if pyenv versions 2>/dev/null | grep -q "neovim3"; then
-        # Update packages in Neovim virtual environment
-        if pyenv_venv_install_packages "neovim3" --upgrade pip neovim coverage pynvim; then
+    if check_command uv; then
+        if uv pip install --python "$NVIM_VENV_DIR/bin/python" --upgrade pynvim neovim coverage; then
             log_success "Neovim Python packages updated"
         else
             log_warning "Failed to update Neovim Python packages"
         fi
     else
-        log_warning "Neovim Python environment not found. Run setup script first."
+        if "$NVIM_VENV_DIR/bin/pip" install --upgrade pynvim neovim coverage; then
+            log_success "Neovim Python packages updated"
+        else
+            log_warning "Failed to update Neovim Python packages"
+        fi
     fi
-elif [[ -d "$HOME/.local/share/nvim-venv" ]]; then
-    # Use existing venv
-    log_running "Updating Python packages in venv..."
-    if "$HOME/.local/share/nvim-venv/bin/pip" install --upgrade pynvim neovim coverage; then
-        log_success "Neovim Python packages updated"
-    else
-        log_warning "Failed to update Neovim Python packages"
-    fi
+else
+    log_warning "Neovim Python environment not found. Run setup script first."
 fi
 {{- end }}
 {{- else }}
@@ -60,21 +54,8 @@ fi
 # Update Node.js packages for Neovim
 {{- if ne .chezmoi.os "android" }}
 {{- if ne .chezmoi.os "windows" }}
-if nvm_init; then
+if check_command npm; then
     log_running "Updating Node.js packages for Neovim..."
-
-    # Use LTS version
-    if nvm_use_lts; then
-        # Update Neovim packages
-        if nvm_install_global_packages neovim; then
-            log_success "Neovim Node.js packages updated"
-        else
-            log_warning "Failed to update Neovim Node.js packages"
-        fi
-    fi
-elif check_command npm; then
-    # Fallback to system npm
-    log_running "Updating Node.js packages with system npm..."
     if npm update -g neovim 2>/dev/null || npm install -g neovim 2>/dev/null; then
         log_success "Neovim Node.js packages updated"
     else

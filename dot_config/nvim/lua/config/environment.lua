@@ -48,10 +48,7 @@ M.setup_python = function()
   if vim.fn.has('unix') == 1 then
     -- Try multiple common Python paths in order of preference
     local python_paths = {
-      vim.fn.expand('$HOME/.local/share/nvim-venv/bin/python'),  -- venv (for systems without pyenv)
-      vim.fn.expand('$HOME/.pyenv/versions/neovim3/bin/python'), -- pyenv
-      vim.fn.expand('$HOME/.virtualenvs/neovim3/bin/python'),
-      vim.fn.expand('$HOME/venv/neovim3/bin/python'),
+      vim.fn.expand('$HOME/.local/share/nvim-venv/bin/python'),  -- dedicated neovim venv
     }
     
     for _, path in ipairs(python_paths) do
@@ -121,34 +118,10 @@ M.setup_nodejs = function()
     end
   else
     -- Unix-like systems
-    -- Try nvm first
-    if command_exists('nvm') then
-      local handle = io.popen('bash -c "source ~/.nvm/nvm.sh && nvm which current 2>/dev/null"')
-      if handle then
-        local node_path = handle:read("*a")
-        handle:close()
-        if node_path and node_path:match("%S") then
-          vim.g.node_host_prog = node_path:gsub("%s+", "")
-          return
-        end
-      end
-    end
-    
-    -- Try fnm (Fast Node Manager)
-    if command_exists('fnm') then
-      local handle = io.popen('fnm exec --using default -- which node 2>/dev/null')
-      if handle then
-        local node_path = handle:read("*a")
-        handle:close()
-        if node_path and node_path:match("%S") then
-          vim.g.node_host_prog = node_path:gsub("%s+", "")
-          return
-        end
-      end
-    end
+    -- mise manages node, so just use whatever is on PATH
   end
-  
-  -- Fallback to system node
+
+  -- Use node from PATH (managed by mise or system)
   if command_exists('node') then
     vim.g.node_host_prog = vim.fn.exepath('node')
   end

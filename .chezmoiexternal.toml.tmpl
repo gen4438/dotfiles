@@ -177,25 +177,7 @@
 {{- end }}
 
 {{- if and (ne .chezmoi.os "darwin") (ne .chezmoi.os "android") }}
-# Version managers (Linux only - macOS uses Homebrew, Android uses system packages)
-
-# Python environment manager
-[".pyenv"]
-    type = "git-repo"
-    url = "https://github.com/pyenv/pyenv.git"
-    refreshPeriod = "168h"
-
-[".pyenv/plugins/pyenv-virtualenv"]
-    type = "git-repo"
-    url = "https://github.com/pyenv/pyenv-virtualenv.git"
-    refreshPeriod = "168h"
-
-# Node.js version manager
-[".nvm"]
-    type = "git-repo"
-    url = "https://github.com/nvm-sh/nvm.git"
-    refreshPeriod = "168h"
-
+# Version managers are now handled by mise (installed via setup script)
 {{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}

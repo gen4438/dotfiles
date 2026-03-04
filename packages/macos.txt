@@ -20,10 +20,8 @@ direnv
 jq
 age
 
-# Python and Node.js (via Homebrew)
-pyenv
-pyenv-virtualenv
-nvm
+# Unified version manager
+mise
 
 # Go language
 go

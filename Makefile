@@ -43,7 +43,7 @@ update:
 	@echo "✅ Update complete!"
 
 .PHONY: update-tools
-## Update development tools (pyenv, nvm, fzf, etc.)
+## Update development tools (mise, fzf, etc.)
 update-tools:
 	@echo "🔧 Updating development tools..."
 	@bash ~/.chezmoiscripts/run_onchange_30-update-development-tools.sh
@@ -61,12 +61,13 @@ update-neovim-all: update-neovim update-neovim-env
 ## Update Python/Node.js environment for Neovim
 update-neovim-env:
 	@echo "🔄 Updating Python/Node.js environment..."
-	@if command -v pyenv >/dev/null 2>&1 && [ -d ~/.pyenv/versions/neovim3 ]; then \
-		echo "Updating pyenv neovim3..."; \
-		~/.pyenv/versions/neovim3/bin/pip install --upgrade pip pynvim neovim; \
-	elif [ -d ~/.local/share/nvim-venv ]; then \
-		echo "Updating venv..."; \
-		~/.local/share/nvim-venv/bin/pip install --upgrade pip pynvim neovim; \
+	@if [ -d ~/.local/share/nvim-venv ]; then \
+		echo "Updating nvim-venv..."; \
+		if command -v uv >/dev/null 2>&1; then \
+			uv pip install --python ~/.local/share/nvim-venv/bin/python --upgrade pynvim neovim; \
+		else \
+			~/.local/share/nvim-venv/bin/pip install --upgrade pip pynvim neovim; \
+		fi; \
 	fi
 	@if command -v npm >/dev/null 2>&1; then \
 		echo "Updating npm packages..."; \
@@ -192,6 +193,7 @@ tools-status:
 	@echo "Neovim: $$(nvim --version 2>/dev/null | head -1 || echo 'Not installed')"
 	@echo "fzf: $$(fzf --version 2>/dev/null || echo 'Not installed')"
 	@echo "ripgrep: $$(rg --version 2>/dev/null | head -1 || echo 'Not installed')"
+	@echo "mise: $$(mise --version 2>/dev/null || echo 'Not installed')"
 	@echo "direnv: $$(direnv --version 2>/dev/null || echo 'Not installed')"
 
 .PHONY: edit-source

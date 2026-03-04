@@ -4,3 +4,25 @@ if [ "$EUID" != "0" ]; then
     exit $?
 fi
 endsnippet
+
+# direnv .envrc snippets
+snippet direnv_uv "uv layout" b
+layout uv
+endsnippet
+
+snippet direnv_python_venv "venv" b
+layout python
+endsnippet
+
+snippet direnv_mise "mise layout" b
+layout mise
+endsnippet
+
+snippet direnv_mise_uv "mise + uv layout" b
+use mise
+layout uv
+endsnippet
+
+snippet direnv_mise_use "use mise (activate tools)" b
+use mise
+endsnippet

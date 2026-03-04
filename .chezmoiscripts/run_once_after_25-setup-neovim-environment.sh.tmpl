@@ -1,103 +1,56 @@
 {{ template "shebang-bash.tmpl" . }}
 # Setup Neovim Python and Node.js environments
 # This script runs once to set up Neovim-specific dependencies
-# This script is refactored to use common libraries
 # script hash: {{ include ".chezmoiscripts/run_once_after_25-setup-neovim-environment.sh.tmpl" | sha256sum }}
 
 set -e
 
 # Include common libraries
 {{ template "lib-logging.sh.tmpl" . }}
-{{ template "lib-pyenv.sh.tmpl" . }}
-{{ template "lib-nvm.sh.tmpl" . }}
 
 log_info "Setting up Neovim environment..."
 
-# Setup Python environment for Neovim
+# Setup Python environment for Neovim using uv or venv
 {{- if ne .chezmoi.os "windows" }}
 log_step "Setting up Python environment for Neovim..."
 
-# Try to initialize pyenv
-if pyenv_init; then
-        # Get latest Python version
-        latest_python=$(pyenv_get_latest_version)
+NVIM_VENV_DIR="$HOME/.local/share/nvim-venv"
 
-        if [[ -n "$latest_python" ]]; then
-            # Ensure Python is installed
-            if ! pyenv_is_version_installed "$latest_python"; then
-                pyenv_install_version "$latest_python"
-            fi
-
-            # Create virtual environment for Neovim
-            if pyenv_create_virtualenv "$latest_python" "neovim3"; then
-                # Install Neovim Python packages
-                if pyenv_venv_install_packages "neovim3" neovim coverage pynvim; then
-                    python_path=$(pyenv which python)
-                    log_success "Neovim Python environment created at: $python_path"
-                else
-                    log_error "Failed to install Python packages for Neovim"
-                fi
-            else
-                log_error "Failed to create Python virtual environment for Neovim"
-            fi
-        else
-            log_error "Could not determine latest Python version"
-        fi
-else
-    log_warning "Failed to initialize pyenv"
-fi
-
-# Fallback to system Python if pyenv is not available
-if ! check_command pyenv && check_command python3; then
-    log_warning "pyenv not found, creating venv for Neovim..."
-
-    # Create Neovim-specific venv
-    if python3 -m venv ~/.local/share/nvim-venv; then
-        # Install Neovim Python packages in venv
-        ~/.local/share/nvim-venv/bin/pip install --upgrade pip
-        ~/.local/share/nvim-venv/bin/pip install pynvim neovim
-
-        log_success "Neovim Python environment created at ~/.local/share/nvim-venv"
+if [[ ! -d "$NVIM_VENV_DIR" ]]; then
+    if check_command uv; then
+        log_running "Creating Neovim Python venv with uv..."
+        uv venv "$NVIM_VENV_DIR"
+        uv pip install --python "$NVIM_VENV_DIR/bin/python" pynvim neovim coverage
+        log_success "Neovim Python environment created at $NVIM_VENV_DIR"
+    elif check_command python3; then
+        log_running "Creating Neovim Python venv..."
+        python3 -m venv "$NVIM_VENV_DIR"
+        "$NVIM_VENV_DIR/bin/pip" install --upgrade pip
+        "$NVIM_VENV_DIR/bin/pip" install pynvim neovim coverage
+        log_success "Neovim Python environment created at $NVIM_VENV_DIR"
     else
-        log_error "Failed to create Python venv for Neovim"
+        log_warning "Neither uv nor python3 available for Neovim provider"
     fi
+else
+    log_success "Neovim Python environment already exists at $NVIM_VENV_DIR"
 fi
 {{- end }}
 
 # Setup Node.js environment for Neovim
-if check_directory "$HOME/.nvm"; then
+if check_command npm; then
     log_step "Setting up Node.js environment for Neovim..."
-
-    if nvm_init; then
-        # Use LTS version
-        if nvm_use_lts; then
-            # Check if neovim package is already installed
-            if ! nvm_is_global_package_installed neovim; then
-                log_running "Installing Node.js packages for Neovim..."
-                if nvm_install_global_packages neovim; then
-                    log_success "Neovim Node.js packages installed"
-                else
-                    log_error "Failed to install Neovim Node.js packages"
-                fi
-            else
-                log_success "Neovim Node.js package already installed"
-            fi
-        else
-            log_error "Failed to use LTS Node.js version"
-        fi
-    else
-        log_error "Failed to initialize nvm"
-    fi
-elif check_command npm; then
-    log_warning "nvm not found, using system npm..."
-    # Check if neovim package is already installed
-    if ! nvm_is_global_package_installed neovim; then
+    if ! npm list -g neovim >/dev/null 2>&1; then
         log_running "Installing Node.js packages for Neovim..."
-        npm install -g neovim
-        log_success "Neovim Node.js package installed"
+        if npm install -g neovim; then
+            log_success "Neovim Node.js packages installed"
+        else
+            log_error "Failed to install Neovim Node.js packages"
+        fi
     else
         log_success "Neovim Node.js package already installed"
     fi
+else
+    log_warning "npm not found, skipping Node.js Neovim setup"
 fi
 
 {{- if ne .chezmoi.os "windows" }}

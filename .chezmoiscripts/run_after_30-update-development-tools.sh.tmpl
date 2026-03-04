@@ -1,95 +1,88 @@
 {{ template "shebang-bash.tmpl" . }}
 # Update development tools and runtimes
 # This script runs on every chezmoi apply to keep tools up-to-date
-# This script is refactored to use common libraries
 # Git repositories are automatically updated by chezmoi external management
 
 set -e
 
 # Include common libraries
 {{ template "lib-logging.sh.tmpl" . }}
-{{ template "lib-pyenv.sh.tmpl" . }}
-{{ template "lib-nvm.sh.tmpl" . }}
 
 log_info "Updating development tools..."
 
-# Note: External git repositories (.fzf, .pyenv, .nvm, etc.) are automatically
+# Note: External git repositories (.fzf, etc.) are automatically
 # updated by chezmoi external with refreshPeriod = "168h" (weekly)
 log_info "External repositories are managed by chezmoi and updated weekly"
 
-# Update pyenv and install latest Python
-{{- if ne .chezmoi.os "android" }}
-{{- if ne .chezmoi.os "windows" }}
-log_step "Updating pyenv and Python..."
+# Update mise and tool versions
+{{- if and (ne .chezmoi.os "android") (ne .chezmoi.os "windows") }}
+log_step "Updating mise tools..."
 
-{{- if ne .chezmoi.os "darwin" }}
-log_info "pyenv repositories are managed by chezmoi external with weekly updates"
-{{- end }}
+if check_command mise; then
+    # Upgrade mise itself
+    if mise self-update --yes 2>/dev/null; then
+        log_success "mise updated"
+    else
+        log_info "mise self-update not available (installed via package manager)"
+    fi
 
-if pyenv_init; then
-        # Get latest stable Python version
-        latest_python=$(pyenv_get_latest_version)
-        current_python=$(pyenv_get_global_version)
+    # Install/upgrade all configured tools
+    if mise install; then
+        log_success "mise tools are up to date"
+    else
+        log_warning "Failed to update some mise tools"
+    fi
 
-        # Install latest Python if not already installed
-        if [[ -n "$latest_python" && "$latest_python" != "$current_python" ]]; then
-            log_info "Latest Python: $latest_python (current: $current_python)"
+    # Upgrade installed tool versions
+    if mise upgrade --yes 2>/dev/null; then
+        log_success "mise tool versions upgraded"
+    else
+        log_info "No tool upgrades available"
+    fi
 
-            if pyenv_install_version "$latest_python"; then
-                if pyenv_set_global_version "$latest_python"; then
-                    log_success "Python updated to $latest_python"
+    # Setup Neovim Python provider using uv
+    log_step "Setting up Neovim Python provider..."
+    NVIM_VENV_DIR="$HOME/.local/share/nvim-venv"
+    if [[ ! -d "$NVIM_VENV_DIR" ]]; then
+        log_running "Creating Neovim Python virtual environment..."
+        if check_command uv; then
+            uv venv "$NVIM_VENV_DIR"
+            uv pip install --python "$NVIM_VENV_DIR/bin/python" pynvim neovim
+            log_success "Neovim Python provider installed via uv"
+        elif check_command python3; then
+            python3 -m venv "$NVIM_VENV_DIR"
+            "$NVIM_VENV_DIR/bin/pip" install --upgrade pip pynvim neovim
+            log_success "Neovim Python provider installed via venv"
+        else
+            log_warning "Neither uv nor python3 available for Neovim provider"
+        fi
+    else
+        log_running "Updating Neovim Python packages..."
+        if check_command uv; then
+            uv pip install --python "$NVIM_VENV_DIR/bin/python" --upgrade pynvim neovim
+        else
+            "$NVIM_VENV_DIR/bin/pip" install --upgrade pynvim neovim
+        fi
+        log_success "Neovim Python provider updated"
+    fi
 
-                    # Update pip
-                    pip install --upgrade pip
-                else
-                    log_error "Failed to set global Python version"
-                fi
+    # Ensure Neovim Node.js package is installed
+    if check_command npm; then
+        if ! npm list -g neovim >/dev/null 2>&1; then
+            log_running "Installing Neovim Node.js package..."
+            if npm install -g neovim; then
+                log_success "Neovim Node.js package installed"
             else
-                log_error "Failed to install Python $latest_python"
+                log_warning "Failed to install Neovim Node.js package"
             fi
         else
-            log_success "Python is up to date ($current_python)"
+            log_success "Neovim Node.js package is installed"
         fi
-
-        # Always check and update neovim3 environment if needed
-        if pyenv versions | grep -q "neovim3"; then
-            # Check if neovim3 is using the latest Python
-            if [[ -d "$PYENV_ROOT/versions/$latest_python/envs/neovim3" ]]; then
-                log_success "neovim3 already using Python $latest_python"
-            else
-                log_running "Recreating neovim3 virtual environment with Python $latest_python..."
-
-                # Delete old virtual environment
-                pyenv uninstall -f neovim3
-
-                # Create new virtual environment with latest Python
-                if pyenv_create_virtualenv "$latest_python" "neovim3"; then
-                    if pyenv_venv_install_packages "neovim3" neovim coverage pynvim; then
-                        log_success "neovim3 environment recreated with Python $latest_python"
-                    else
-                        log_error "Failed to install packages in neovim3"
-                    fi
-                else
-                    log_error "Failed to recreate neovim3 environment"
-                fi
-            fi
-        else
-            log_step "Creating neovim3 virtual environment with Python $latest_python..."
-            if pyenv_create_virtualenv "$latest_python" "neovim3"; then
-                if pyenv_venv_install_packages "neovim3" neovim coverage pynvim; then
-                    log_success "neovim3 environment created with Python $latest_python"
-                else
-                    log_error "Failed to install packages in neovim3"
-                fi
-            else
-                log_error "Failed to create neovim3 environment"
-            fi
-        fi
+    fi
 else
-    log_warning "pyenv not available, skipping Python update"
+    log_warning "mise not available, skipping tool updates"
 fi
-{{- end }}
-{{- else }}
+{{- else if eq .chezmoi.os "android" }}
 log_info "Android/Termux: Using system Python (pkg install python)"
 log_info "Android/Termux: Using system Node.js (pkg install nodejs)"
 log_step "Installing Neovim packages globally..."
@@ -103,78 +96,6 @@ fi
 if check_command npm; then
     npm install -g neovim
     log_success "Node.js package for Neovim installed"
-fi
-{{- end }}
-
-# Update nvm and Node.js
-{{- if ne .chezmoi.os "android" }}
-{{- if ne .chezmoi.os "windows" }}
-log_step "Updating nvm and Node.js..."
-
-{{- if ne .chezmoi.os "darwin" }}
-log_info "nvm repositories are managed by chezmoi external with weekly updates"
-{{- end }}
-
-if nvm_init; then
-        # Install/update to latest LTS if not using LTS
-        current_version=$(nvm_get_default_version)
-
-        if [[ -n "$current_version" ]]; then
-            log_info "Current default Node.js: $current_version"
-
-            # Check if there's a newer LTS version
-            log_running "Checking for newer LTS version..."
-            if nvm install --lts; then
-                if nvm alias default lts/*; then
-                    new_version=$(nvm_get_default_version)
-                    if [[ "$new_version" != "$current_version" ]]; then
-                        log_success "Node.js updated to $new_version"
-                    else
-                        log_success "Node.js is up to date ($current_version)"
-                    fi
-                fi
-            else
-                log_error "Failed to install/update Node.js LTS"
-            fi
-        else
-            # No default version set, install LTS
-            if nvm_ensure_lts; then
-                log_success "Node.js LTS installed"
-            else
-                log_error "Failed to install Node.js LTS"
-            fi
-        fi
-
-        # Ensure neovim package is installed
-        if nvm_use_lts; then
-            if ! nvm_is_global_package_installed neovim; then
-                log_running "Installing Neovim Node.js package..."
-                if nvm_install_global_packages neovim; then
-                    log_success "Neovim Node.js packages installed"
-                else
-                    log_error "Failed to install Neovim Node.js packages"
-                fi
-            else
-                log_success "Neovim Node.js package is installed"
-            fi
-        fi
-else
-    log_warning "nvm not available, skipping Node.js update"
-fi
-{{- end }}
-{{- end }}
-
-# Update Rust toolchain
-{{- if ne .chezmoi.os "windows" }}
-log_step "Updating Rust toolchain..."
-if check_command rustup; then
-    if rustup update; then
-        log_success "Rust toolchain updated"
-    else
-        log_warning "Failed to update Rust toolchain"
-    fi
-else
-    log_warning "rustup not found, skipping Rust update"
 fi
 {{- end }}
 

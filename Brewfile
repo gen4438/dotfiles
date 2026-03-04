@@ -31,10 +31,8 @@ brew "sqlite"
 brew "xz"
 brew "zlib"
 
-# Version managers
-brew "nvm"
-brew "pyenv"
-brew "pyenv-virtualenv"
+# Unified version manager
+brew "mise"
 
 # Text editors and terminal tools
 brew "neovim"

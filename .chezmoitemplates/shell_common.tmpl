@@ -129,7 +129,7 @@ alias ls='ls -G'
 {{- end }}
 
 # PATH Priority Order Policy:
-# 1. Version manager shims (pyenv, nvm) - highest priority for language switching
+# 1. mise shims - unified version management for python/node/go/rust
 # 2. User binaries (~/.local/bin, ~/bin) - personal scripts and tools
 # 3. Language-specific paths (GOPATH/bin, cargo/bin) - compiled binaries
 # 4. Development tools (fzf, etc.) - frequently used utilities
@@ -140,17 +140,14 @@ add_to_path "$HOME/.local/bin"
 add_to_path "$HOME/bin"
 
 # Programming language specific configurations
-# Go (gvm - Go Version Manager)
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+# Go - GOPATH for go install targets
 if command -v go &> /dev/null; then
     export GOPATH="${GOPATH:-$HOME/go}"
     add_to_path "$GOPATH/bin"
 fi
 
-# Rust (this sources cargo env which adds ~/.cargo/bin to PATH)
-if [ -f "$HOME/.cargo/env" ]; then
-    . "$HOME/.cargo/env"
-fi
+# Rust - cargo bin for cargo install targets
+add_to_path "$HOME/.cargo/bin"
 
 # fzf (fuzzy finder) - important development tool
 add_to_path "$HOME/.fzf/bin"
@@ -159,21 +156,12 @@ add_to_path "$HOME/.fzf/bin"
 # Android/Termux: Use system packages (pkg install python nodejs)
 # Global npm/pip packages will be installed via system package manager
 {{- else }}
-# Node.js (nvm) - standard initialization
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Python (pyenv) - disabled by default, use direnv + uv instead
-# export PYENV_ROOT="$HOME/.pyenv"
-# add_to_path "$PYENV_ROOT/bin"
-# if command -v pyenv &> /dev/null; then
-#     eval "$(pyenv init -)"
-#     eval "$(pyenv virtualenv-init -)"
-# fi
+# mise (unified version manager for python, node, go, rust)
+if command -v mise &> /dev/null; then
+    eval "$(mise activate ${SHELL_TYPE})"
+fi
 
 # Disable automatic prompt modification - we'll handle it ourselves
-# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 {{- end }}
 
@@ -182,15 +170,6 @@ add_to_path "$HOME/.poetry/bin"
 
 # pipenv configuration
 export PIPENV_SKIP_LOCK=true
-
-{{- if ne .chezmoi.os "android" }}
-# Remove specific pyenv shims to use system versions (disabled with pyenv)
-# for cmd in black blackd grip rg gettext envsubst rst2man.py; do
-#     if command -v "/usr/bin/$cmd" >/dev/null 2>&1 && [[ -f "$HOME/.pyenv/shims/$cmd" ]]; then
-#         rm -f "$HOME/.pyenv/shims/$cmd"
-#     fi
-# done
-{{- end }}
 
 # pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
@@ -294,7 +273,7 @@ remove_path_duplicates
 show_dev_env() {
     local parts=""
 
-    # Python environment detection (uv / pyenv / virtualenv / venv)
+    # Python environment detection (uv / virtualenv / venv)
     if [[ -n "$VIRTUAL_ENV" ]]; then
         local venv_name
         venv_name="$(basename "$VIRTUAL_ENV")"
@@ -307,17 +286,15 @@ show_dev_env() {
         else
             parts+="(${venv_name})"
         fi
-    elif [[ -n "$PYENV_SHELL" ]]; then
-        local pyver
-        pyver="$(pyenv version-name 2>/dev/null)"
-        if [[ -n "$pyver" && "$pyver" != "system" ]]; then
-            parts+="(pyenv:${pyver})"
-        fi
     fi
 
-    # Node.js environment (nvm via direnv)
-    if [[ -n "$DIRENV_NVM_VERSION" && -n "$DIRENV_DIR" ]]; then
-        parts+="(nvm:$(node --version 2>/dev/null))"
+    # mise-managed tool version (show if .mise.toml is present in current dir)
+    if [[ -f ".mise.toml" ]] && command -v mise &>/dev/null; then
+        local mise_info
+        mise_info="$(mise current 2>/dev/null | awk '{printf "(%s:%s)", $1, $2}' | head -c 80)"
+        if [[ -n "$mise_info" ]]; then
+            parts+="$mise_info"
+        fi
     fi
 
     [[ -n "$parts" ]] && echo "$parts"

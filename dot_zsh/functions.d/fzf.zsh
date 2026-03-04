@@ -46,21 +46,12 @@ function fssh() {
     xpanes -tc "${xpanes_cmd} {}" ${sshLoginHost}
 }
 
-# pyenvの切替
-function fpyenv() {
-  if command -v pyenv 1>/dev/null 2>&1; then
+# mise tool version switching
+function fmise() {
+  if command -v mise 1>/dev/null 2>&1; then
     local target
-    target=$(pyenv versions | fzf --no-hscroll --no-multi --ansi |  sed -e 's/(.*)//' -e 's/\*//' -e 's/ \+//g') || return
-    pyenv shell "$target"
-  fi
-}
-
-# pyevn-virtualenvの切替
-function fpyenv-virtualenv() {
-  if command -v pyenv 1>/dev/null 2>&1; then
-    local target
-    target=$(pyenv virtualenvs | fzf --no-hscroll --no-multi --ansi |  sed -e 's/(.*)//' -e 's/\*//' -e 's/ \+//g') || return
-    pyenv activate "$target"
+    target=$(mise ls --installed | fzf --no-hscroll --no-multi --ansi | awk '{print $1 "@" $2}') || return
+    mise use "$target"
   fi
 }
 
