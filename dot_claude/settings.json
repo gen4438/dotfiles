@@ -8,8 +8,9 @@
   "enabledPlugins": {
     "ralph-loop@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "medium",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "medium"
 }
