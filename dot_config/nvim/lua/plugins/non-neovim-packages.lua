@@ -4,7 +4,22 @@ return {
   {
     "williamboman/mason.nvim",
     lazy = false,
-    config = true,
+    opts = {
+      ensure_installed = {
+        "copilot-language-server",
+      },
+    },
+    config = function(_, opts)
+      require("mason").setup(opts)
+      -- ensure_installed のパッケージを自動インストール
+      local registry = require("mason-registry")
+      for _, name in ipairs(opts.ensure_installed or {}) do
+        local ok, pkg = pcall(registry.get_package, name)
+        if ok and not pkg:is_installed() then
+          pkg:install()
+        end
+      end
+    end,
   },
 
   -- fzf
