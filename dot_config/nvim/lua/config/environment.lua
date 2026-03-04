@@ -121,9 +121,9 @@ M.setup_nodejs = function()
     -- mise manages node, so just use whatever is on PATH
   end
 
-  -- Use node from PATH (managed by mise or system)
-  if command_exists('node') then
-    vim.g.node_host_prog = vim.fn.exepath('node')
+  -- Use neovim-node-host from PATH (installed via npm install -g neovim)
+  if command_exists('neovim-node-host') then
+    vim.g.node_host_prog = vim.fn.exepath('neovim-node-host')
   end
 end
 
