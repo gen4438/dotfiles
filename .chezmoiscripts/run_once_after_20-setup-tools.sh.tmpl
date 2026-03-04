@@ -53,82 +53,41 @@ if check_command mise; then
 fi
 {{- end }}
 
-# Setup zplug and install plugins (only for zsh users)
+# Setup Zim plugins (zsh plugin manager)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
 {{- if $shells.uses_zsh }}
-log_step "Setting up zplug plugins..."
+log_step "Setting up Zim plugins..."
 
-# Platform-appropriate zplug detection
-{{- if eq .chezmoi.os "darwin" }}
-# macOS - check Homebrew locations first, then local (chezmoi external backup)
-ZPLUG_HOME=""
-for zplug_path in \
-    "/opt/homebrew/opt/zplug" \
-    "/usr/local/opt/zplug" \
-    "/opt/homebrew/share/zplug" \
-    "/usr/local/share/zplug" \
-    "$HOME/.zplug"; do
-    if [[ -f "$zplug_path/init.zsh" ]]; then
-        export ZPLUG_HOME="$zplug_path"
-        break
-    fi
-done
-{{- else }}
-# Linux/Android/other - chezmoi external manages zplug at ~/.zplug
-if [[ -f "$HOME/.zplug/init.zsh" ]]; then
-    export ZPLUG_HOME="$HOME/.zplug"
-fi
-{{- end }}
-
-if [[ -n "$ZPLUG_HOME" && -f "$ZPLUG_HOME/init.zsh" ]]; then
-    log_info "Checking zplug plugins..."
-
-    # zplug requires zsh, so we run it in a zsh subshell
-    if check_command zsh; then
-        # Check if plugins are already installed by checking for a key plugin directory
-        ZPLUG_REPOS_DIR="$ZPLUG_HOME/repos"
-        if [[ ! -d "$ZPLUG_REPOS_DIR/sindresorhus/pure" ]] || [[ ! -d "$ZPLUG_REPOS_DIR/robbyrussell/oh-my-zsh" ]]; then
-            log_running "Installing zplug plugins..."
-            zsh -c "
-                export ZPLUG_HOME='$ZPLUG_HOME'
-                source '$ZPLUG_HOME/init.zsh'
-                zstyle ':zplug:tag' depth 1
-
-                # Define plugins (matching .zshrc.tmpl)
-                zplug 'lib/completion', from:oh-my-zsh
-                zplug 'lib/directories', from:oh-my-zsh
-                zplug 'lib/functions', from:oh-my-zsh
-                zplug 'lib/history', from:oh-my-zsh
-                zplug 'plugins/git', from:oh-my-zsh
-                zplug 'plugins/dotenv', from:oh-my-zsh
-                zplug 'plugins/poetry', from:oh-my-zsh
-                zplug 'plugins/npm', from:oh-my-zsh
-                zplug 'plugins/kubectl', from:oh-my-zsh
-                zplug 'plugins/gh', from:oh-my-zsh
-                zplug 'plugins/vi-mode', from:oh-my-zsh
-                zplug 'sindresorhus/pure', use:pure.zsh, from:github, as:theme
-                zplug 'mafredri/zsh-async', from:github
-                zplug 'zsh-users/zsh-history-substring-search', defer:2
-                zplug 'changyuheng/fz', defer:1
-                zplug 'rupa/z', use:z.sh
-                zplug 'greymd/tmux-xpanes'
-                zplug 'qoomon/zsh-lazyload'
-
-                # Install plugins (ignore \"no packages to install\" error)
-                zplug install || [[ \$? -eq 1 && \$(zplug list | wc -l) -gt 0 ]]
-            "
-            log_success "zplug plugins installed"
-        else
-            log_success "zplug plugins already installed"
-        fi
+if check_command zsh; then
+    ZIM_HOME="$HOME/.zim"
+    if [[ -f "$ZIM_HOME/zimfw.zsh" ]] || [[ -f "/opt/homebrew/opt/zimfw/share/zimfw.zsh" ]] || [[ -f "/usr/local/opt/zimfw/share/zimfw.zsh" ]]; then
+        log_running "Installing Zim modules..."
+        zsh -c '
+            ZIM_HOME=~/.zim
+            {{- if eq .chezmoi.os "darwin" }}
+            if [[ -d "/opt/homebrew" ]]; then
+                ZIMFW_PATH="/opt/homebrew/opt/zimfw/share/zimfw.zsh"
+            else
+                ZIMFW_PATH="/usr/local/opt/zimfw/share/zimfw.zsh"
+            fi
+            if [[ -f "$ZIMFW_PATH" ]]; then
+                source "$ZIMFW_PATH" install
+            fi
+            {{- else }}
+            if [[ -f "$ZIM_HOME/zimfw.zsh" ]]; then
+                source "$ZIM_HOME/zimfw.zsh" install
+            fi
+            {{- end }}
+        '
+        log_success "Zim modules installed"
     else
-        log_warning "zsh not available, skipping zplug plugin installation"
+        log_warning "Zim not found, skipping plugin installation"
     fi
 else
-    log_warning "zplug not found, skipping plugin installation"
+    log_warning "zsh not available, skipping Zim plugin installation"
 fi
 {{- else }}
-log_info "zsh not detected, skipping zplug plugin installation"
+log_info "zsh not detected, skipping Zim plugin installation"
 {{- end }}
 
 # Setup tmux plugin manager
@@ -212,6 +171,28 @@ if check_command uv; then
             fi
         fi
     done
+fi
+{{- end }}
+
+# Setup devcontainer CLI
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up devcontainer CLI..."
+if check_command devcontainer; then
+    log_success "devcontainer CLI is already installed"
+else
+    log_running "Installing devcontainer CLI..."
+    if check_command npm; then
+        if npm install -g @devcontainers/cli; then
+            log_success "devcontainer CLI installed successfully"
+        else
+            log_warning "Failed to install devcontainer CLI via npm"
+        fi
+    elif check_command node; then
+        # Try npx as fallback
+        log_warning "npm not found, devcontainer CLI not installed (install Node.js/npm first)"
+    else
+        log_warning "Node.js not found, skipping devcontainer CLI installation"
+    fi
 fi
 {{- end }}
 

@@ -179,6 +179,9 @@ add_to_path "$PNPM_HOME"
 export LUAROCKS_HOME="$HOME/.luarocks"
 add_to_path "$LUAROCKS_HOME/bin"
 
+# devcontainer CLI
+add_to_path "$HOME/.devcontainers/bin"
+
 # Kubernetes plugins (Krew)
 add_to_path "${KREW_ROOT:-$HOME/.krew}/bin"
 
