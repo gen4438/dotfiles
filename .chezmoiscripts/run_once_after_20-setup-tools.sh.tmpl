@@ -251,4 +251,19 @@ if check_command uv; then
 fi
 {{- end }}
 
+# Setup Claude Code
+{{- if ne .chezmoi.os "windows" }}
+log_step "Setting up Claude Code..."
+if check_command claude; then
+    log_success "Claude Code is already installed"
+else
+    log_running "Installing Claude Code..."
+    if curl -fsSL https://claude.ai/install.sh | bash; then
+        log_success "Claude Code installed successfully"
+    else
+        log_warning "Failed to install Claude Code"
+    fi
+fi
+{{- end }}
+
 log_success "Development tools setup completed"
