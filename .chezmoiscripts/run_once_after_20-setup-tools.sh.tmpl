@@ -141,7 +141,7 @@ log_step "Setting up Windows specific tools..."
 {{- end }}
 
 # Setup uv (Python package manager)
-{{- if ne .chezmoi.os "windows" }}
+{{- if and (ne .chezmoi.os "windows") (ne .chezmoi.os "android") }}
 log_step "Setting up uv..."
 if check_command uv; then
     log_success "uv is already installed"
