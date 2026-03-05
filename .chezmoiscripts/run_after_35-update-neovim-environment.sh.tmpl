@@ -33,9 +33,9 @@ else
 fi
 {{- end }}
 {{- else }}
-# Android/Termux: Use venv
+# Android/Termux: Use venv or system pip
 log_running "Updating Python packages for Neovim (Termux)..."
-if [[ -d "$HOME/.local/share/nvim-venv" ]]; then
+if [[ -d "$HOME/.local/share/nvim-venv" ]] && [[ -f "$HOME/.local/share/nvim-venv/bin/pip" ]]; then
     if "$HOME/.local/share/nvim-venv/bin/pip" install --upgrade pynvim neovim coverage; then
         log_success "Neovim Python packages updated"
     else

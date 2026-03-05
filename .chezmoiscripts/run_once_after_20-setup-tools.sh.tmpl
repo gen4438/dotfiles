@@ -197,7 +197,7 @@ fi
 {{- end }}
 
 # Setup Claude Code
-{{- if ne .chezmoi.os "windows" }}
+{{- if and (ne .chezmoi.os "windows") (ne .chezmoi.os "android") }}
 log_step "Setting up Claude Code..."
 if check_command claude; then
     log_success "Claude Code is already installed"
