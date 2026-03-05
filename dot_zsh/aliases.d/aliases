@@ -28,3 +28,6 @@ if command -v zplug &> /dev/null; then
     alias zplug-clean='zplug clean'
     alias zplug-status='zplug status'
 fi
+
+# Claude
+alias claude-yolo='claude --allow-dangerously-skip-permissions'
