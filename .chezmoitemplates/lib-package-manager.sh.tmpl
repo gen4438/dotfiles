@@ -3,7 +3,9 @@
 
 # Detect package manager
 detect_package_manager() {
-    {{- if eq .chezmoi.os "linux" }}
+    {{- if eq .chezmoi.os "android" }}
+    echo "pkg"
+    {{- else if eq .chezmoi.os "linux" }}
     {{- $distro := .chezmoi.osRelease.id }}
     {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
     echo "apt"
@@ -11,8 +13,6 @@ detect_package_manager() {
     echo "dnf"
     {{- else if or (eq $distro "arch") (eq $distro "manjaro") }}
     echo "pacman"
-    {{- else if eq $distro "termux" }}
-    echo "pkg"
     {{- else }}
     echo "unknown"
     {{- end }}
