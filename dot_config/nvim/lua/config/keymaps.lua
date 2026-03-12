@@ -198,7 +198,14 @@ vim.keymap.set('n', '<c-k><c-t>', ':Colors<CR>', { desc = "Choose colorscheme" }
 vim.keymap.set('n', ']b', ':bn<CR>', { desc = "Next buffer" })
 vim.keymap.set('n', '[b', ':bp<CR>', { desc = "Previous buffer" })
 vim.keymap.set('n', 'sq', ':bp<CR>:bd #<CR>', { desc = "Close current buffer" })
-vim.keymap.set('n', 'sc', '<cmd>%bd|e#|bd#<CR>', { desc = "Close all other buffers" })
+vim.keymap.set('n', 'sc', function()
+  local current = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) then
+      pcall(vim.api.nvim_buf_delete, buf, {})
+    end
+  end
+end, { desc = "Close all other buffers" })
 
 -- Window management (s prefix)
 vim.keymap.set('n', 's', '<Nop>', opts)  -- Disable 's' to use as prefix
