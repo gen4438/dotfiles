@@ -70,5 +70,6 @@ cask "rar"  # RAR archive utility
 cask "xquartz"  # X11 for macOS
 
 # Fonts (Cask)
+cask "font-caskaydia-cove-nerd-font"  # Nerd Font
 cask "font-fantasque-sans-mono-nerd-font"  # Nerd Font
 cask "font-hack-nerd-font"  # Nerd Font

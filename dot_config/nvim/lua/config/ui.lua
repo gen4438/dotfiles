@@ -10,26 +10,41 @@ M.font = {
   current_size = 10,
 }
 
+local function is_neovide()
+  return vim.g.neovide
+end
+
+local function is_gui()
+  return is_neovide() or vim.fn.has("gui_running") == 1
+end
+
+local function guifont_string(family, size)
+  if is_neovide() then
+    family = family:gsub(" ", "\\ ")
+  end
+  return string.format("%s:h%d", family, size)
+end
+
 -- Initialize font settings
 M.setup_font = function()
-  if vim.fn.has("gui_running") == 1 then
-    vim.opt.guifont = string.format("%s:h%d", M.font.family, M.font.default_size)
+  if is_gui() then
+    vim.opt.guifont = guifont_string(M.font.family, M.font.default_size)
     M.font.current_size = M.font.default_size
   end
 end
 
 -- Font size manipulation functions
 M.change_font_size = function(delta)
-  if vim.fn.has("gui_running") == 1 then
+  if is_gui() then
     M.font.current_size = math.max(6, M.font.current_size + delta)
-    vim.opt.guifont = string.format("%s:h%d", M.font.family, M.font.current_size)
+    vim.opt.guifont = guifont_string(M.font.family, M.font.current_size)
   end
 end
 
 M.reset_font_size = function()
-  if vim.fn.has("gui_running") == 1 then
+  if is_gui() then
     M.font.current_size = M.font.default_size
-    vim.opt.guifont = string.format("%s:h%d", M.font.family, M.font.default_size)
+    vim.opt.guifont = guifont_string(M.font.family, M.font.default_size)
   end
 end
 
@@ -182,20 +197,18 @@ M.setup_toggle_keymaps = function()
   vim.keymap.set('n', '<Space>w', ':setlocal wrap!<CR>', { desc = "Toggle wrap" })
 end
 
--- Neovide: Windows でアニメーションを無効化
+-- Neovide: アニメーションを無効化
 M.setup_neovide = function()
   if not vim.g.neovide then
     return
   end
-  if vim.fn.has('win32') == 1 then
-    vim.g.neovide_cursor_animation_length = 0
-    vim.g.neovide_cursor_trail_size = 0
-    vim.g.neovide_cursor_animate_in_insert_mode = false
-    vim.g.neovide_cursor_animate_command_line = false
-    vim.g.neovide_scroll_animation_length = 0
-    vim.g.neovide_position_animation_length = 0
-    vim.g.neovide_cursor_vfx_mode = ""
-  end
+  vim.g.neovide_cursor_animation_length = 0
+  vim.g.neovide_cursor_trail_size = 0
+  vim.g.neovide_cursor_animate_in_insert_mode = false
+  vim.g.neovide_cursor_animate_command_line = false
+  vim.g.neovide_scroll_animation_length = 0
+  vim.g.neovide_position_animation_length = 0
+  vim.g.neovide_cursor_vfx_mode = ""
 end
 
 -- Main setup function
