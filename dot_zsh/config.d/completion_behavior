@@ -14,3 +14,6 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 # Completion caching for better performance
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
+
+# mosh: use same completion as ssh (hostnames from ~/.ssh/config)
+compdef mosh=ssh

@@ -201,7 +201,7 @@ vim.keymap.set('n', 'sq', ':bp<CR>:bd #<CR>', { desc = "Close current buffer" })
 vim.keymap.set('n', 'sc', function()
   local current = vim.api.nvim_get_current_buf()
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) then
+    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype ~= 'terminal' then
       pcall(vim.api.nvim_buf_delete, buf, {})
     end
   end

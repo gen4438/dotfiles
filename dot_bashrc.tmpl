@@ -87,6 +87,11 @@ if command -v _fzf_setup_completion >/dev/null 2>&1; then
     _fzf_setup_completion dir tree
 fi
 
+# mosh: use same completion as ssh (hostnames from ~/.ssh/config)
+if command -v mosh >/dev/null 2>&1 && declare -F _ssh >/dev/null 2>&1; then
+    complete -F _ssh mosh
+fi
+
 # Disable Ctrl+S/Ctrl+Q flow control (allows Ctrl+S for search)
 stty -ixon
 
