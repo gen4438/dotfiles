@@ -1,0 +1,3 @@
+#!/bin/bash
+encoded=$(base64 -w0)
+printf '\033]52;c;%s\a' "$encoded" > "$(tmux display-message -p '#{client_tty}')"
