@@ -56,8 +56,6 @@ bindkey '^F' autosuggest-accept
 # Alt+F or Ctrl+Right to accept only one word of the suggestion
 bindkey '^[[1;5C' forward-word
 bindkey '^[f' forward-word
-# Ctrl+E to accept suggestion and execute
-bindkey '^E' autosuggest-execute
 
 # Custom key bindings for efficient autosuggestion usage
 # Ctrl+W: Use built-in forward-word for partial autosuggestion accept
