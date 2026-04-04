@@ -93,7 +93,7 @@ return {
         function()
           local function return_to_insert(opts)
             if opts.__CTX and opts.__CTX.mode == "i" then
-              vim.cmd [[noautocmd lua vim.api.nvim_feedkeys('i', 'n', true)]]
+              vim.cmd [[noautocmd lua vim.api.nvim_feedkeys('a', 'n', true)]]
             end
           end
 
@@ -156,11 +156,11 @@ return {
                       table.insert(additional_lines, paths[i])
                     end
                     vim.api.nvim_buf_set_lines(0, current_row, current_row, false, additional_lines)
-                    vim.api.nvim_win_set_cursor(0, { current_row + #additional_lines, #paths[#paths] })
+                    vim.api.nvim_win_set_cursor(0, { current_row + #additional_lines, #paths[#paths] - 1 })
                     return_to_insert(opts)
                   end)
                 else
-                  vim.api.nvim_win_set_cursor(0, { opts.__CTX.cursor[1], replace_at + #paths[1] - 1 })
+                  vim.api.nvim_win_set_cursor(0, { opts.__CTX.cursor[1], replace_at + #paths[1] - 2 })
                   return_to_insert(opts)
                 end
               end

@@ -248,13 +248,17 @@ map('n', 'sP', function()
   vscode.call('workbench.action.previousEditor')
 end, { desc = "Previous editor" })
 
-map('n', 'sc', function()
+map('n', 'sQ', function()
   vscode.call('workbench.action.closeOtherEditors')
 end, { desc = "Close other editors" })
 
+map('n', 'sc', function()
+  vscode.call('workbench.action.closeGroup')
+end, { desc = "Close current editor group" })
+
 map('n', 'sC', function()
-  vscode.call('workbench.action.closeEditorsInGroup')
-end, { desc = "Close editors in group" })
+  vscode.call('workbench.action.closeEditorsInOtherGroups')
+end, { desc = "Close other editor groups" })
 
 map('n', 'src', function()
   vscode.call('workbench.action.closeEditorsToTheRight')

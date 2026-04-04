@@ -198,7 +198,7 @@ vim.keymap.set('n', '<c-k><c-t>', ':Colors<CR>', { desc = "Choose colorscheme" }
 vim.keymap.set('n', ']b', ':bn<CR>', { desc = "Next buffer" })
 vim.keymap.set('n', '[b', ':bp<CR>', { desc = "Previous buffer" })
 vim.keymap.set('n', 'sq', ':bp<CR>:bd #<CR>', { desc = "Close current buffer" })
-vim.keymap.set('n', 'sc', function()
+vim.keymap.set('n', 'sQ', function()
   local current = vim.api.nvim_get_current_buf()
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     if buf ~= current and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype ~= 'terminal' then
@@ -254,8 +254,8 @@ vim.keymap.set('n', '<c-pageup>', ':tabprevious<CR>', { desc = "Previous tab" })
 vim.keymap.set('n', 'sT', ':tab split<CR>', { desc = "Open in new tab" })
 vim.keymap.set('n', 'sN', ':tabnext<CR>', { desc = "Next tab" })
 vim.keymap.set('n', 'sP', ':tabprevious<CR>', { desc = "Previous tab" })
--- vim.keymap.set('n', 'sc', ':tabclose<CR>', { desc = "Close tab" })
-vim.keymap.set('n', 'sC', ':tabclose<CR>', { desc = "Close tab" })
+vim.keymap.set('n', 'sc', '<C-w>c', { desc = "Close current window" })
+vim.keymap.set('n', 'sC', '<C-w>o', { desc = "Close all other windows" })
 
 -- Quickfix and location list navigation
 vim.keymap.set('n', '[q', ':<C-u>cprevious<CR>', { desc = "Previous quickfix item" })

@@ -221,6 +221,20 @@ return {
     -- }
   },
 
+  -- テキストオブジェクト拡張 (引数, next/last など)
+  {
+    'echasnovski/mini.ai',
+    lazy = true,
+    event = 'VeryLazy',
+    opts = {
+      custom_textobjects = {
+        f = false, -- treesitter-textobjects の function を優先
+      },
+      -- カーソル位置から検索する行数
+      n_lines = 50,
+    },
+  },
+
   -- ウィンドウを閉じずにbuffer削除
   {
     'qpkorr/vim-bufkill',
