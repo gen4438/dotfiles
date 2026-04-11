@@ -173,6 +173,29 @@ if (-not $env:GITHUB_TOKEN -and (Get-Command gh -ErrorAction SilentlyContinue)) 
 Set-Alias vi nvim
 Set-Alias vim nvim
 
+# Navigation shortcuts
+function .. { Set-Location .. }
+function ... { Set-Location ..\.. }
+function .... { Set-Location ..\..\.. }
+function ..... { Set-Location ..\..\..\.. }
+function cdgit { Set-Location (git rev-parse --show-toplevel) }
+function mkcd { param([string]$Path) New-Item -ItemType Directory -Force $Path | Out-Null; Set-Location $Path }
+
+# Git shortcuts
+function g { git @args }
+function gs { git status @args }
+function ga { git add @args }
+function gc { git commit @args }
+function gp { git push @args }
+function gd { git diff @args }
+function gb { git branch @args }
+function gco { git checkout @args }
+function gl { git log @args }
+
+# Directory listing
+function ll { Get-ChildItem -Force @args }
+function la { Get-ChildItem -Force -Name @args }
+
 # Claude / Copilot
 function claude-yolo { claude --allow-dangerously-skip-permissions @args }
 function copilot-yolo { copilot --yolo @args }
