@@ -75,6 +75,9 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
 }
 
 # Set up aliases for common commands
+$env:EDITOR = 'nvim'
+$env:VISUAL = 'nvim'
+
 Set-Alias vi nvim
 Set-Alias vim nvim
 
