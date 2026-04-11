@@ -135,22 +135,37 @@
     refreshPeriod = "168h"
 {{- end }}
 
+# zoxide - A smarter cd command (cross-platform)
+# Platform-specific release naming patterns:
+# Linux x86_64: zoxide-{version}-x86_64-unknown-linux-musl.tar.gz
+# Linux aarch64: zoxide-{version}-aarch64-unknown-linux-musl.tar.gz
+# Linux armv7: zoxide-{version}-armv7-unknown-linux-musleabihf.tar.gz
+# macOS x86_64: zoxide-{version}-x86_64-apple-darwin.tar.gz
+# macOS aarch64: zoxide-{version}-aarch64-apple-darwin.tar.gz
+# Windows x86_64: zoxide-{version}-x86_64-pc-windows-msvc.zip
+# Android (arm64): zoxide-{version}-aarch64-linux-android.tar.gz
+{{- if eq .chezmoi.os "windows" }}
+[".local/bin/zoxide.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "ajeetdsouza/zoxide" (printf "zoxide-*-%s-pc-windows-msvc.zip" (.chezmoi.arch | replace "amd64" "x86_64")) | quote }}
+    executable = true
+    path = "zoxide.exe"
+    refreshPeriod = "168h"
+{{- else }}
+[".local/bin/zoxide"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "ajeetdsouza/zoxide" (printf "zoxide-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "android" | ternary "linux-android" (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-musl"))) | quote }}
+    executable = true
+    path = "zoxide"
+    refreshPeriod = "168h"
+{{- end }}
+
 # 以降は windows ではインストールしない
 {{- if ne .chezmoi.os "windows" }}
 
-# z, fz, tmux-xpanes for bash users (zsh uses zim)
+# tmux-xpanes for bash users (zsh uses zim)
 {{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
 {{- if and $shells.uses_bash (ne .chezmoi.os "darwin") }}
-[".local/share/z"]
-    type = "git-repo"
-    url = "https://github.com/rupa/z.git"
-    refreshPeriod = "168h"
-
-[".local/share/fz"]
-    type = "git-repo"
-    url = "https://github.com/changyuheng/fz.git"
-    refreshPeriod = "168h"
-
 [".local/share/tmux-xpanes"]
     type = "git-repo"
     url = "https://github.com/greymd/tmux-xpanes.git"

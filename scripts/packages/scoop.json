@@ -13,6 +13,7 @@
     "vcxsrv",
     "oh-my-posh",
     "fzf",
+    "zoxide",
     "ripgrep",
     "fd",
     "bat",

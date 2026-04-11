@@ -271,6 +271,11 @@ fi
 # Clean up PATH duplicates after all configurations are loaded
 remove_path_duplicates
 
+# zoxide (smarter cd command - replaces z/fz)
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init ${SHELL_TYPE})"
+fi
+
 # Shared prompt functions for bash and zsh
 # Show active development environment in prompt
 show_dev_env() {

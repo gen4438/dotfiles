@@ -123,6 +123,11 @@ function copilot-yolo { copilot --yolo @args }
 # 無変換キーが@として入力される問題への対処
 # WindowsのIME設定でキーバインドをカスタマイズすることで解決可能
 # PowerShellでキー入力をデバッグする関数
+# zoxide (smarter cd command)
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
 function Test-KeyInput {
     Write-Host "Press any key to see its details (Ctrl+C to exit):" -ForegroundColor Yellow
     while ($true) {
