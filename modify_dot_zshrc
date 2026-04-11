@@ -1,5 +1,6 @@
+{{- /* chezmoi:modify-template */ -}}
 # Zsh configuration
-# Managed by chezmoi - see dot_zshrc.tmpl
+# Managed by chezmoi - see modify_dot_zshrc
 
 # Performance profiling - uncomment to measure startup time
 # zmodload zsh/zprof
@@ -38,7 +39,7 @@ else
 fi
 
 # Install missing modules and update init.zsh if needed
-if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then 
+if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZDOTDIR:-${HOME}}/.zimrc ]]; then
     if [[ -f "$ZIMFW_PATH" ]]; then
         source "$ZIMFW_PATH" init
     fi
@@ -68,7 +69,7 @@ export ZSH_AUTOSUGGEST_MANUAL_REBIND=true
 
 # Load common shell configuration (shared with bash) AFTER plugin initialization
 # This ensures plugin widgets are available for custom keybindings
-{{ template "shell_common.tmpl" . }}
+{{ includeTemplate "shell_common.tmpl" . }}
 
 
 
@@ -149,3 +150,9 @@ export PROMPT='$(vi_mode_prompt_info)$(show_dev_env)'"${PROMPT//$'\n'/}"
 
 # Key bindings are handled by dot_zsh/keybindings.d/keybindings
 # This ensures proper loading order and prevents conflicts
+
+# chezmoi:managed-end
+{{ $parts := splitList "# chezmoi:managed-end" .chezmoi.stdin -}}
+{{ if gt (len $parts) 1 -}}
+{{ index $parts 1 | trimPrefix "\n" -}}
+{{ end -}}

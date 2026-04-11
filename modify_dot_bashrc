@@ -1,9 +1,10 @@
+{{- /* chezmoi:modify-template */ -}}
 # Set byobu config directory to XDG compliant location
 export BYOBU_CONFIG_DIR="$HOME/.config/byobu"
 
 {{- if eq .chezmoi.os "linux" }}
 # Ubuntu/Debian default bashrc configuration
-{{ template "ubuntu_bashrc.tmpl" . }}
+{{ includeTemplate "ubuntu_bashrc.tmpl" . }}
 {{- else }}
 # Default minimal bash configuration for non-Linux systems
 # If not running interactively, don't do anything
@@ -26,7 +27,7 @@ shopt -s checkwinsize
 
 # Load common shell configuration early (shared with zsh)
 # This includes add_to_path function and other shared utilities
-{{ template "shell_common.tmpl" . }}
+{{ includeTemplate "shell_common.tmpl" . }}
 
 # Byobu integration
 [ -r ~/.config/byobu/prompt ] && source ~/.config/byobu/prompt   #byobu-prompt#
@@ -41,7 +42,7 @@ HISTSIZE=9999
 if [[ -n "$IS_WSL" || -n "$WSL_DISTRO_NAME" ]]; then
     # Windows Explorer alias
     alias e='explorer.exe'
-    
+
     # X11 display for WSL (GWSL configuration)
     # Note: Adjust IP range according to your network setup
     export DISPLAY=$(ipconfig.exe /all | grep -a IPv4 | grep -o -e "192.168.11.[0-9]\{1,3\}"):0.0
@@ -96,3 +97,8 @@ stty -ixon
 # Cargo environment is now handled in shell_common.tmpl
 # PATH cleanup is now handled in shell_common.tmpl
 
+# chezmoi:managed-end
+{{ $parts := splitList "# chezmoi:managed-end" .chezmoi.stdin -}}
+{{ if gt (len $parts) 1 -}}
+{{ index $parts 1 | trimPrefix "\n" -}}
+{{ end -}}

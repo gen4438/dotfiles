@@ -214,6 +214,7 @@ Documents/WindowsPowerShell/**
 !Documents/PowerShell/
 Documents/PowerShell/**
 !Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+!Documents/PowerShell/Microsoft.PowerShell_profile.ps1.ps1
 {{- end }}
 
 
