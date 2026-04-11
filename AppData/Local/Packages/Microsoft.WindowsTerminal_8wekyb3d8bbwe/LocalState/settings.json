@@ -109,7 +109,8 @@
         "guid": "{d3b2a1c4-9876-4abc-8def-500000000001}",
         "hidden": false,
         "icon": "ms-appx:///ProfileIcons/pwsh.png",
-        "name": "psmux"
+        "name": "psmux",
+        "startingDirectory": "%USERPROFILE%"
       },
       {
         "commandline": "wsl.exe -d Ubuntu -- byobu",
