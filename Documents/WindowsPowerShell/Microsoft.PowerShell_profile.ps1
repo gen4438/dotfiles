@@ -14,6 +14,36 @@ Import-Module PSReadLine
 Set-PSReadLineOption -EditMode Vi
 Set-PSReadLineOption -BellStyle None
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+
+# Vi mode indicator in prompt
+$ESC = [char]0x1b
+Set-PSReadLineOption -ViModeIndicator Script -ViModeChangeHandler {
+    param([string]$Mode)
+    $e = [char]0x1b
+    if ($Mode -eq 'Command') {
+        # Save cursor, move to column 1, overwrite mode indicator, restore cursor
+        Write-Host -NoNewline "$e[s$e[1 q$e[0G$e[32m[N]$e[0m$e[u"
+    } else {
+        Write-Host -NoNewline "$e[s$e[5 q$e[0G$e[36m[I]$e[0m$e[u"
+    }
+}
+function prompt {
+    $exitCode = $LASTEXITCODE
+    $e = [char]0x1b
+    $path = $executionContext.SessionState.Path.CurrentLocation.Path
+    $path = $path -replace "^$([regex]::Escape($HOME))", '~'
+    $branch = git rev-parse --abbrev-ref HEAD 2>$null
+
+    # Start with [I] (Insert mode) - ViModeChangeHandler overwrites this in-place
+    $promptText = "$e[36m[I]$e[0m "
+    $promptText += "$e[33m$path$e[0m"
+    if ($branch) {
+        $promptText += " $e[35m($branch)$e[0m"
+    }
+    $promptText += " > "
+    $LASTEXITCODE = $exitCode
+    return $promptText
+}
 # Set-PSReadLineOption -CompletionQueryItems 25
 
 # Non-default key bindings for intelligent history search
