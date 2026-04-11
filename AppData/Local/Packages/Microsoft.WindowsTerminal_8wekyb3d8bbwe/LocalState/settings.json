@@ -22,6 +22,14 @@
             "keys": "shift+enter"
         },
         {
+            "command": { "action": "scrollUpPage" },
+            "keys": "shift+pgup"
+        },
+        {
+            "command": { "action": "scrollDownPage" },
+            "keys": "shift+pgdn"
+        },
+        {
             "id": null,
             "keys": "alt+shift+down"
         },
