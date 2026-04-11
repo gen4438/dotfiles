@@ -133,5 +133,6 @@ alias byobu_sync_off='tmux set-window-option synchronize-panes off'
 alias byobu_kill_session='a=(`byobu ls | cut -d " " -f 1`); byobu ls | cat -n; read b; byobu kill-session -t ${a[$b-1]}'
 alias update_display='export DISPLAY=$(tmux show-env | sed -n "s/^DISPLAY=//p")'
 
-# Claude
+# Claude / Copilot
 alias claude-yolo='claude --allow-dangerously-skip-permissions'
+alias copilot-yolo='copilot --yolo'

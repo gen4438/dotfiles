@@ -81,6 +81,10 @@ $env:VISUAL = 'nvim'
 Set-Alias vi nvim
 Set-Alias vim nvim
 
+# Claude / Copilot
+function claude-yolo { claude --allow-dangerously-skip-permissions @args }
+function copilot-yolo { copilot --yolo @args }
+
 # 無変換キーが@として入力される問題への対処
 # WindowsのIME設定でキーバインドをカスタマイズすることで解決可能
 # PowerShellでキー入力をデバッグする関数

@@ -29,5 +29,6 @@ if command -v zplug &> /dev/null; then
     alias zplug-status='zplug status'
 fi
 
-# Claude
+# Claude / Copilot
 alias claude-yolo='claude --allow-dangerously-skip-permissions'
+alias copilot-yolo='copilot --yolo'
