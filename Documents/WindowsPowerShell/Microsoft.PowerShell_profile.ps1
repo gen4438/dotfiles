@@ -1,9 +1,11 @@
 # PowerShell Cursor Movement Optimization Profile
 # All settings are non-default values for improved performance
 
-# UTF-8 encoding for proper emoji display
-# Ensure Windows Terminal is using CaskaydiaCove Nerd Font Mono for full emoji support
+# UTF-8 encoding settings for Japanese environment
+# Fixes mojibake when interacting with external commands (git, ripgrep, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 Import-Module PSReadLine
