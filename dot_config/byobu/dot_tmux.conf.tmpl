@@ -66,5 +66,26 @@ set -g @resurrect-processes 'false'
 # continuum
 # set -g @continuum-restore 'on'
 
-# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+# Initialize TMUX plugin manager
 run '~/.tmux/plugins/tpm/tpm'
+{{- if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+
+# WSL2: tpm/tmux-sensible の後に配置し、組み込みキーバインドを確実に上書きする
+
+# デフォルトシェルをトグル (pwsh → bash → powershell → pwsh ...)
+bind-key t run-shell '\
+    current=$(tmux show-option -gqv @byobu-shell); \
+    case "$current" in \
+        pwsh)       next=bash;       label="bash" ;; \
+        bash)       next=powershell; label="powershell.exe" ;; \
+        powershell) next=pwsh;       label="pwsh.exe" ;; \
+        *)          next=pwsh;       label="pwsh.exe" ;; \
+    esac; \
+    tmux set-option -g @byobu-shell "$next"; \
+    tmux display-message "Default shell: $label"'
+
+# 明示的にシェルを指定して開く
+bind-key b new-window -n bash bash
+bind-key B split-window -h bash
+bind-key p new-window -n pwsh '~/.config/byobu/bin/powershell-wrapper.sh'
+{{- end }}
