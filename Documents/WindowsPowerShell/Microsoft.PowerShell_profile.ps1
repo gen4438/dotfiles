@@ -51,6 +51,14 @@ function prompt {
     $exitCode = $LASTEXITCODE
     $e = [char]0x1b
     $path = $executionContext.SessionState.Path.CurrentLocation.Path
+
+    # OSC 7: CWD を WSL パスに変換して tmux に通知 (pane_current_path の追跡用)
+    if ($env:TMUX) {
+        $wslPath = $path -replace '^([A-Za-z]):\\', '/mnt/$1/' -replace '\\', '/'
+        $wslPath = $wslPath -creplace '/mnt/([A-Z])/', { '/mnt/' + $_.Groups[1].Value.ToLower() + '/' }
+        Write-Host -NoNewline "$e]7;file://localhost$wslPath$e\\"
+    }
+
     $path = $path -replace "^$([regex]::Escape($HOME))", '~'
     $branch = git rev-parse --abbrev-ref HEAD 2>$null
 
