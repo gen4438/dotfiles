@@ -105,9 +105,6 @@ bindkey '^N' history-substring-search-down
 alias reload='source ~/.zshrc'
 alias zshconfig='${EDITOR:-vim} ~/.zshrc'
 
-# fzf integration for zsh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 # fzf configuration is now handled in shell_common.tmpl
 
 # fzf-tab configuration

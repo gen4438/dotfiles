@@ -57,7 +57,6 @@ if [[ -f "$HOME/.env" ]]; then
 fi
 
 # External Tools Integration
-[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
 [[ -f ~/bin/tmux-xpanes/activate.sh ]] && source ~/bin/tmux-xpanes/activate.sh
 
 # Version Managers Initialization

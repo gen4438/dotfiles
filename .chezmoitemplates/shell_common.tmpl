@@ -276,6 +276,14 @@ if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init ${SHELL_TYPE})"
 fi
 
+# fzf (fuzzy finder) shell integration
+# Must be loaded BEFORE atuin so atuin can override Ctrl+R
+if [[ "$SHELL_TYPE" == "bash" ]]; then
+    [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+elif [[ "$SHELL_TYPE" == "zsh" ]]; then
+    [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+fi
+
 # atuin (enhanced shell history - replaces fzf Ctrl+R)
 if command -v atuin >/dev/null 2>&1; then
     eval "$(atuin init ${SHELL_TYPE} --disable-up-arrow)"
