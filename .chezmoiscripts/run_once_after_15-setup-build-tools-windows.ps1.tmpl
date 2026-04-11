@@ -173,19 +173,19 @@ if (Test-Command rustup) {
 # =============================================================================
 Log-Step "Configuring C compiler environment variable..."
 
-# Prefer gcc from MSYS2 MinGW, then clang, then cl.exe
+# Prefer clang (stable path via scoop), then gcc from MSYS2 MinGW, then cl.exe
 $ccSet = $false
 
-if ($msys2Root -and (Test-Path "$msys2Root\mingw64\bin\gcc.exe")) {
-    [System.Environment]::SetEnvironmentVariable('CC', "$msys2Root\mingw64\bin\gcc.exe", [System.EnvironmentVariableTarget]::User)
-    $env:CC = "$msys2Root\mingw64\bin\gcc.exe"
-    Log-Success "CC set to MSYS2 MinGW gcc"
-    $ccSet = $true
-} elseif (Test-Command clang) {
+if (Test-Command clang) {
     $clangPath = (Get-Command clang).Source
     [System.Environment]::SetEnvironmentVariable('CC', $clangPath, [System.EnvironmentVariableTarget]::User)
     $env:CC = $clangPath
     Log-Success "CC set to clang: $clangPath"
+    $ccSet = $true
+} elseif ($msys2Root -and (Test-Path "$msys2Root\mingw64\bin\gcc.exe")) {
+    [System.Environment]::SetEnvironmentVariable('CC', "$msys2Root\mingw64\bin\gcc.exe", [System.EnvironmentVariableTarget]::User)
+    $env:CC = "$msys2Root\mingw64\bin\gcc.exe"
+    Log-Success "CC set to MSYS2 MinGW gcc"
     $ccSet = $true
 }
 
