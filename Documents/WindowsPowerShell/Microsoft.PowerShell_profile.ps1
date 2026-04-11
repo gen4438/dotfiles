@@ -162,6 +162,11 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
 $env:EDITOR = 'nvim'
 $env:VISUAL = 'nvim'
 
+# GITHUB_TOKEN: gh CLI の認証トークンを環境変数に設定
+if (-not $env:GITHUB_TOKEN -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+    $env:GITHUB_TOKEN = (gh auth token -h github.com 2>$null)
+}
+
 Set-Alias vi nvim
 Set-Alias vim nvim
 
