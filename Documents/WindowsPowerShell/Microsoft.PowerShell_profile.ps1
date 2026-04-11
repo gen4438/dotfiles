@@ -50,6 +50,9 @@ function prompt {
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 
+# Git completion (posh-git)
+Import-Module posh-git
+
 # Tab to complete commands and arguments
 Set-PSReadLineKeyHandler -Key Tab -Function Complete
 
