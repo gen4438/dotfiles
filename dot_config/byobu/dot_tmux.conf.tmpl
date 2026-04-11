@@ -7,6 +7,7 @@ run-shell 'tmux set-option -g @byobu-shell "${BYOBU_SHELL:-pwsh}"'
 {{- end }}
 
 set-option -g default-terminal tmux-256color
+set -g unicode-ambiguous wide
 # set-option -g default-terminal screen-256color
 set-option -ga terminal-overrides ",*256*:Tc"
 # set -g mouse on
