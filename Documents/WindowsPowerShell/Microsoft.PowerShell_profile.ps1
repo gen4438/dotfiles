@@ -88,14 +88,15 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 # Ctrl+d to exit PowerShell
 Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteCharOrExit
 
-# Ctrl+r: fzf でコマンド履歴を検索
-if (Get-Command fzf -ErrorAction SilentlyContinue) {
+# Ctrl+r: atuin でコマンド履歴を検索 (フォールバック: fzf)
+if (Get-Command atuin -ErrorAction SilentlyContinue) {
+    Invoke-Expression (&atuin init powershell --disable-up-arrow | Out-String)
+} elseif (Get-Command fzf -ErrorAction SilentlyContinue) {
     Set-PSReadLineKeyHandler -Key Ctrl+r -ScriptBlock {
         $line = $null
         $cursor = $null
         [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
-        # インメモリ履歴を使用（推測補完と同じデータソース）
         $selected = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistoryItems() |
             ForEach-Object { $_.CommandLine } |
             Where-Object { $_ -ne '' } |
