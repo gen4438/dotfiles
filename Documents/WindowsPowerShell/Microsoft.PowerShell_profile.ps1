@@ -197,19 +197,8 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 }
 
 # broot (interactive tree explorer - br function for cd-on-exit)
-# Windows ではシンボリックリンクに管理者権限が必要なため、br 関数を直接定義
 if (Get-Command broot -ErrorAction SilentlyContinue) {
-    function br {
-        $tmpFile = New-TemporaryFile
-        broot --outcmd $tmpFile.FullName @args
-        if ($LASTEXITCODE -eq 0) {
-            $cmd = Get-Content $tmpFile.FullName -Raw
-            Remove-Item $tmpFile.FullName
-            if ($cmd) { Invoke-Expression $cmd }
-        } else {
-            Remove-Item $tmpFile.FullName
-        }
-    }
+    Invoke-Expression (&broot --print-shell-function powershell | Out-String)
 }
 
 function Test-KeyInput {

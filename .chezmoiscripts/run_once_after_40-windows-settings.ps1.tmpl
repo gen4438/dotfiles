@@ -95,6 +95,25 @@ if (-not (Test-Path $profileDir)) {
     Log-Success "PowerShell profile directory already exists"
 }
 
+# Enable Developer Mode (allows symlink creation without admin privileges)
+# Required for tools like broot that create symlinks for shell integration
+Log-Step "Checking Developer Mode..."
+$devModeKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
+$currentValue = (Get-ItemProperty $devModeKey -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense
+if ($currentValue -eq 1) {
+    Log-Success "Developer Mode is already enabled"
+} else {
+    Log-Running "Enabling Developer Mode..."
+    try {
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-Command", `
+            "Set-ItemProperty -Path '$devModeKey' -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord" `
+            -Verb RunAs -Wait
+        Log-Success "Developer Mode enabled"
+    } catch {
+        Log-Warning "Failed to enable Developer Mode (requires UAC approval): $_"
+    }
+}
+
 Log-Success "Windows settings configuration completed"
 Log-Info "Note: You may need to restart your shell or log out/in for PATH changes to take effect"
 {{- end }}
