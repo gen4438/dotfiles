@@ -1,7 +1,9 @@
 {{- if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
 # WSL2: シェルディスパッチャー経由で起動 (@byobu-shell で切り替え)
+# 初期値は環境変数 BYOBU_SHELL から取得 (未設定時は pwsh)
+# ~/.env に BYOBU_SHELL=bash 等と書くことで変更可能
 set-option -g default-command '~/.config/byobu/bin/powershell-wrapper.sh'
-set-option -g @byobu-shell 'pwsh'
+run-shell 'tmux set-option -g @byobu-shell "${BYOBU_SHELL:-pwsh}"'
 {{- end }}
 
 set-option -g default-terminal tmux-256color
