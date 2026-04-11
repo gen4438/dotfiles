@@ -196,11 +196,6 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     }
 }
 
-# broot (interactive tree explorer - br function for cd-on-exit)
-if (Get-Command broot -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&broot --print-shell-function powershell | Out-String)
-}
-
 function Test-KeyInput {
     Write-Host "Press any key to see its details (Ctrl+C to exit):" -ForegroundColor Yellow
     while ($true) {

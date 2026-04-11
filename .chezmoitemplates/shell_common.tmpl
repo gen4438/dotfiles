@@ -281,10 +281,6 @@ if command -v atuin >/dev/null 2>&1; then
     eval "$(atuin init ${SHELL_TYPE} --disable-up-arrow)"
 fi
 
-# broot (interactive tree explorer)
-# The br shell function is managed by broot itself via symlink (broot --install)
-# On Linux/macOS, run "broot" on first launch to set up the br function automatically
-
 # Shared prompt functions for bash and zsh
 # Show active development environment in prompt
 show_dev_env() {
