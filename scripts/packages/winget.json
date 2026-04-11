@@ -5,18 +5,6 @@
     {
       "Packages": [
         {
-          "PackageIdentifier": "Git.Git"
-        },
-        {
-          "PackageIdentifier": "OpenJS.NodeJS.LTS"
-        },
-        {
-          "PackageIdentifier": "Python.Python.3"
-        },
-        {
-          "PackageIdentifier": "Neovim.Neovim"
-        },
-        {
           "PackageIdentifier": "Microsoft.VisualStudioCode"
         },
         {
@@ -36,36 +24,6 @@
         },
         {
           "PackageIdentifier": "marha.VcXsrv"
-        },
-        {
-          "PackageIdentifier": "JanDeDobbeleer.OhMyPosh"
-        },
-        {
-          "PackageIdentifier": "junegunn.fzf"
-        },
-        {
-          "PackageIdentifier": "BurntSushi.ripgrep.MSVC"
-        },
-        {
-          "PackageIdentifier": "sharkdp.fd"
-        },
-        {
-          "PackageIdentifier": "sharkdp.bat"
-        },
-        {
-          "PackageIdentifier": "Gyan.FFmpeg"
-        },
-        {
-          "PackageIdentifier": "GoLang.Go"
-        },
-        {
-          "PackageIdentifier": "GitHub.cli"
-        },
-        {
-          "PackageIdentifier": "MSYS2.MSYS2"
-        },
-        {
-          "PackageIdentifier": "LLVM.LLVM"
         }
       ],
       "SourceDetails": {
