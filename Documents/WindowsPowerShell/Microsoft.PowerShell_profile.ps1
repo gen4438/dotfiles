@@ -95,8 +95,9 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
         $cursor = $null
         [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
 
-        $historyFile = (Get-PSReadLineOption).HistorySavePath
-        $selected = Get-Content $historyFile |
+        # インメモリ履歴を使用（推測補完と同じデータソース）
+        $selected = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistoryItems() |
+            ForEach-Object { $_.CommandLine } |
             Where-Object { $_ -ne '' } |
             ForEach-Object -Begin { $seen = [System.Collections.Generic.HashSet[string]]::new() } -Process {
                 if ($seen.Add($_)) { $_ }
