@@ -91,6 +91,28 @@ pkg install jq yq
 # Others: cargo install sd broot bottom procs atuin just
 ```
 
+## Migrating Data from Legacy Tools
+
+### atuin (Shell History)
+
+Import existing shell history into atuin:
+
+```bash
+atuin import bash        # from ~/.bash_history
+atuin import zsh         # from zsh history
+atuin import fish        # from fish history
+atuin import powershell  # from PowerShell history
+```
+
+### zoxide (Directory Jump)
+
+Import jump data from legacy tools:
+
+```bash
+zoxide import --from=z ~/.z              # from z
+zoxide import --from=autojump /path/to/db  # from autojump
+```
+
 ## Notes on `just` for Cross-Platform Use
 
 `just` is a significant improvement over `Makefile` for cross-platform projects:
