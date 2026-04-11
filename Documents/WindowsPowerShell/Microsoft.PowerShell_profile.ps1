@@ -1,6 +1,26 @@
 # PowerShell Cursor Movement Optimization Profile
 # All settings are non-default values for improved performance
 
+# WSL2 経由の起動時に WindowsPowerShell\Modules が PSModulePath に含まれない問題を修正
+$_wpsMods = Join-Path $HOME 'Documents\WindowsPowerShell\Modules'
+if ((Test-Path $_wpsMods) -and ($env:PSModulePath -notlike "*$_wpsMods*")) {
+    $env:PSModulePath = $_wpsMods + ';' + $env:PSModulePath
+}
+Remove-Variable _wpsMods
+
+# WSL2 経由の起動時に Git\bin が PATH に含まれない問題を修正 (bash.exe 等が必要)
+# system32\bash.exe (WSL bash) より前に git-bash を配置する
+foreach ($_gitBin in @(
+    (Join-Path $HOME 'scoop\apps\git\current\bin'),
+    'C:\Program Files\Git\bin'
+)) {
+    if ((Test-Path $_gitBin) -and ($env:PATH -notlike "*$_gitBin*")) {
+        $env:PATH = $_gitBin + ';' + $env:PATH
+        break
+    }
+}
+Remove-Variable _gitBin -ErrorAction SilentlyContinue
+
 # UTF-8 encoding settings for Japanese environment
 # Fixes mojibake when interacting with external commands (git, ripgrep, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8

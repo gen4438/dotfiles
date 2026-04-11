@@ -1,0 +1,26 @@
+{{ template "shebang-bash.tmpl" . }}
+# byobu/tmux の新規ペイン用シェルディスパッチャー
+# tmux オプション @byobu-shell の値に応じてシェルを切り替える
+#   pwsh        → pwsh.exe (デフォルト)
+#   powershell  → powershell.exe
+#   bash        → bash
+
+SHELL_MODE=$(tmux show-option -gqv @byobu-shell 2>/dev/null)
+
+case "$SHELL_MODE" in
+    bash)
+        exec bash
+        ;;
+    powershell)
+        PWSH="powershell.exe"
+        ;;
+    *)
+        PWSH="pwsh.exe"
+        ;;
+esac
+
+# PowerShell: CWD が WSL ネイティブパスなら Windows ホームに移動
+if [[ "$PWD" != /mnt/* ]]; then
+    cd "/mnt/c/Users/$USER" 2>/dev/null
+fi
+exec "$PWSH" -NoLogo
