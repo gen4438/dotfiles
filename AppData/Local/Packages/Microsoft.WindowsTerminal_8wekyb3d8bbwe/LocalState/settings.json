@@ -22,38 +22,6 @@
             "keys": "shift+enter"
         },
         {
-            "command": { "action": "splitPane", "split": "horizontal" },
-            "keys": "shift+f2"
-        },
-        {
-            "command": { "action": "splitPane", "split": "vertical" },
-            "keys": "ctrl+f2"
-        },
-        {
-            "command": { "action": "moveFocus", "direction": "up" },
-            "keys": "shift+up"
-        },
-        {
-            "command": { "action": "moveFocus", "direction": "down" },
-            "keys": "shift+down"
-        },
-        {
-            "command": { "action": "moveFocus", "direction": "left" },
-            "keys": "shift+left"
-        },
-        {
-            "command": { "action": "moveFocus", "direction": "right" },
-            "keys": "shift+right"
-        },
-        {
-            "command": { "action": "scrollUpPage" },
-            "keys": "alt+pgup"
-        },
-        {
-            "command": { "action": "scrollDownPage" },
-            "keys": "alt+pgdn"
-        },
-        {
             "id": null,
             "keys": "alt+shift+down"
         },
