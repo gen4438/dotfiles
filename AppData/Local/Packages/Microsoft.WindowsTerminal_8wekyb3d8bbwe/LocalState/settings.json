@@ -1,10 +1,10 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions":
+    "actions": 
     [
         {
-            "command":
+            "command": 
             {
                 "action": "sendInput",
                 "input": "\u001b\r"
@@ -15,23 +15,15 @@
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-    "keybindings":
+    "keybindings": 
     [
         {
-            "id": "User.sendInput.8F63D3A9",
-            "keys": "shift+enter"
-        },
-        {
-            "command": { "action": "scrollUpPage" },
-            "keys": "shift+pgup"
-        },
-        {
-            "command": { "action": "scrollDownPage" },
+            "id": "Terminal.ScrollDownPage",
             "keys": "shift+pgdn"
         },
         {
-            "id": null,
-            "keys": "alt+shift+down"
+            "id": "User.sendInput.8F63D3A9",
+            "keys": "shift+enter"
         },
         {
             "id": null,
@@ -39,11 +31,19 @@
         },
         {
             "id": null,
-            "keys": "alt+down"
+            "keys": "alt+shift+down"
+        },
+        {
+            "id": "Terminal.ScrollUpPage",
+            "keys": "shift+pgup"
         },
         {
             "id": null,
             "keys": "alt+shift+plus"
+        },
+        {
+            "id": null,
+            "keys": "alt+down"
         },
         {
             "id": null,
@@ -168,6 +168,14 @@
                 "hidden": false,
                 "name": "PowerShell",
                 "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "commandline": "wsl.exe -d Ubuntu -- byobu",
+                "guid": "{a1b2c3d4-5678-4def-abcd-b10b00005e11}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/pwsh.png",
+                "name": "Byobu + PowerShell",
+                "startingDirectory": "~"
             }
         ]
     },
