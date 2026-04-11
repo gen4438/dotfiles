@@ -20,6 +20,9 @@
           "PackageIdentifier": "voidtools.Everything"
         },
         {
+          "PackageIdentifier": "voidtools.Everything.Cli"
+        },
+        {
           "PackageIdentifier": "Google.Chrome"
         },
         {

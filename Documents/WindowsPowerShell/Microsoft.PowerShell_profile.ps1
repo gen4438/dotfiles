@@ -111,6 +111,22 @@ if (Get-Command atuin -ErrorAction SilentlyContinue) {
     }
 }
 
+# Ctrl+f: Everything + fzf でファイル検索し、選択結果をコマンドラインに挿入
+if ((Get-Command es -ErrorAction SilentlyContinue) -and (Get-Command fzf -ErrorAction SilentlyContinue)) {
+    Set-PSReadLineKeyHandler -Key Ctrl+f -ScriptBlock {
+        $line = $null
+        $cursor = $null
+        [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+
+        $selected = fzf --bind "change:reload:es -regex {q}" --phony --preview "type {}"
+        if ($selected) {
+            # スペースを含むパスはクォート
+            if ($selected -match '\s') { $selected = "`"$selected`"" }
+            [Microsoft.PowerShell.PSConsoleReadLine]::Insert($selected)
+        }
+    }
+}
+
 # ~/.ssh/config, ~/.ssh/config.d/*.conf から ssh ホスト名を取得する関数
 Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   param($wordToComplete, $commandAst, $cursorPosition)
