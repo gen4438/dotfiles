@@ -4,6 +4,17 @@
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Linux distributions
 # This script is refactored to use common libraries and external package lists
+# linux-common.txt hash: {{ include "packages/linux-common.txt" | sha256sum }}
+{{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
+# linux-ubuntu.txt hash: {{ include "packages/linux-ubuntu.txt" | sha256sum }}
+# fonts-japanese-ubuntu.txt hash: {{ include "packages/fonts-japanese-ubuntu.txt" | sha256sum }}
+{{- else if or (eq $distro "almalinux") (eq $distro "rocky") (eq $distro "centos") (eq $distro "rhel") (eq $distro "fedora") }}
+# linux-redhat.txt hash: {{ include "packages/linux-redhat.txt" | sha256sum }}
+# fonts-japanese-redhat.txt hash: {{ include "packages/fonts-japanese-redhat.txt" | sha256sum }}
+{{- else if or (eq $distro "arch") (eq $distro "manjaro") }}
+# linux-arch.txt hash: {{ include "packages/linux-arch.txt" | sha256sum }}
+# fonts-japanese-arch.txt hash: {{ include "packages/fonts-japanese-arch.txt" | sha256sum }}
+{{- end }}
 
 set -e
 

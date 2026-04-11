@@ -2,6 +2,7 @@
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for macOS development environment
 # This script is refactored to use common libraries and external Brewfile
+# Brewfile hash: {{ include "Brewfile" | sha256sum }}
 
 set -e
 
