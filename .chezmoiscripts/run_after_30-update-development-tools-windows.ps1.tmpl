@@ -1,0 +1,179 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Update development tools for Windows
+# This script runs on every chezmoi apply to keep tools up-to-date
+# Only upgrades packages that are managed by chezmoi (listed in package config files)
+
+$ErrorActionPreference = "Continue"
+
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Updating development tools for Windows..."
+
+# =============================================================================
+# Scoop packages (only chezmoi-managed)
+# =============================================================================
+if (Test-Command scoop) {
+    Log-Step "Updating Scoop packages..."
+
+    $packageFile = "{{ .chezmoi.sourceDir }}\scripts\packages\scoop.json"
+    if (Test-Path $packageFile) {
+        $config = Get-Content $packageFile | ConvertFrom-Json
+        $managedApps = $config.apps
+
+        # Update scoop itself
+        Log-Running "Updating Scoop..."
+        scoop update 2>&1 | Out-Null
+        Log-Success "Scoop updated"
+
+        # Get list of outdated packages
+        $outdatedOutput = scoop status 2>&1
+        $updatedCount = 0
+        $failedCount = 0
+
+        foreach ($app in $managedApps) {
+            # Check if this app has an update available
+            if ($outdatedOutput -match "(?m)^\s*$app\s") {
+                Log-Running "Upgrading $app..."
+                try {
+                    scoop update $app 2>&1 | Out-Null
+                    Log-Success "$app upgraded"
+                    $updatedCount++
+                } catch {
+                    Log-Warning "Failed to upgrade ${app}: $_"
+                    $failedCount++
+                }
+            }
+        }
+
+        if ($updatedCount -eq 0 -and $failedCount -eq 0) {
+            Log-Success "All Scoop packages are up to date"
+        } else {
+            if ($updatedCount -gt 0) { Log-Info "Upgraded $updatedCount Scoop package(s)" }
+            if ($failedCount -gt 0) { Log-Warning "Failed to upgrade $failedCount Scoop package(s)" }
+        }
+    } else {
+        Log-Warning "Scoop package config not found: $packageFile"
+    }
+} else {
+    Log-Info "Scoop not installed, skipping"
+}
+
+# =============================================================================
+# Winget packages (only chezmoi-managed)
+# =============================================================================
+if (Test-Command winget) {
+    Log-Step "Updating Winget packages..."
+
+    $wingetFile = "{{ .chezmoi.sourceDir }}\scripts\packages\winget.json"
+    if (Test-Path $wingetFile) {
+        $wingetConfig = Get-Content $wingetFile | ConvertFrom-Json
+        $managedPackages = $wingetConfig.Sources[0].Packages | ForEach-Object { $_.PackageIdentifier }
+
+        # Get list of available upgrades
+        $upgradeOutput = winget upgrade --accept-source-agreements 2>&1 | Out-String
+        $updatedCount = 0
+        $failedCount = 0
+
+        foreach ($pkgId in $managedPackages) {
+            if ($upgradeOutput -match $pkgId) {
+                Log-Running "Upgrading $pkgId..."
+                try {
+                    winget upgrade --id $pkgId --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null
+                    Log-Success "$pkgId upgraded"
+                    $updatedCount++
+                } catch {
+                    Log-Warning "Failed to upgrade ${pkgId}: $_"
+                    $failedCount++
+                }
+            }
+        }
+
+        if ($updatedCount -eq 0 -and $failedCount -eq 0) {
+            Log-Success "All Winget packages are up to date"
+        } else {
+            if ($updatedCount -gt 0) { Log-Info "Upgraded $updatedCount Winget package(s)" }
+            if ($failedCount -gt 0) { Log-Warning "Failed to upgrade $failedCount Winget package(s)" }
+        }
+    } else {
+        Log-Warning "Winget package config not found: $wingetFile"
+    }
+} else {
+    Log-Info "Winget not installed, skipping"
+}
+
+# =============================================================================
+# uv tools
+# =============================================================================
+if (Test-Command uv) {
+    Log-Step "Updating uv tools..."
+
+    # Upgrade uv itself
+    Log-Running "Upgrading uv..."
+    try {
+        uv self update 2>&1 | Out-Null
+        Log-Success "uv updated"
+    } catch {
+        Log-Info "uv self-update not available"
+    }
+
+    # Upgrade installed uv tools
+    $uvTools = @("ruff", "ipython")
+    foreach ($tool in $uvTools) {
+        try {
+            $uvToolList = (uv tool list 2>&1) -join "`n"
+            if ($uvToolList -match "(?m)^$tool ") {
+                Log-Running "Upgrading $tool..."
+                uv tool upgrade $tool 2>&1 | Out-Null
+                Log-Success "$tool upgraded"
+            }
+        } catch {
+            Log-Warning "Failed to upgrade ${tool}: $_"
+        }
+    }
+} else {
+    Log-Info "uv not installed, skipping"
+}
+
+# =============================================================================
+# npm global packages
+# =============================================================================
+if (Test-Command npm) {
+    Log-Step "Updating npm global packages..."
+
+    $npmPackages = @("neovim", "@devcontainers/cli", "tree-sitter-cli")
+    foreach ($pkg in $npmPackages) {
+        try {
+            if (npm list -g $pkg 2>&1 | Select-String $pkg) {
+                Log-Running "Upgrading $pkg..."
+                npm update -g $pkg 2>&1 | Out-Null
+                Log-Success "$pkg upgraded"
+            }
+        } catch {
+            Log-Warning "Failed to upgrade ${pkg}: $_"
+        }
+    }
+} else {
+    Log-Info "npm not installed, skipping"
+}
+
+# =============================================================================
+# PowerShell modules
+# =============================================================================
+Log-Step "Updating PowerShell modules..."
+$modules = @("PSReadLine", "posh-git", "Terminal-Icons")
+
+foreach ($module in $modules) {
+    try {
+        if (Get-Module -ListAvailable -Name $module) {
+            Log-Running "Updating $module..."
+            Update-Module -Name $module -Scope CurrentUser -Force -ErrorAction SilentlyContinue 2>&1 | Out-Null
+            Log-Success "$module updated"
+        }
+    } catch {
+        Log-Warning "Failed to update ${module}: $_"
+    }
+}
+
+Log-Success "Development tools update completed"
+{{- end }}
