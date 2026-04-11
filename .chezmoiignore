@@ -93,6 +93,13 @@ Documents/WindowsPowerShell/
 # Exclude shell scripts on Windows (cannot execute bash scripts)
 .chezmoiscripts/*.sh
 .chezmoiscripts/*.sh.tmpl
+# Exclude byobu on Windows (use psmux instead)
+.config/byobu/
+{{- end }}
+
+{{- if ne .chezmoi.os "windows" }}
+# Exclude psmux config on non-Windows (psmux is Windows-only)
+.psmux.conf
 {{- end }}
 
 

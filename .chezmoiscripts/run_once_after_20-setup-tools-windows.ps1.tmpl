@@ -169,5 +169,38 @@ if (Test-Command copilot) {
     }
 }
 
+# =============================================================================
+# psmux (Windows-native terminal multiplexer)
+# =============================================================================
+Log-Step "Setting up psmux..."
+
+if (Test-Command psmux) {
+    Log-Success "psmux is already installed"
+} else {
+    if (Test-Command scoop) {
+        Log-Running "Adding psmux scoop bucket..."
+        try {
+            $existingBuckets = scoop bucket list
+            if ("psmux" -notin $existingBuckets.Name) {
+                scoop bucket add psmux https://github.com/psmux/scoop-psmux | Out-Null
+                Log-Success "psmux bucket added"
+            }
+        } catch {
+            Log-Warning "Failed to add psmux bucket: $_"
+        }
+
+        Log-Running "Installing psmux..."
+        try {
+            scoop install psmux | Out-Null
+            Log-Success "psmux installed successfully"
+        } catch {
+            Log-Warning "Failed to install psmux: $_"
+        }
+    } else {
+        Log-Warning "scoop not found, skipping psmux installation"
+        Log-Info "Install manually: winget install psmux"
+    }
+}
+
 Log-Success "Development tools setup completed"
 {{- end }}
