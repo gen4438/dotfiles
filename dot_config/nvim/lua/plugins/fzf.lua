@@ -98,12 +98,19 @@ return {
           end
 
           require("fzf-lua").complete_path({
+            previewer = require("fzf-lua.defaults")._default_previewer_fn(),
+            file_icons = true,
             fzf_opts = {
               ["--no-multi"] = false,
               ["--multi"] = "",
             },
             winopts = {
-              preview = { title = "複数選択可能 (TAB: 選択切替, Ctrl-A: 全選択)" }
+              preview = {
+                hidden = false,
+                layout = "horizontal",
+                horizontal = "right:50%",
+                title = "複数選択可能 (TAB: 選択切替, Ctrl-A: 全選択)",
+              }
             },
             actions = {
               ["default"] = function(selected, opts)
