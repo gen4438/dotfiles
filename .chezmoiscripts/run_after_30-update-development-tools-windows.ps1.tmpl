@@ -167,7 +167,7 @@ foreach ($module in $modules) {
     try {
         if (Get-Module -ListAvailable -Name $module) {
             Log-Running "Updating $module..."
-            Update-Module -Name $module -Scope CurrentUser -Force -ErrorAction SilentlyContinue 2>&1 | Out-Null
+            Update-Module -Name $module -Force -ErrorAction SilentlyContinue 2>&1 | Out-Null
             Log-Success "$module updated"
         }
     } catch {
