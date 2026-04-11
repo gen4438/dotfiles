@@ -1,12 +1,58 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": [],
+    "actions":
+    [
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u001b\r"
+            },
+            "id": "User.sendInput.8F63D3A9"
+        }
+    ],
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-    "keybindings": 
+    "keybindings":
     [
+        {
+            "id": "User.sendInput.8F63D3A9",
+            "keys": "shift+enter"
+        },
+        {
+            "command": { "action": "splitPane", "split": "horizontal" },
+            "keys": "shift+f2"
+        },
+        {
+            "command": { "action": "splitPane", "split": "vertical" },
+            "keys": "ctrl+f2"
+        },
+        {
+            "command": { "action": "moveFocus", "direction": "up" },
+            "keys": "shift+up"
+        },
+        {
+            "command": { "action": "moveFocus", "direction": "down" },
+            "keys": "shift+down"
+        },
+        {
+            "command": { "action": "moveFocus", "direction": "left" },
+            "keys": "shift+left"
+        },
+        {
+            "command": { "action": "moveFocus", "direction": "right" },
+            "keys": "shift+right"
+        },
+        {
+            "command": { "action": "scrollUpPage" },
+            "keys": "alt+pgup"
+        },
+        {
+            "command": { "action": "scrollDownPage" },
+            "keys": "alt+pgdn"
+        },
         {
             "id": null,
             "keys": "alt+shift+down"
@@ -140,6 +186,12 @@
                 "icon": "%USERPROFILE%\\scoop\\apps\\msys2\\current\\msys2.ico",
                 "name": "msys2",
                 "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
             }
         ]
     },

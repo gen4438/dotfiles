@@ -45,9 +45,11 @@ if (Test-Command uv) {
     Log-Step "Installing uv tools..."
     $uvTools = @("ruff", "ipython")
 
+    $ErrorActionPreference = "Continue"
+    $uvToolList = (uv tool list 2>&1) -join "`n"
+    $ErrorActionPreference = "Stop"
     foreach ($tool in $uvTools) {
-        $uvToolList = uv tool list 2>$null
-        if ($uvToolList -match "^$tool ") {
+        if ($uvToolList -match "(?m)^$tool ") {
             Log-Success "$tool is already installed"
         } else {
             Log-Running "Installing $tool..."
