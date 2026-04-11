@@ -60,6 +60,10 @@ brew "zimfw"
 # macOS specific tools
 brew "mas"  # Mac App Store CLI
 
+# AI coding tools
+cask "claude-code"  # Anthropic Claude Code CLI
+brew "copilot-cli"  # GitHub Copilot CLI
+
 # GUI applications (Cask)
 cask "rectangle"  # Window management
 cask "karabiner-elements"  # Keyboard customization

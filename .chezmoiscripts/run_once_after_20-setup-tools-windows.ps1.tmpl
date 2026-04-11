@@ -135,16 +135,37 @@ Log-Step "Setting up Claude Code..."
 if (Test-Command claude) {
     Log-Success "Claude Code is already installed"
 } else {
-    if (Test-Command npm) {
-        Log-Running "Installing Claude Code..."
+    if (Test-Command winget) {
+        Log-Running "Installing Claude Code via winget..."
         try {
-            npm install -g @anthropic-ai/claude-code
+            winget install --id Anthropic.ClaudeCode --accept-source-agreements --accept-package-agreements
             Log-Success "Claude Code installed"
         } catch {
-            Log-Warning "Failed to install Claude Code: $_"
+            Log-Warning "Failed to install Claude Code via winget: $_"
         }
     } else {
-        Log-Warning "npm not found, skipping Claude Code installation"
+        Log-Warning "winget not found, skipping Claude Code installation"
+    }
+}
+
+# =============================================================================
+# GitHub Copilot CLI
+# =============================================================================
+Log-Step "Setting up GitHub Copilot CLI..."
+
+if (Test-Command copilot) {
+    Log-Success "GitHub Copilot CLI is already installed"
+} else {
+    if (Test-Command winget) {
+        Log-Running "Installing GitHub Copilot CLI via winget..."
+        try {
+            winget install --id GitHub.Copilot --accept-source-agreements --accept-package-agreements
+            Log-Success "GitHub Copilot CLI installed"
+        } catch {
+            Log-Warning "Failed to install GitHub Copilot CLI via winget: $_"
+        }
+    } else {
+        Log-Warning "winget not found, skipping GitHub Copilot CLI installation"
     }
 }
 
