@@ -4,6 +4,9 @@ GITHUB_TOKEN=$(gh auth token -h github.com)
 # rootless-docker
 # DOCKER_HOST=unix:///run/user/${UID}/docker.sock
 
+# for wsl2 byobu default shell (pwsh / bash / powershell)
+BYOBU_SHELL=pwsh
+
 # for wsl2
 # export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0 #GWSL
 # export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}') #GWSL
