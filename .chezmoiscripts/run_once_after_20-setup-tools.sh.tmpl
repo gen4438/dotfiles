@@ -299,7 +299,7 @@ if check_command copilot; then
     log_success "GitHub Copilot CLI is already installed"
 else
     {{- if eq .chezmoi.os "darwin" }}
-    # macOS: installed via Brewfile (brew install copilot-cli)
+    # macOS: installed via Brewfile (cask copilot-cli)
     log_warning "GitHub Copilot CLI not found (should be installed via Brewfile)"
     {{- else }}
     log_running "Installing GitHub Copilot CLI..."

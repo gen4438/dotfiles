@@ -68,8 +68,8 @@ brew "zimfw"
 brew "mas"  # Mac App Store CLI
 
 # AI coding tools
-cask "claude-code"  # Anthropic Claude Code CLI
-brew "copilot-cli"  # GitHub Copilot CLI
+# Claude Code is installed via official script (curl -fsSL https://claude.ai/install.sh | bash)
+cask "copilot-cli"  # GitHub Copilot CLI
 
 # GUI applications (Cask)
 cask "rectangle"  # Window management
