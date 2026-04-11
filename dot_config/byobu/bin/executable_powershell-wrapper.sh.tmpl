@@ -23,4 +23,9 @@ esac
 if [[ "$PWD" != /mnt/* ]]; then
     cd "/mnt/c/Users/$USER" 2>/dev/null
 fi
+
+# PowerShell (Windows) は \r\n を出力するが、PTY のデフォルト設定 onlcr が
+# \n → \r\n に変換するため、tmux に \r\r\n が届き copy-mode の行選択が壊れる。
+# onlcr を無効化して二重変換を防ぐ。
+stty -onlcr
 exec "$PWSH" -NoLogo
