@@ -87,6 +87,27 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 # Ctrl+d to exit PowerShell
 Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteCharOrExit
 
+# Ctrl+r: fzf でコマンド履歴を検索
+if (Get-Command fzf -ErrorAction SilentlyContinue) {
+    Set-PSReadLineKeyHandler -Key Ctrl+r -ScriptBlock {
+        $line = $null
+        $cursor = $null
+        [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+
+        $historyFile = (Get-PSReadLineOption).HistorySavePath
+        $selected = Get-Content $historyFile |
+            Where-Object { $_ -ne '' } |
+            ForEach-Object -Begin { $seen = [System.Collections.Generic.HashSet[string]]::new() } -Process {
+                if ($seen.Add($_)) { $_ }
+            } |
+            fzf --tac --no-sort --height 40% --reverse --query $line
+        if ($selected) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+            [Microsoft.PowerShell.PSConsoleReadLine]::Insert($selected)
+        }
+    }
+}
+
 # ~/.ssh/config, ~/.ssh/config.d/*.conf から ssh ホスト名を取得する関数
 Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
   param($wordToComplete, $commandAst, $cursorPosition)
