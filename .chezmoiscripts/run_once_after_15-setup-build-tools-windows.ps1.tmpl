@@ -169,29 +169,28 @@ if (Test-Command rustup) {
 }
 
 # =============================================================================
-# CC Environment Variable
+# CC Environment Variable — intentionally NOT set
 # =============================================================================
-Log-Step "Configuring C compiler environment variable..."
+# Do not set CC globally. With MSVC installed, cc-rs (cargo) and tree-sitter
+# auto-detect cl.exe. Setting CC=clang breaks cargo builds for msvc targets
+# because cc-rs passes MSVC-style flags (/D...) that clang doesn't understand.
+Log-Step "Verifying C compiler availability..."
 
-# Prefer clang (stable path via scoop), then gcc from MSYS2 MinGW, then cl.exe
-$ccSet = $false
-
-if (Test-Command clang) {
-    $clangPath = (Get-Command clang).Source
-    [System.Environment]::SetEnvironmentVariable('CC', $clangPath, [System.EnvironmentVariableTarget]::User)
-    $env:CC = $clangPath
-    Log-Success "CC set to clang: $clangPath"
-    $ccSet = $true
-} elseif ($msys2Root -and (Test-Path "$msys2Root\mingw64\bin\gcc.exe")) {
-    [System.Environment]::SetEnvironmentVariable('CC', "$msys2Root\mingw64\bin\gcc.exe", [System.EnvironmentVariableTarget]::User)
-    $env:CC = "$msys2Root\mingw64\bin\gcc.exe"
-    Log-Success "CC set to MSYS2 MinGW gcc"
-    $ccSet = $true
+# Remove stale CC if previously set by this script
+$existingCC = [System.Environment]::GetEnvironmentVariable('CC', [System.EnvironmentVariableTarget]::User)
+if ($existingCC) {
+    Log-Running "Removing stale CC environment variable ($existingCC)"
+    [System.Environment]::SetEnvironmentVariable('CC', $null, [System.EnvironmentVariableTarget]::User)
+    Remove-Item Env:CC -ErrorAction SilentlyContinue
+    Log-Success "CC environment variable removed (MSVC cl.exe will be auto-detected)"
 }
 
-if (-not $ccSet) {
-    Log-Warning "No C compiler found for CC environment variable"
-    Log-Info "Install MSYS2 packages or LLVM to set up a C compiler"
+if (Test-Command cl) {
+    Log-Success "MSVC cl.exe available (will be auto-detected by build tools)"
+} elseif (Test-Command clang) {
+    Log-Success "clang available (note: do not set as CC with msvc Rust target)"
+} else {
+    Log-Warning "No C compiler found. Install Visual Studio Build Tools."
 }
 
 Log-Success "Build tools setup completed"

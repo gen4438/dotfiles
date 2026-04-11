@@ -62,7 +62,9 @@ if (Test-Command npm) {
     Log-Info "Install Node.js with: scoop install nodejs-lts"
 }
 
-# Setup tree-sitter-cli (prefer cargo for native binary, fallback to npm)
+# Setup tree-sitter-cli via cargo (installs native .exe)
+# Do NOT use npm: it installs shell-script wrappers that vim.system() (libuv)
+# cannot execute on Windows, causing ENOENT errors in nvim-treesitter.
 Log-Step "Setting up tree-sitter-cli..."
 if (Test-Command tree-sitter) {
     Log-Success "tree-sitter-cli already installed"
@@ -76,23 +78,13 @@ if (Test-Command tree-sitter) {
             $tsInstalled = $true
             Log-Success "tree-sitter-cli installed via cargo"
         } catch {
-            Log-Warning "Failed to install tree-sitter-cli via cargo"
-        }
-    }
-
-    if (-not $tsInstalled -and (Test-Command npm)) {
-        Log-Running "Installing tree-sitter-cli via npm..."
-        try {
-            npm install -g tree-sitter-cli
-            $tsInstalled = $true
-            Log-Success "tree-sitter-cli installed via npm"
-        } catch {
-            Log-Warning "Failed to install tree-sitter-cli via npm"
+            Log-Warning "Failed to install tree-sitter-cli via cargo: $_"
         }
     }
 
     if (-not $tsInstalled) {
-        Log-Warning "Could not install tree-sitter-cli"
+        Log-Warning "Could not install tree-sitter-cli (requires cargo)"
+        Log-Info "Install with: scoop install rustup; rustup install stable"
     }
 }
 
