@@ -12,7 +12,7 @@
   ],
   "copyFormatting": "none",
   "copyOnSelect": false,
-  "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+  "defaultProfile": "{d3b2a1c4-9876-4abc-8def-500000000001}",
   "disabledProfileSources": [
     "Windows.Terminal.Azure",
     "Windows.Terminal.PowershellCore",
@@ -105,9 +105,16 @@
         "name": "Windows PowerShell"
       },
       {
+        "commandline": "psmux",
+        "guid": "{d3b2a1c4-9876-4abc-8def-500000000001}",
+        "hidden": false,
+        "icon": "ms-appx:///ProfileIcons/pwsh.png",
+        "name": "psmux"
+      },
+      {
         "commandline": "wsl.exe -d Ubuntu -- byobu",
         "guid": "{a1b2c3d4-5678-4def-abcd-b10b00005e11}",
-        "hidden": false,
+        "hidden": true,
         "icon": "ms-appx:///ProfileIcons/pwsh.png",
         "name": "Byobu + PowerShell",
         "startingDirectory": "~"
