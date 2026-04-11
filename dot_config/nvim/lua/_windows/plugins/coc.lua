@@ -1,6 +1,24 @@
 local coc_setup = function()
   -- https://raw.githubusercontent.com/neoclide/coc.nvim/master/doc/coc-example-config.lua
 
+  -- bash-language-server: use MSYS2 bash on Windows
+  local msys2_bash = vim.fn.expand('~/scoop/apps/msys2/current/usr/bin/bash.exe')
+  if vim.fn.executable(msys2_bash) == 1 then
+    vim.fn['coc#config']('languageserver.bash', {
+      command = 'bash-language-server',
+      args = { 'start' },
+      filetypes = { 'sh', 'bash' },
+      settings = {
+        bashIde = {
+          shellcheckPath = '',
+          explainshellEndpoint = '',
+          globPattern = '*@(.sh|.inc|.bash|.command)',
+          bashPath = msys2_bash,
+        },
+      },
+    })
+  end
+
   vim.g.coc_global_extensions = {
     'coc-marketplace',
     'coc-ultisnips',
