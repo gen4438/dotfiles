@@ -8,6 +8,13 @@ ripgrep
 fd
 bat
 git-delta
+yq
+sd
+bottom
+procs
+just
+broot
+atuin
 
 # Python development
 python-pip

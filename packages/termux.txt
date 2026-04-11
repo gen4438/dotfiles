@@ -42,4 +42,5 @@ gh
 
 # Other utilities
 jq
+yq
 openssh

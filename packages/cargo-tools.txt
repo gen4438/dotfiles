@@ -1,0 +1,9 @@
+# Rust CLI tools installed via cargo-binstall (prebuilt binaries)
+# Used on Linux distros where these are not in package repos (Ubuntu/Debian, RHEL/Fedora)
+# On Arch Linux, these are available via pacman and listed in linux-arch.txt instead.
+sd
+broot
+bottom
+procs
+atuin
+just
