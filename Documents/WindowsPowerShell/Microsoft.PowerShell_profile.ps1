@@ -126,6 +126,17 @@ function copilot-yolo { copilot --yolo @args }
 # zoxide (smarter cd command)
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
+
+    # z <tab> で fzf によるインタラクティブ選択
+    if (Get-Command fzf -ErrorAction SilentlyContinue) {
+        Register-ArgumentCompleter -CommandName z -Native -ScriptBlock {
+            param($wordToComplete, $commandAst, $cursorPosition)
+            $result = zoxide query -l 2>$null | fzf --height 40% --reverse --query $wordToComplete
+            if ($result) {
+                [System.Management.Automation.CompletionResult]::new($result, $result, 'ParameterValue', $result)
+            }
+        }
+    }
 }
 
 function Test-KeyInput {
