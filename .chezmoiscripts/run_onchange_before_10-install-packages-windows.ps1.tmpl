@@ -1,6 +1,7 @@
 {{- if eq .chezmoi.os "windows" -}}
 # Install essential packages for Windows development environment
 # This script is refactored to use common libraries
+# scoop.json hash: {{ include "scripts/packages/scoop.json" | sha256sum }}
 
 $ErrorActionPreference = "Stop"
 
