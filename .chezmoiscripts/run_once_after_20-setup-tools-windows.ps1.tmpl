@@ -1,0 +1,150 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Setup development tools for Windows (equivalent to setup-tools.sh for Linux/macOS)
+# Installs uv, tree-sitter-cli, devcontainer CLI, Claude Code, and other tools
+# script hash: {{ include ".chezmoiscripts/run_once_after_20-setup-tools-windows.ps1.tmpl" | sha256sum }}
+
+$ErrorActionPreference = "Stop"
+
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Setting up development tools for Windows..."
+
+# =============================================================================
+# uv (Python package manager)
+# =============================================================================
+Log-Step "Setting up uv..."
+
+if (Test-Command uv) {
+    Log-Success "uv is already installed"
+} else {
+    Log-Running "Installing uv..."
+    try {
+        Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
+        # Refresh PATH for current session
+        $uvBin = "$env:USERPROFILE\.local\bin"
+        if (Test-Path "$uvBin\uv.exe") {
+            $env:PATH = "$uvBin;$env:PATH"
+        }
+        $cargoUvBin = "$env:USERPROFILE\.cargo\bin"
+        if (Test-Path "$cargoUvBin\uv.exe") {
+            $env:PATH = "$cargoUvBin;$env:PATH"
+        }
+        if (Test-Command uv) {
+            Log-Success "uv installed successfully"
+        } else {
+            Log-Warning "uv installed but not found in PATH"
+        }
+    } catch {
+        Log-Warning "Failed to install uv: $_"
+    }
+}
+
+# Install uv tools
+if (Test-Command uv) {
+    Log-Step "Installing uv tools..."
+    $uvTools = @("ruff", "ipython")
+
+    foreach ($tool in $uvTools) {
+        $uvToolList = uv tool list 2>$null
+        if ($uvToolList -match "^$tool ") {
+            Log-Success "$tool is already installed"
+        } else {
+            Log-Running "Installing $tool..."
+            try {
+                uv tool install $tool
+                Log-Success "$tool installed successfully"
+            } catch {
+                Log-Warning "Failed to install ${tool}: $_"
+            }
+        }
+    }
+}
+
+# =============================================================================
+# tree-sitter-cli
+# =============================================================================
+Log-Step "Setting up tree-sitter-cli..."
+
+if (Test-Command tree-sitter) {
+    Log-Success "tree-sitter-cli is already installed"
+} else {
+    $installed = $false
+
+    # Try cargo first (preferred, produces native binary)
+    if (Test-Command cargo) {
+        Log-Running "Installing tree-sitter-cli via cargo..."
+        try {
+            cargo install tree-sitter-cli
+            if (Test-Command tree-sitter) {
+                Log-Success "tree-sitter-cli installed via cargo"
+                $installed = $true
+            }
+        } catch {
+            Log-Warning "Failed to install tree-sitter-cli via cargo"
+        }
+    }
+
+    # Fallback to npm
+    if (-not $installed -and (Test-Command npm)) {
+        Log-Running "Installing tree-sitter-cli via npm..."
+        try {
+            npm install -g tree-sitter-cli
+            if (Test-Command tree-sitter) {
+                Log-Success "tree-sitter-cli installed via npm"
+                $installed = $true
+            }
+        } catch {
+            Log-Warning "Failed to install tree-sitter-cli via npm"
+        }
+    }
+
+    if (-not $installed) {
+        Log-Warning "Could not install tree-sitter-cli (requires cargo or npm)"
+    }
+}
+
+# =============================================================================
+# devcontainer CLI
+# =============================================================================
+Log-Step "Setting up devcontainer CLI..."
+
+if (Test-Command devcontainer) {
+    Log-Success "devcontainer CLI is already installed"
+} else {
+    if (Test-Command npm) {
+        Log-Running "Installing devcontainer CLI..."
+        try {
+            npm install -g @devcontainers/cli
+            Log-Success "devcontainer CLI installed"
+        } catch {
+            Log-Warning "Failed to install devcontainer CLI: $_"
+        }
+    } else {
+        Log-Warning "npm not found, skipping devcontainer CLI installation"
+    }
+}
+
+# =============================================================================
+# Claude Code
+# =============================================================================
+Log-Step "Setting up Claude Code..."
+
+if (Test-Command claude) {
+    Log-Success "Claude Code is already installed"
+} else {
+    if (Test-Command npm) {
+        Log-Running "Installing Claude Code..."
+        try {
+            npm install -g @anthropic-ai/claude-code
+            Log-Success "Claude Code installed"
+        } catch {
+            Log-Warning "Failed to install Claude Code: $_"
+        }
+    } else {
+        Log-Warning "npm not found, skipping Claude Code installation"
+    }
+}
+
+Log-Success "Development tools setup completed"
+{{- end }}

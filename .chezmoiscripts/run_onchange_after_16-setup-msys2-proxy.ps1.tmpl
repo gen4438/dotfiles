@@ -1,0 +1,61 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Configure proxy settings for MSYS2 environment
+# proxy_url: {{ .proxy_url }}
+# no_proxy: {{ .no_proxy }}
+
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Step "Configuring MSYS2 proxy settings..."
+
+# Find MSYS2 installation
+$msys2Root = $null
+$possiblePaths = @(
+    "$env:USERPROFILE\scoop\apps\msys2\current",
+    "C:\msys64",
+    "C:\msys32"
+)
+
+foreach ($p in $possiblePaths) {
+    if (Test-Path "$p\etc\profile.d") {
+        $msys2Root = $p
+        break
+    }
+}
+
+if (-not $msys2Root) {
+    Log-Warning "MSYS2 not found, skipping proxy configuration"
+    exit 0
+}
+
+$proxyFile = "$msys2Root\etc\profile.d\proxy.sh"
+{{ if .proxy_url }}
+$proxyUrl = {{ .proxy_url | quote }}
+{{ if .no_proxy -}}
+$noProxy = {{ .no_proxy | quote }}
+{{ else -}}
+$noProxy = "localhost,127.0.0.1,::1"
+{{ end -}}
+
+$proxyScript = @"
+# Proxy settings (managed by chezmoi)
+export http_proxy="$proxyUrl"
+export https_proxy="$proxyUrl"
+export HTTP_PROXY="$proxyUrl"
+export HTTPS_PROXY="$proxyUrl"
+export no_proxy="$noProxy"
+export NO_PROXY="$noProxy"
+"@
+
+Log-Running "Writing proxy configuration to $proxyFile"
+Set-Content -Path $proxyFile -Value $proxyScript -Encoding UTF8 -NoNewline
+Log-Success "MSYS2 proxy configured: $proxyUrl"
+{{ else }}
+# No proxy configured - remove proxy script if it exists
+if (Test-Path $proxyFile) {
+    Remove-Item -Path $proxyFile -Force
+    Log-Success "MSYS2 proxy configuration removed (no proxy set)"
+} else {
+    Log-Success "No proxy configured (skipped)"
+}
+{{ end -}}
+{{- end }}

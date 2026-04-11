@@ -20,7 +20,10 @@
     "go",
     "gh",
     "msys2",
-    "llvm"
+    "llvm",
+    "cmake",
+    "ninja",
+    "rustup"
   ],
   "buckets": [
     "extras",

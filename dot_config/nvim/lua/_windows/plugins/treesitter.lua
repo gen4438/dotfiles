@@ -13,9 +13,9 @@ return {
         install_dir = vim.fn.stdpath('data') .. '/site',
       }
 
-      -- Windows では最小限のパーサーのみインストール
+      -- パーサーの自動インストール (MSYS2 gcc / clang でコンパイル)
       require('nvim-treesitter').install {
-        'css', 'go', 'html', 'javascript', 'json', 'lua',
+        'bash', 'css', 'go', 'html', 'javascript', 'json', 'lua',
         'markdown', 'markdown_inline', 'powershell', 'python', 'vim', 'vimdoc', 'yaml',
       }
 

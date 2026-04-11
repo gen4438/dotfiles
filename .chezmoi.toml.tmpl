@@ -3,6 +3,8 @@
 {{- $ssh_identity_file := promptStringOnce . "ssh_identity_file" "SSH identity file path (leave empty for default)" -}}
 {{- $age_identity := promptStringOnce . "age.identity" "Age identity file path" "~/.config/chezmoi/key.txt" -}}
 {{- $age_recipient := promptStringOnce . "age.recipient" "Age recipient (public key)" "age1lnt3hvd436d02uaen8nelcn6aywephrx7lx6ctxjyeyqwv82x59s8kk7dx" -}}
+{{- $proxy_url := promptStringOnce . "proxy_url" "Proxy URL (leave empty for no proxy)" "" -}}
+{{- $no_proxy := promptStringOnce . "no_proxy" "No proxy list (comma-separated, leave empty for default)" "" -}}
 
 {{- if eq .chezmoi.os "android" }}
 # Android/Termux specific configuration
@@ -21,3 +23,5 @@ encryption = "age"
 
 [data]
     ssh_identity_file = {{ $ssh_identity_file | quote }}
+    proxy_url = {{ $proxy_url | quote }}
+    no_proxy = {{ $no_proxy | quote }}

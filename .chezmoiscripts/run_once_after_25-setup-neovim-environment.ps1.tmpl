@@ -47,12 +47,12 @@ if (Test-Command npm) {
     # Check if neovim package is already installed
     $npmCheck = npm list -g neovim 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Log-Running "Installing Node.js packages for Neovim..."
+        Log-Running "Installing Node.js neovim package..."
         try {
-            npm install -g neovim tree-sitter-cli
-            Log-Success "Neovim Node.js packages installed"
+            npm install -g neovim
+            Log-Success "Neovim Node.js package installed"
         } catch {
-            Log-Error "Failed to install Node.js packages: $_"
+            Log-Error "Failed to install Node.js neovim package: $_"
         }
     } else {
         Log-Success "Neovim Node.js package already installed"
@@ -60,6 +60,55 @@ if (Test-Command npm) {
 } else {
     Log-Warning "npm not found in PATH"
     Log-Info "Install Node.js with: scoop install nodejs-lts"
+}
+
+# Setup tree-sitter-cli (prefer cargo for native binary, fallback to npm)
+Log-Step "Setting up tree-sitter-cli..."
+if (Test-Command tree-sitter) {
+    Log-Success "tree-sitter-cli already installed"
+} else {
+    $tsInstalled = $false
+
+    if (Test-Command cargo) {
+        Log-Running "Installing tree-sitter-cli via cargo..."
+        try {
+            cargo install tree-sitter-cli
+            $tsInstalled = $true
+            Log-Success "tree-sitter-cli installed via cargo"
+        } catch {
+            Log-Warning "Failed to install tree-sitter-cli via cargo"
+        }
+    }
+
+    if (-not $tsInstalled -and (Test-Command npm)) {
+        Log-Running "Installing tree-sitter-cli via npm..."
+        try {
+            npm install -g tree-sitter-cli
+            $tsInstalled = $true
+            Log-Success "tree-sitter-cli installed via npm"
+        } catch {
+            Log-Warning "Failed to install tree-sitter-cli via npm"
+        }
+    }
+
+    if (-not $tsInstalled) {
+        Log-Warning "Could not install tree-sitter-cli"
+    }
+}
+
+# Verify C compiler availability for tree-sitter parser compilation
+Log-Step "Verifying C compiler for tree-sitter..."
+if (Test-Command gcc) {
+    $gccVersion = gcc --version 2>&1 | Select-Object -First 1
+    Log-Success "gcc available: $gccVersion"
+} elseif (Test-Command clang) {
+    $clangVersion = clang --version 2>&1 | Select-Object -First 1
+    Log-Success "clang available: $clangVersion"
+} elseif (Test-Command cl) {
+    Log-Success "MSVC cl.exe available"
+} else {
+    Log-Warning "No C compiler found. tree-sitter parsers may fail to compile."
+    Log-Info "Run the build tools setup script or install MSYS2 toolchain"
 }
 
 # Install Neovim providers health check

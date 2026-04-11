@@ -1,0 +1,199 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Setup MSVC Build Tools, MSYS2 toolchain, and Rust for Windows
+# Enables tree-sitter parser compilation and general C/C++ development
+# script hash: {{ include ".chezmoiscripts/run_once_after_15-setup-build-tools-windows.ps1.tmpl" | sha256sum }}
+
+$ErrorActionPreference = "Stop"
+
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+Log-Info "Setting up build tools for Windows..."
+
+# =============================================================================
+# MSVC Build Tools
+# =============================================================================
+Log-Step "Setting up Visual Studio Build Tools..."
+
+$vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$hasVS = $false
+
+if (Test-Path $vsWhere) {
+    $vsPath = & $vsWhere -latest -property installationPath 2>$null
+    if ($vsPath) {
+        $hasVS = $true
+        Log-Success "Visual Studio Build Tools already installed at: $vsPath"
+    }
+}
+
+if (-not $hasVS) {
+    if (Test-Command winget) {
+        Log-Running "Installing Visual Studio Build Tools 2022..."
+        Log-Info "This may take a while (large download)..."
+        try {
+            winget install Microsoft.VisualStudio.2022.BuildTools `
+                --override "--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" `
+                --accept-package-agreements --accept-source-agreements
+            Log-Success "Visual Studio Build Tools installed"
+        } catch {
+            Log-Warning "Failed to install VS Build Tools via winget: $_"
+            Log-Info "You can install manually from https://visualstudio.microsoft.com/visual-cpp-build-tools/"
+        }
+    } else {
+        Log-Warning "winget not found, cannot auto-install VS Build Tools"
+        Log-Info "Install manually from https://visualstudio.microsoft.com/visual-cpp-build-tools/"
+    }
+}
+
+# =============================================================================
+# MSYS2 Setup
+# =============================================================================
+Log-Step "Setting up MSYS2 development packages..."
+
+# Find MSYS2 installation
+$msys2Root = $null
+$possiblePaths = @(
+    "$env:USERPROFILE\scoop\apps\msys2\current",
+    "C:\msys64",
+    "C:\msys32"
+)
+
+foreach ($p in $possiblePaths) {
+    if (Test-Path "$p\usr\bin\bash.exe") {
+        $msys2Root = $p
+        break
+    }
+}
+
+if ($msys2Root) {
+    Log-Success "MSYS2 found at: $msys2Root"
+
+    $bash = "$msys2Root\usr\bin\bash.exe"
+
+    # Initialize MSYS2 keyring and update package database
+    Log-Running "Updating MSYS2 package database..."
+    try {
+        & $bash -lc "pacman-key --init 2>/dev/null; pacman-key --populate msys2 2>/dev/null; pacman -Sy --noconfirm" 2>$null
+        Log-Success "MSYS2 package database updated"
+    } catch {
+        Log-Warning "Failed to update MSYS2 package database: $_"
+    }
+
+    # Install MinGW-w64 toolchain and development packages
+    Log-Running "Installing MSYS2 MinGW-w64 toolchain..."
+    $msys2Packages = @(
+        "mingw-w64-x86_64-toolchain",
+        "mingw-w64-x86_64-cmake",
+        "mingw-w64-x86_64-ninja",
+        "mingw-w64-x86_64-pkg-config",
+        "make",
+        "autoconf",
+        "automake",
+        "libtool"
+    )
+    $packageList = $msys2Packages -join " "
+
+    try {
+        & $bash -lc "pacman -S --noconfirm --needed $packageList"
+        Log-Success "MSYS2 development packages installed"
+    } catch {
+        Log-Warning "Failed to install some MSYS2 packages: $_"
+    }
+
+    # Add MSYS2 MinGW64 bin to user PATH
+    $mingwBin = "$msys2Root\mingw64\bin"
+    $msys2UsrBin = "$msys2Root\usr\bin"
+
+    foreach ($binPath in @($mingwBin, $msys2UsrBin)) {
+        if (Test-Path $binPath) {
+            $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
+            $pathEntries = $currentPath -split ';' | Where-Object { $_ -ne '' }
+
+            if ($binPath -notin $pathEntries) {
+                Log-Running "Adding $binPath to user PATH"
+                $newUserPath = ($pathEntries + $binPath) -join ';'
+                [System.Environment]::SetEnvironmentVariable('PATH', $newUserPath, [System.EnvironmentVariableTarget]::User)
+                # Also update current session PATH
+                $env:PATH = "$binPath;$env:PATH"
+                Log-Success "Added $binPath to PATH"
+            } else {
+                Log-Success "$binPath is already in PATH"
+            }
+        }
+    }
+} else {
+    Log-Warning "MSYS2 not found. Install with: scoop install msys2"
+}
+
+# =============================================================================
+# Rust / Cargo
+# =============================================================================
+Log-Step "Setting up Rust toolchain..."
+
+if (Test-Command rustup) {
+    # Check if default toolchain is installed
+    $toolchains = rustup toolchain list 2>$null
+    if ($toolchains -match "stable") {
+        Log-Success "Rust stable toolchain already installed"
+    } else {
+        Log-Running "Installing Rust stable toolchain..."
+        try {
+            rustup install stable
+            rustup default stable
+            Log-Success "Rust stable toolchain installed"
+        } catch {
+            Log-Warning "Failed to install Rust toolchain: $_"
+        }
+    }
+
+    # Ensure cargo bin is in PATH
+    $cargoBin = "$env:USERPROFILE\.cargo\bin"
+    if (Test-Path $cargoBin) {
+        $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
+        $pathEntries = $currentPath -split ';' | Where-Object { $_ -ne '' }
+
+        if ($cargoBin -notin $pathEntries) {
+            Log-Running "Adding $cargoBin to user PATH"
+            $newUserPath = ($pathEntries + $cargoBin) -join ';'
+            [System.Environment]::SetEnvironmentVariable('PATH', $newUserPath, [System.EnvironmentVariableTarget]::User)
+            $env:PATH = "$cargoBin;$env:PATH"
+            Log-Success "Added cargo bin to PATH"
+        } else {
+            Log-Success "Cargo bin is already in PATH"
+        }
+    }
+} elseif (Test-Command rustc) {
+    Log-Success "Rust is already installed (without rustup)"
+} else {
+    Log-Warning "rustup not found. Install with: scoop install rustup"
+}
+
+# =============================================================================
+# CC Environment Variable
+# =============================================================================
+Log-Step "Configuring C compiler environment variable..."
+
+# Prefer gcc from MSYS2 MinGW, then clang, then cl.exe
+$ccSet = $false
+
+if ($msys2Root -and (Test-Path "$msys2Root\mingw64\bin\gcc.exe")) {
+    [System.Environment]::SetEnvironmentVariable('CC', "$msys2Root\mingw64\bin\gcc.exe", [System.EnvironmentVariableTarget]::User)
+    $env:CC = "$msys2Root\mingw64\bin\gcc.exe"
+    Log-Success "CC set to MSYS2 MinGW gcc"
+    $ccSet = $true
+} elseif (Test-Command clang) {
+    $clangPath = (Get-Command clang).Source
+    [System.Environment]::SetEnvironmentVariable('CC', $clangPath, [System.EnvironmentVariableTarget]::User)
+    $env:CC = $clangPath
+    Log-Success "CC set to clang: $clangPath"
+    $ccSet = $true
+}
+
+if (-not $ccSet) {
+    Log-Warning "No C compiler found for CC environment variable"
+    Log-Info "Install MSYS2 packages or LLVM to set up a C compiler"
+}
+
+Log-Success "Build tools setup completed"
+Log-Info "Note: You may need to restart your shell for PATH changes to take effect"
+{{- end }}
