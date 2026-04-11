@@ -81,6 +81,10 @@
         {
             "id": null,
             "keys": "f11"
+        },
+        {
+            "id": null,
+            "keys": "alt+enter"
         }
     ],
     "newTabMenu": 
