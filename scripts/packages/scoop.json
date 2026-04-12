@@ -4,6 +4,7 @@
     "nodejs-lts",
     "python",
     "neovim",
+    "neovide",
     "goneovim",
     "oh-my-posh",
     "fzf",
