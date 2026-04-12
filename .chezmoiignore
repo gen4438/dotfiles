@@ -113,13 +113,17 @@ Documents/WindowsPowerShell/
 .config/fcitx5/
 
 # Exclude Unix-specific tools
-.config/mise/
 .config/byobu/
 .env.example
 
-# Exclude other OS manual configs
-.config/manual-configs/linux/
-.config/manual-configs/macos/
+# Exclude fugitive (empty on Windows)
+fugitive/
+
+# Exclude non-Windows package lists (keep cargo-tools)
+packages/fonts-japanese-*.txt
+packages/linux-*.txt
+packages/macos.txt
+packages/termux.txt
 {{- end }}
 
 {{- if ne .chezmoi.os "windows" }}
