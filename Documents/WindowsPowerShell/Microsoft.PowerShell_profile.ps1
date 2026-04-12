@@ -52,12 +52,18 @@ function prompt {
     $e = [char]0x1b
     $path = $executionContext.SessionState.Path.CurrentLocation.Path
 
-    # OSC 7: CWD を WSL2 tmux (byobu) に通知 (pane_current_path の追跡用)
-    # psmux はネイティブで CWD を追跡するため OSC 7 不要
-    if ($env:TMUX -and $env:WSL_DISTRO_NAME) {
-        $wslPath = $path -replace '^([A-Za-z]):\\', '/mnt/$1/' -replace '\\', '/'
-        $wslPath = $wslPath -creplace '/mnt/([A-Z])/', { '/mnt/' + $_.Groups[1].Value.ToLower() + '/' }
-        Write-Host -NoNewline "$e]7;file://localhost$wslPath$e\\"
+    # psmux/tmux の pane_current_path 追跡用
+    if ($env:TMUX) {
+        # OS レベル CWD を同期 (PowerShell の Set-Location は更新しないため)
+        # psmux は NtQueryInformationProcess で CWD を読むのでこれが必要
+        [System.IO.Directory]::SetCurrentDirectory($path)
+
+        if ($env:WSL_DISTRO_NAME) {
+            # WSL2 tmux (byobu): OSC 7 で CWD を通知
+            $oscPath = $path -replace '^([A-Za-z]):\\', '/mnt/$1/' -replace '\\', '/'
+            $oscPath = $oscPath -creplace '/mnt/([A-Z])/', { '/mnt/' + $_.Groups[1].Value.ToLower() + '/' }
+            Write-Host -NoNewline "$e]7;file://localhost$oscPath$e\\"
+        }
     }
 
     $path = $path -replace "^$([regex]::Escape($HOME))", '~'
