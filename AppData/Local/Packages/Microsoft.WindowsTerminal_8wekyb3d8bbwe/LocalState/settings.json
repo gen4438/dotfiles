@@ -115,7 +115,7 @@
         "list": 
         [
             {
-                "commandline": "psmux",
+                "commandline": "pwsh -NoExit -Command \"psmux new -A -s main\"",
                 "guid": "{d3b2a1c4-9876-4abc-8def-500000000001}",
                 "hidden": false,
                 "icon": "ms-appx:///ProfileIcons/pwsh.png",
