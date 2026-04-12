@@ -1,5 +1,10 @@
 return {
-  -- tmux/psmux に行を送る
+  -- psmux (Windows 版 tmux) のペインにコードを送る
+  -- Linux 版 (plugins/vim-slime.lua) との差分:
+  --   1. slime#common#system を psmux 対応版に上書き
+  --      - neovim の &shell が MSYS2 bash だと psmux に接続不可のため pwsh 経由で実行
+  --      - psmux の paste-buffer -t が外部プロセスから動作しないため send-keys -l で代替
+  --   2. $TMUX_PANE から同ウィンドウ内の隣接ペインIDを自動検出
   {
     'jpalardy/vim-slime',
     branch = 'main',
@@ -31,9 +36,7 @@ return {
     },
 
     init = function()
-      -- these two should be set before the plugin loads
       vim.g.slime_target = "tmux"
-      -- vim.g.slime_target = "neovim"
       vim.g.slime_no_mappings = true
 
       -- ipython の設定
@@ -41,15 +44,12 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "python", "ipynb" },
         callback = function()
-          -- vim.b.slime_python_ipython = 1
           vim.b.slime_bracketed_paste = 1
         end,
       })
       vim.api.nvim_create_autocmd("BufEnter", {
-        -- ipynb はファイル自体は json だったりするのでBufEnterで設定
         pattern = { "*.py", "*.ipynb" },
         callback = function()
-          -- vim.b.slime_python_ipython = 1
           vim.b.slime_bracketed_paste = 1
         end,
       })
@@ -59,10 +59,22 @@ return {
       vim.g.slime_paste_file = vim.fn.tempname()
       vim.g.slime_dont_ask_default = true
 
-      -- psmux 対応: MSYS2 bash 経由では psmux に接続できないため、
-      -- slime#common#system を上書きし、一時的に pwsh を使って実行する。
-      -- E746 回避: autoload 関数はパスが一致するファイルからのみ定義可能なため、
-      -- 一時ファイルを autoload/slime/common.vim パスに作成して source する。
+      --------------------------------------------------------------------------
+      -- psmux 対応: slime#common#system の上書き
+      --
+      -- 背景:
+      --   neovim の &shell は MSYS2 bash だが、MSYS2 のプロセス空間からは
+      --   psmux サーバーに接続できない。また psmux は外部プロセスからの
+      --   paste-buffer -t によるペイン指定送信をサポートしていない。
+      --
+      -- 解決:
+      --   vim-slime の load-buffer/paste-buffer パイプラインを
+      --   send-keys -l (リテラル送信) に置き換え、pwsh 経由で実行する。
+      --
+      -- E746 回避:
+      --   autoload 関数はパスが一致するファイルからのみ定義可能なため、
+      --   一時ディレクトリに autoload/slime/common.vim を作成して source する。
+      --------------------------------------------------------------------------
       if vim.env.TMUX and vim.fn.has('win32') == 1 then
         local tmpdir = vim.fn.tempname()
         vim.fn.mkdir(tmpdir .. '/autoload/slime', 'p')
@@ -79,24 +91,22 @@ function! slime#common#system(cmd_template, args, ...) abort
     echom "slime system (psmux): " . cmd
   endif
 
+  " load-buffer: テキストを保持するだけ (後続の paste-buffer で送信)
   if cmd =~# 'load-buffer' && a:0 > 0
-    " load-buffer: テキストを保持するだけ (psmux では stdin パイプ不可)
     let s:psmux_pending_text = a:1
     return ""
   endif
 
+  " paste-buffer → send-keys -l に置き換え
   if cmd =~# 'paste-buffer' && s:psmux_pending_text !=# ""
-    " paste-buffer → send-keys -l に置き換え (psmux では paste-buffer -t が不安定)
     let base_cmd = matchstr(cmd, '^tmux\s\+\S\+\s\+\S\+')
     let target = matchstr(cmd, '-t\s\+\zs\S\+')
     let text = s:psmux_pending_text
     let s:psmux_pending_text = ""
 
-    " 末尾の改行を除去 (send-keys Enter で別途送信するため)
     let has_newline = (text =~# '\(\r\n\|\r\|\n\)$')
     let text = substitute(text, '\(\r\n\|\r\|\n\)$', '', '')
 
-    " テキストを一時ファイルに書き出し、pwsh で読み込んで send-keys -l する
     let tmpfile = tempname()
     call writefile(split(text, "\n", 1), tmpfile, 'b')
     let send_cmd = base_cmd . ' send-keys -l -t ' . target
@@ -109,7 +119,6 @@ function! slime#common#system(cmd_template, args, ...) abort
     let result = system(["pwsh.exe", "-NoProfile", "-Command", send_cmd])
     call delete(tmpfile)
 
-    " 末尾に改行があった場合は Enter を送信
     if has_newline
       call system(["pwsh.exe", "-NoProfile", "-Command",
             \ base_cmd . ' send-keys -t ' . target . ' Enter'])
@@ -119,19 +128,20 @@ function! slime#common#system(cmd_template, args, ...) abort
   endif
 
   " その他のコマンド (send-keys cancel, send-keys Enter 等)
-  let result = system(["pwsh.exe", "-NoProfile", "-Command", cmd])
-  return result
+  return system(["pwsh.exe", "-NoProfile", "-Command", cmd])
 endfunction
 ]])
           f:close()
-          -- 先に元の autoload ファイルを読み込み、次に上書き版を source する
           vim.cmd('runtime autoload/slime/common.vim')
           vim.cmd('source ' .. vim.fn.fnameescape(override_path))
         end
       end
 
-      -- psmux: $TMUX_PANE (自分のペインID) から同ウィンドウ内の次のペインを取得する
-      -- $TMUX_PANE はペイン作成時に psmux がセットし、neovim が継承するため確実
+      --------------------------------------------------------------------------
+      -- ペインターゲットの自動検出
+      --------------------------------------------------------------------------
+
+      -- $TMUX_PANE から同ウィンドウ内の次のペインIDを取得する
       local function get_psmux_next_pane()
         local my_pane = vim.env.TMUX_PANE
         if not my_pane or my_pane == "" then
@@ -169,7 +179,10 @@ if ($myWin) {
         return ":.+1"
       end
 
-      -- 送信先を tmux/psmux に設定
+      --------------------------------------------------------------------------
+      -- tmux / neovim ターゲット設定
+      --------------------------------------------------------------------------
+
       local function SlimeConfigTmux()
         if vim.g.slime_target ~= "tmux" and vim.b.slime_config then
           vim.b.slime_config = nil
@@ -187,7 +200,6 @@ if ($myWin) {
         vim.cmd("SlimeConfig")
       end, {})
 
-      -- ウィンドウが開かれたときにチャンネルを設定
       vim.api.nvim_create_augroup("nvim_slime", { clear = true })
 
       vim.api.nvim_create_autocmd("TermOpen", {
@@ -198,7 +210,6 @@ if ($myWin) {
         end,
       })
 
-      -- 送信先を neovim に設定
       local function SlimeConfigNeovim()
         if vim.g.slime_target ~= "neovim" and vim.b.slime_config then
           vim.b.slime_config = nil
@@ -228,29 +239,24 @@ if ($myWin) {
         SlimeConfigNeovim()
       end
 
+      --------------------------------------------------------------------------
+      -- ファイルタイプ別キーマップ
+      --------------------------------------------------------------------------
+
       vim.api.nvim_create_augroup("vimSlimeCommand", { clear = true })
 
-      -- ファイルタイプごとにキーマップを設定
-      -- キーマップ設定関数
       local function set_keymaps()
-        -- REPL を起動
         vim.api.nvim_set_keymap('n', '<Space>i', ':lua handle_keymap_space_i()<CR>', { noremap = true })
-        -- REPL を再起動
         vim.api.nvim_set_keymap('n', '<Space>00', ':lua handle_keymap_space_00()<CR>', { noremap = true })
-        -- ipython リロード
         vim.api.nvim_set_keymap('n', '<Space>a', ':lua handle_keymap_space_a()<CR>', { noremap = true })
-        -- スクリプト実行
         vim.api.nvim_set_keymap('n', '<Space>e', ':lua handle_keymap_space_e()<CR>', { noremap = true })
-        -- スクリプト実行コマンドをヤンク
         vim.api.nvim_set_keymap('n', 'y<Space>e', ':lua handle_keymap_space_e_yank()<CR>', { noremap = true })
       end
 
-      -- キーマップ実行時の処理関数
       function handle_keymap_space_i()
         local filetype = vim.bo.filetype
         if filetype == "python" or filetype == "ipynb" then
-          -- vim.cmd('SlimeSend0 "\\x15ipython\\n"')
-          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]]) -- ctrl-u to clear the line
+          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]])
           vim.cmd('SlimeSend0 "ipython\\n"')
           vim.cmd('SlimeSend0 "%load_ext autoreload\\n"')
         elseif filetype == "javascript" or filetype == "javascriptreact" or filetype == "typescript" or filetype == "typescriptreact" then
@@ -263,7 +269,7 @@ if ($myWin) {
       function handle_keymap_space_00()
         local filetype = vim.bo.filetype
         if filetype == "python" or filetype == "ipynb" then
-          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]]) -- ctrl-u to clear the line
+          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]])
           vim.cmd('SlimeSend0 "exit\\n"')
           vim.cmd('SlimeSend0 "ipython\\n"')
           vim.cmd('SlimeSend0 "%load_ext autoreload\\n"')
@@ -279,12 +285,11 @@ if ($myWin) {
       function handle_keymap_space_a()
         local filetype = vim.bo.filetype
         if filetype == "python" or filetype == "ipynb" then
-          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]]) -- ctrl-u to clear the line
+          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]])
           vim.cmd('SlimeSend0 "%autoreload\\n"')
         end
       end
 
-      -- コマンド生成関数
       local function get_command_for_space_e()
         local filetype = vim.bo.filetype
         local cmd = ""
@@ -312,29 +317,23 @@ if ($myWin) {
         return cmd
       end
 
-      -- キーマップ実行時の処理関数
       function handle_keymap_space_e()
         local filetype = vim.bo.filetype
         local cmd = get_command_for_space_e()
 
         if cmd ~= "" and (filetype == "python" or filetype == "ipynb") then
-          -- python
-          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]]) -- ctrl-u to clear the line
+          vim.cmd([[SlimeSend0 "\e[201~\x15\e[200~"]])
           vim.cmd('SlimeSend0 "' .. cmd .. '\\n"')
         elseif cmd ~= "" then
-          -- python 以外
           vim.cmd('SlimeSend0 "\\x15' .. cmd .. '\\n"')
         end
       end
 
-      -- スクリプト実行コマンドをヤンク
       function handle_keymap_space_e_yank()
         local cmd = get_command_for_space_e()
 
         if cmd ~= "" then
-          -- コマンドを無名レジスタにヤンク
           vim.fn.setreg('"', cmd)
-          -- + レジスタ（システムクリップボード）にもコピー
           vim.fn.setreg('+', cmd)
           print('Yanked: ' .. cmd)
         else
@@ -342,15 +341,12 @@ if ($myWin) {
         end
       end
 
-      -- 初期化時にキーマップを設定
       set_keymaps()
     end
   },
-  -- vim-slime と ipython の連携
   {
     'hanschen/vim-ipython-cell',
     lazy = true,
     enabled = false,
   },
-
 }
