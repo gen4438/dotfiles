@@ -93,8 +93,33 @@ Documents/WindowsPowerShell/
 # Exclude shell scripts on Windows (cannot execute bash scripts)
 .chezmoiscripts/*.sh
 .chezmoiscripts/*.sh.tmpl
-# Exclude byobu on Windows (use psmux instead)
+
+# Exclude Unix shell configurations (bash/zsh)
+.bashrc
+.bash/
+.zshrc
+.zsh/
+.zimrc
+.inputrc
+
+# Exclude macOS-specific tools
+.hammerspoon/
+
+# Exclude Linux-specific tools
+.mozc/
+.config/direnv/
+.config/fontconfig/
+.config/fcitx/
+.config/fcitx5/
+
+# Exclude Unix-specific tools
+.config/mise/
 .config/byobu/
+.env.example
+
+# Exclude other OS manual configs
+.config/manual-configs/linux/
+.config/manual-configs/macos/
 {{- end }}
 
 {{- if ne .chezmoi.os "windows" }}
