@@ -1,9 +1,14 @@
 # Rust CLI tools installed via cargo-binstall (prebuilt binaries)
 # Used on Linux distros where these are not in package repos (Ubuntu/Debian, RHEL/Fedora)
 # On Arch Linux, these are available via pacman and listed in linux-arch.txt instead.
+#
+# Format: <tool>[ source]
+#   Append " source" to force `cargo install` (build from source) instead of
+#   cargo-binstall. Use when prebuilt binaries have runtime incompatibilities
+#   (e.g. GLIBC version mismatch on older distros like Ubuntu 22.04).
 sd
 broot
 bottom
 procs
-atuin
+atuin source
 just

@@ -157,10 +157,12 @@ if check_command cargo; then
     # Install tools from cargo-tools.txt
     CARGO_TOOLS_FILE="{{ .chezmoi.sourceDir }}/packages/cargo-tools.txt"
     if [[ -f "$CARGO_TOOLS_FILE" ]]; then
-        while IFS= read -r tool || [[ -n "$tool" ]]; do
+        while IFS= read -r line || [[ -n "$line" ]]; do
             # Skip comments and empty lines
-            [[ "$tool" =~ ^#.*$ || -z "$tool" ]] && continue
-            tool=$(echo "$tool" | tr -d '[:space:]')
+            [[ "$line" =~ ^[[:space:]]*#.*$ || -z "${line// }" ]] && continue
+            # Parse "<tool>[ source]" — second field forces cargo install
+            read -r tool flag _ <<< "$line"
+            [[ -z "$tool" ]] && continue
 
             # Map cargo package name to binary name
             case "$tool" in
@@ -170,6 +172,9 @@ if check_command cargo; then
 
             if check_command "$bin_name"; then
                 log_success "$tool is already installed"
+            elif [[ "$flag" == "source" ]]; then
+                log_running "Installing $tool from source..."
+                cargo install "$tool" && log_success "$tool installed via cargo install" || log_warning "Failed to install $tool"
             else
                 log_running "Installing $tool..."
                 if check_command cargo-binstall; then
