@@ -1,0 +1,4 @@
+# Ubuntu 24.04-specific packages
+
+# clang (Ubuntu 24.04 ships clang-18 by default)
+libclang-common-18-dev

@@ -1,0 +1,4 @@
+# Ubuntu 22.04-specific packages
+
+# clang (Ubuntu 22.04 ships clang-14 by default)
+libclang-common-14-dev

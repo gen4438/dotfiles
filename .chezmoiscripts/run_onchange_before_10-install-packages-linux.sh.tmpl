@@ -1,5 +1,11 @@
 {{- if eq .chezmoi.os "linux" -}}
 {{- $distro := .chezmoi.osRelease.id -}}
+{{- $versionID := .chezmoi.osRelease.versionID | default "" -}}
+{{- $versionFile := printf "packages/linux-ubuntu-%s.txt" $versionID -}}
+{{- $hasVersionFile := false -}}
+{{- if stat (joinPath .chezmoi.sourceDir $versionFile) -}}
+{{-   $hasVersionFile = true -}}
+{{- end -}}
 {{- if not (eq $distro "termux") -}}
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Linux distributions
@@ -7,6 +13,9 @@
 # linux-common.txt hash: {{ include "packages/linux-common.txt" | sha256sum }}
 {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
 # linux-ubuntu.txt hash: {{ include "packages/linux-ubuntu.txt" | sha256sum }}
+{{- if $hasVersionFile }}
+# {{ base $versionFile }} hash: {{ include $versionFile | sha256sum }}
+{{- end }}
 # fonts-japanese-ubuntu.txt hash: {{ include "packages/fonts-japanese-ubuntu.txt" | sha256sum }}
 {{- else if or (eq $distro "almalinux") (eq $distro "rocky") (eq $distro "centos") (eq $distro "rhel") (eq $distro "fedora") }}
 # linux-redhat.txt hash: {{ include "packages/linux-redhat.txt" | sha256sum }}
@@ -35,6 +44,10 @@ install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-common.txt"
 {{- if or (eq $distro "ubuntu") (eq $distro "debian") }}
 log_step "Installing Ubuntu/Debian-specific packages..."
 install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/linux-ubuntu.txt"
+{{- if $hasVersionFile }}
+log_step "Installing Ubuntu {{ $versionID }}-specific packages..."
+install_packages_from_file "{{ .chezmoi.sourceDir }}/packages/{{ base $versionFile }}"
+{{- end }}
 
 # Install Neovim from PPA
 log_running "Adding Neovim PPA..."

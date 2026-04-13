@@ -34,4 +34,3 @@ liblzma-dev
 # clang
 clang
 libclang-dev
-libclang-common-18-dev
