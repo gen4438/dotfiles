@@ -25,12 +25,14 @@ shopt -s checkwinsize
 
 ### User Customizations
 
-# Load common shell configuration early (shared with zsh)
-# This includes add_to_path function and other shared utilities
-{{ includeTemplate "shell_common.tmpl" . }}
-
-# Byobu integration
+# Byobu integration (must be loaded BEFORE atuin so byobu's PROMPT_COMMAND
+# modifications don't overwrite atuin's precmd hook for history recording)
 [ -r ~/.config/byobu/prompt ] && source ~/.config/byobu/prompt   #byobu-prompt#
+
+# Load common shell configuration (shared with zsh)
+# This includes add_to_path function, atuin init, and other shared utilities
+# Must be loaded AFTER byobu prompt to ensure atuin's PROMPT_COMMAND hooks survive
+{{ includeTemplate "shell_common.tmpl" . }}
 
 # Vi mode for command line editing
 set -o vi
