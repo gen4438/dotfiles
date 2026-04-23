@@ -285,7 +285,12 @@ elif [[ "$SHELL_TYPE" == "zsh" ]]; then
 fi
 
 # atuin (enhanced shell history - replaces fzf Ctrl+R)
+# bash requires bash-preexec to be loaded before `atuin init bash` so that
+# atuin can register its preexec/precmd hooks for history recording.
 if command -v atuin >/dev/null 2>&1; then
+    if [[ "$SHELL_TYPE" == "bash" ]]; then
+        [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+    fi
     eval "$(atuin init ${SHELL_TYPE} --disable-up-arrow)"
 fi
 

@@ -282,6 +282,23 @@ else
 fi
 {{- end }}
 
+# Setup bash-preexec (required by atuin for bash history recording)
+{{- $shells := fromJson (includeTemplate "shell-detection.tmpl" .) }}
+{{- if $shells.uses_bash }}
+log_step "Setting up bash-preexec..."
+BASH_PREEXEC_PATH="$HOME/.bash-preexec.sh"
+if [[ -f "$BASH_PREEXEC_PATH" ]]; then
+    log_success "bash-preexec is already installed"
+else
+    log_running "Downloading bash-preexec..."
+    if curl -fsSL https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o "$BASH_PREEXEC_PATH"; then
+        log_success "bash-preexec installed successfully"
+    else
+        log_warning "Failed to install bash-preexec (atuin history recording will not work in bash)"
+    fi
+fi
+{{- end }}
+
 # Setup Claude Code
 {{- if and (ne .chezmoi.os "windows") (ne .chezmoi.os "android") }}
 log_step "Setting up Claude Code..."
