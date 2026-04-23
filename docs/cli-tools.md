@@ -4,49 +4,49 @@ Modern command-line tools that enhance productivity across all platforms (Window
 
 ## Currently Installed (Base)
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
-| [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`) | Ultra-fast regex search | `grep` |
-| [fd](https://github.com/sharkdp/fd) | Simple, fast file finder | `find` |
-| [bat](https://github.com/sharkdp/bat) | Syntax-highlighted `cat` | `cat` |
-| [fzf](https://github.com/junegunn/fzf) | Fuzzy finder for anything | - |
-| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smart `cd` with frecency | `cd` |
-| [delta](https://github.com/dandavella/delta) | Better git diff viewer | `diff` |
+| Tool                                                    | Description               | Replaces |
+| ------------------------------------------------------- | ------------------------- | -------- |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`) | Ultra-fast regex search   | `grep`   |
+| [fd](https://github.com/sharkdp/fd)                     | Simple, fast file finder  | `find`   |
+| [bat](https://github.com/sharkdp/bat)                   | Syntax-highlighted `cat`  | `cat`    |
+| [fzf](https://github.com/junegunn/fzf)                  | Fuzzy finder for anything | -        |
+| [zoxide](https://github.com/ajeetdsouza/zoxide)         | Smart `cd` with frecency  | `cd`     |
+| [delta](https://github.com/dandavella/delta)            | Better git diff viewer    | `diff`   |
 
 ## Additional Tools
 
 ### File / Data Processing
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
-| [jq](https://github.com/jqlang/jq) | JSON processor and filter | - |
-| [yq](https://github.com/mikefarah/yq) | YAML/TOML/XML processor (jq-like syntax) | - |
-| [sd](https://github.com/chmln/sd) | Intuitive find & replace | `sed` |
+| Tool                                  | Description                              | Replaces |
+| ------------------------------------- | ---------------------------------------- | -------- |
+| [jq](https://github.com/jqlang/jq)    | JSON processor and filter                | -        |
+| [yq](https://github.com/mikefarah/yq) | YAML/TOML/XML processor (jq-like syntax) | -        |
+| [sd](https://github.com/chmln/sd)     | Intuitive find & replace                 | `sed`    |
 
 ### Directory / Disk
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
+| Tool                                    | Description                                 | Replaces      |
+| --------------------------------------- | ------------------------------------------- | ------------- |
 | [broot](https://github.com/Canop/broot) | Interactive tree explorer with fuzzy search | `tree` + `cd` |
 
 ### System Monitoring
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
-| [bottom](https://github.com/ClementTsang/bottom) (`btm`) | Graphical system monitor | `top` / `htop` |
-| [procs](https://github.com/dalance/procs) | Modern process viewer with color/search | `ps` |
+| Tool                                                     | Description                             | Replaces       |
+| -------------------------------------------------------- | --------------------------------------- | -------------- |
+| [bottom](https://github.com/ClementTsang/bottom) (`btm`) | Graphical system monitor                | `top` / `htop` |
+| [procs](https://github.com/dalance/procs)                | Modern process viewer with color/search | `ps`           |
 
 ### Shell / History
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
+| Tool                                      | Description                                 | Replaces             |
+| ----------------------------------------- | ------------------------------------------- | -------------------- |
 | [atuin](https://github.com/atuinsh/atuin) | Shell history in SQLite, fuzzy search, sync | `history` / `Ctrl+R` |
 
 ### Task Runner
 
-| Tool | Description | Replaces |
-|------|-------------|----------|
-| [just](https://github.com/casey/just) | Cross-platform task runner | `make` |
+| Tool                                  | Description                | Replaces |
+| ------------------------------------- | -------------------------- | -------- |
+| [just](https://github.com/casey/just) | Cross-platform task runner | `make`   |
 
 ## Installation by OS
 
@@ -98,10 +98,14 @@ pkg install jq yq
 Import existing shell history into atuin:
 
 ```bash
-atuin import bash        # from ~/.bash_history
-atuin import zsh         # from zsh history
-atuin import fish        # from fish history
-atuin import powershell  # from PowerShell history
+# from ~/.bash_history
+atuin import bash
+# from zsh history
+atuin import zsh
+# from fish history
+atuin import fish
+# from PowerShell history
+atuin import powershell
 ```
 
 ### zoxide (Directory Jump)
@@ -109,7 +113,8 @@ atuin import powershell  # from PowerShell history
 Import jump data from legacy tools:
 
 ```bash
-zoxide import --from=z ~/.z              # from z
+# from z
+zoxide import --from=z ~/.z --merge
 zoxide import --from=autojump /path/to/db  # from autojump
 ```
 
@@ -118,6 +123,7 @@ zoxide import --from=autojump /path/to/db  # from autojump
 `just` is a significant improvement over `Makefile` for cross-platform projects:
 
 **Advantages over Make:**
+
 - No tab-sensitivity issues
 - No `.PHONY` needed
 - Natural argument passing to recipes
@@ -151,6 +157,7 @@ info:
 ```
 
 **Limitations:**
+
 - Shell commands still differ per OS (e.g., `rm` vs `Remove-Item`)
 - Not a full abstraction layer over OS differences
 - Best suited for projects using cross-platform toolchains (cargo, npm, go, etc.)
