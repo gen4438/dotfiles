@@ -178,5 +178,36 @@
   "workbench.editor.wrapTabs": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.list.defaultFindMode": "filter",
-  "workbench.tree.indent": 20
+  "workbench.tree.indent": 20,
+  "pgsql.serverGroups": [
+    {
+      "name": "Servers",
+      "id": "DFBD5356-C9A0-4A0A-A57D-A34F7307A44E",
+      "isDefault": true
+    }
+  ],
+  "pgsql.connections": [
+    {
+      "id": "B4B9A5EA-5B9C-4364-9656-AE23CF9453EA",
+      "groupId": "DFBD5356-C9A0-4A0A-A57D-A34F7307A44E",
+      "authenticationType": "SqlLogin",
+      "connectTimeout": 15,
+      "applicationName": "vscode-pgsql",
+      "clientEncoding": "utf8",
+      "sslmode": "prefer",
+      "sshSavePassword": true,
+      "savePassword": true,
+      "sslRootCertMode": "none",
+      "server": "localhost",
+      "expiresOn": 0,
+      "emptyPasswordInput": false,
+      "user": "postgres",
+      "password": "",
+      "database": "fin_survey",
+      "port": "5433",
+      "profileName": "localhost, fin_survey (postgres)",
+      "sshPassword": ""
+    }
+  ],
+  "scm.repositories.selectionMode": "single"
 }
