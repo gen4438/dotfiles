@@ -181,6 +181,46 @@ return {
     config = function()
       -- https://github.com/ibhagwan/fzf-lua?tab=readme-ov-file#default-options
       local actions = require "fzf-lua.actions"
+
+      -- 単一選択時は :edit コマンドを直接実行し、複数選択時は fzf-lua 標準の処理を行うカスタム関数
+      local function safe_edit(selected, opts, use_qf)
+        if not selected or #selected == 0 then return end
+
+        if #selected > 1 then
+          vim.schedule(function()
+            if use_qf then
+              actions.file_edit_or_qf(selected, opts)
+            else
+              actions.file_edit(selected, opts)
+            end
+          end)
+        else
+          local path_lib = require('fzf-lua.path')
+          local entry = path_lib.entry_to_file(selected[1], opts)
+          if entry and entry.path and entry.path ~= "<none>" then
+            local fullpath = entry.bufname or entry.path
+            if not path_lib.is_absolute(fullpath) then
+              fullpath = path_lib.join({ opts.cwd or opts._cwd or vim.fn.getcwd(), fullpath })
+            end
+            vim.schedule(function()
+              -- 完全にネイティブな :edit コマンドを実行
+              vim.cmd("edit " .. vim.fn.fnameescape(fullpath))
+
+              -- 1. 行・列情報が存在する場合、安全にカーソルを移動
+              if not opts.no_action_set_cursor and entry.line and entry.line > 0 then
+                local col = entry.col and entry.col > 0 and entry.col or 1
+                pcall(vim.api.nvim_win_set_cursor, 0, { entry.line, col - 1 })
+              end
+
+              -- 2. 折り畳みを展開し、画面の中央に配置 (zvzz) - 行ジャンプがある場合のみ実行
+              if not opts.no_action_zz and entry.line and entry.line > 0 then
+                vim.cmd("normal! zvzz")
+              end
+            end)
+          end
+        end
+      end
+
       require 'fzf-lua'.setup {
         winopts = {
           fullscreen = false, -- start fullscreen?
@@ -222,7 +262,12 @@ return {
             -- `file_edit_or_qf` opens a single selection or sends multiple selection to quickfix
             -- replace `enter` with `file_edit` to open all files/bufs whether single or multiple
             -- replace `enter` with `file_switch_or_edit` to attempt a switch in current tab first
-            ["enter"]  = actions.file_edit_or_qf,
+            ["default"]  = function(selected, opts)
+              safe_edit(selected, opts, true)
+            end,
+            ["enter"]    = function(selected, opts)
+              safe_edit(selected, opts, true)
+            end,
             ["ctrl-q"] = actions.file_sel_to_qf,
             ["ctrl-Q"] = actions.file_sel_to_ll,
             -- ["ctrl-y"] = function(selected)
@@ -243,7 +288,12 @@ return {
             -- action to toggle `--no-ignore`, requires fd or rg installed
             ["ctrl-g"] = { actions.toggle_ignore },
             -- uncomment to override `actions.file_edit_or_qf`
-            ["enter"]  = actions.file_edit,
+            ["default"]  = function(selected, opts)
+              safe_edit(selected, opts, false)
+            end,
+            ["enter"]    = function(selected, opts)
+              safe_edit(selected, opts, false)
+            end,
 
             -- カーソル下のファイルの親ディレクトリから edit 入力
             ["ctrl-e"] = function(selected)
@@ -259,7 +309,12 @@ return {
         },
         oldfiles = {
           actions = {
-            ["enter"] = actions.file_edit,
+            ["default"] = function(selected, opts)
+              safe_edit(selected, opts, false)
+            end,
+            ["enter"]   = function(selected, opts)
+              safe_edit(selected, opts, false)
+            end,
           }
         },
         grep     = {
