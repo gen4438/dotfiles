@@ -2,6 +2,26 @@
 # Setup development tools after package installation
 # This script is refactored to use common libraries
 # script hash: {{ include ".chezmoiscripts/run_once_after_20-setup-tools.sh.tmpl" | sha256sum }}
+#
+# ---------------------------------------------------------------------------
+# Tools installed here (outside of native package files)
+# Native pkg files: Brewfile (macOS), packages/linux-*.txt, packages/termux.txt
+# ---------------------------------------------------------------------------
+#   fzf            — keybindings install (binary comes from .chezmoiexternal)
+#   mise           — linux/darwin: curl mise.run / android: cargo install
+#   mise tools     — `mise install` against ~/.config/mise/config.toml
+#   Zim modules    — `zimfw install` (zsh plugin manager; clone via external)
+#   tmux plugins   — TPM bin/install_plugins
+#   cargo tools    — linux: from packages/cargo-tools.txt via cargo-binstall
+#                    android: bottom only (others via termux pkg)
+#   yq             — linux: GitHub release; darwin/android: native pkg
+#   uv             — linux/darwin: curl astral.sh; android: native pkg
+#   uv tools       — ruff, ipython via `uv tool install`
+#   devcontainer   — npm i -g @devcontainers/cli (non-windows)
+#   bash-preexec   — curl from rcaloras/bash-preexec (for atuin in bash)
+#   Claude Code    — curl claude.ai/install.sh (linux/darwin only)
+#   GH Copilot CLI — curl gh.io/copilot-install (linux only; darwin via brew)
+# ---------------------------------------------------------------------------
 
 set -e
 
@@ -25,18 +45,32 @@ if check_directory "$HOME/.fzf"; then
 fi
 
 # Setup mise (unified version manager for Python, Node.js, Go, Rust)
-{{- if and (ne .chezmoi.os "windows") (ne .chezmoi.os "android") }}
+{{- if ne .chezmoi.os "windows" }}
 log_step "Setting up mise..."
 if check_command mise; then
     log_success "mise is already installed"
 else
     log_running "Installing mise..."
+    {{- if eq .chezmoi.os "android" }}
+    # Termux: no native pkg; build via cargo (rust pkg from packages/termux.txt)
+    if check_command cargo; then
+        if cargo install mise --locked; then
+            export PATH="$HOME/.cargo/bin:$PATH"
+            log_success "mise installed via cargo"
+        else
+            log_warning "Failed to install mise via cargo"
+        fi
+    else
+        log_warning "cargo not found; install 'rust' pkg first"
+    fi
+    {{- else }}
     if curl https://mise.run | sh; then
         export PATH="$HOME/.local/bin:$PATH"
         log_success "mise installed successfully"
     else
         log_warning "Failed to install mise"
     fi
+    {{- end }}
 fi
 
 # Install default tool versions with mise
@@ -215,8 +249,23 @@ fi
 # Android/Termux specific setup
 log_step "Setting up Android/Termux specific tools..."
 
-# Termux-specific configurations can be added here
-log_success "Termux environment detected"
+# Cargo tools on Termux:
+#   atuin/sd/broot/procs/just are installed via packages/termux.txt (pkg).
+#   bottom has no termux pkg → build via cargo (requires 'rust' pkg).
+if check_command cargo; then
+    if check_command btm; then
+        log_success "bottom (btm) is already installed"
+    else
+        log_running "Installing bottom via cargo..."
+        if cargo install bottom --locked; then
+            log_success "bottom installed via cargo"
+        else
+            log_warning "Failed to install bottom"
+        fi
+    fi
+else
+    log_warning "cargo not found; install 'rust' pkg to enable bottom build"
+fi
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
@@ -227,6 +276,7 @@ log_step "Setting up Windows specific tools..."
 {{- end }}
 
 # Setup uv (Python package manager)
+# On android, uv is installed via packages/termux.txt; skip curl bootstrap.
 {{- if and (ne .chezmoi.os "windows") (ne .chezmoi.os "android") }}
 log_step "Setting up uv..."
 if check_command uv; then
@@ -241,8 +291,10 @@ else
         log_warning "Failed to install uv"
     fi
 fi
+{{- end }}
 
-# Install uv tools
+# Install uv tools (also runs on android once uv is available via pkg)
+{{- if ne .chezmoi.os "windows" }}
 if check_command uv; then
     log_step "Installing uv tools..."
     for tool in ruff ipython; do

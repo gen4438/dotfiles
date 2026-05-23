@@ -18,6 +18,11 @@ ripgrep
 fd
 bat
 git-delta
+atuin
+sd
+broot
+procs
+just
 
 # Directory environment
 direnv
@@ -28,11 +33,17 @@ termux-api
 # Python
 python
 
+# Python package manager
+uv
+
 # Node.js
 nodejs
 
 # Go language
 golang
+
+# Rust toolchain (for cargo install: mise, bottom)
+rust
 
 # Text editor
 neovim
