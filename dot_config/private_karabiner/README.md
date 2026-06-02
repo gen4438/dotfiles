@@ -17,7 +17,11 @@ Windows/Linux 的な操作感を macOS で実現するための設定。
 
 complex_modifications より先に処理される。物理キーの配置を論理キーに変換する。
 
-### HHKB (vendor: 11240, product: 6) / Realforce (vendor: 1204, product: 4621)
+> Karabiner-Elements の GUI (Preferences → Simple Modifications) で設定した内容は、
+> karabiner.json の `profiles[].devices[].simple_modifications` に保存される。
+> つまりこのリポジトリの karabiner.json と GUI の表示は常に同じものを指している。
+
+### ARCHISS (vendor: 11240, product: 6) / Realforce (vendor: 1204, product: 4621)
 
 PC キーボード向け。左 Cmd/Ctrl を入れ替え + IME キー変換。
 
@@ -28,9 +32,10 @@ PC キーボード向け。左 Cmd/Ctrl を入れ替え + IME キー変換。
 | japanese_pc_nfer (無変換) | japanese_eisuu (英数) |
 | japanese_pc_xfer (変換)   | japanese_kana (かな)  |
 
-### Apple KB (vendor: 1452, product: 641) / 汎用 (全キーボード共通)
+### Apple KB (vendor: 1452, product: 641) / 汎用 (上記いずれにも該当しないキーボード)
 
-左手の修飾キーを4つローテーション。
+左手の修飾キーを4つローテーション。MacBook Air 内蔵キーボードは特定の vendor/product エントリに
+マッチしないため「汎用」(`is_keyboard: true` のみ) が適用される。
 
 | 物理キー     | 論理キー     |
 | ------------ | ------------ |
@@ -74,25 +79,60 @@ PC キーボード向け。左 Cmd/Ctrl を入れ替え + IME キー変換。
 
 ### Tab 切り替え
 
-3段階の変換で Tab 修飾子をローテーション。
+物理キーの位置を基準に **AltTab と Mission Control を切り分ける**。
+「スペースバーに隣接する修飾キー = AltTab、その外側 = Mission Control」を、
+デバイスごとの simple_modifications を経由して、同じ Tab ルールに収束させる設計。
 
-**基本ルール (全アプリ):**
+#### デバイスごとの修飾キー変換 (再掲)
 
-| 物理キー         | 出力          | 用途                        |
-| ---------------- | ------------- | --------------------------- |
-| Cmd+Tab          | Ctrl+Tab      | アプリ内タブ切り替え        |
-| Option+Tab       | Cmd+Tab       | macOS アプリ切り替え        |
-| Option+Shift+Tab | Cmd+Shift+Tab | macOS アプリ切り替え (逆順) |
-| Ctrl+Tab         | Option+Tab    | ウィンドウ切り替え          |
+| デバイス    | 物理キー (位置)          | simple_mod 後  |
+| ----------- | ------------------------ | -------------- |
+| ARCHISS     | Alt (内側)               | `left_option`  |
+| ARCHISS     | Win (外側)               | `left_control` |
+| MacBook Air | Cmd (内側)               | `left_option`  |
+| MacBook Air | Option (外側)            | `left_control` |
+| MacBook Air | Caps (Cmd 代替)          | `left_command` |
 
-**ターミナル系の補正 (基本ルールより先に評価):**
+ARCHISS は左 Cmd↔Ctrl swap、MacBook Air は4キーローテーション、と変換ルールは違うが、
+**いずれも「内側 → left_option / 外側 → left_control」に収束**するようになっている。
 
-ターミナル系では Cmd/Ctrl swap により修飾子がずれるため、事前に補正して非ターミナルと同じ物理キー体験を維持する。
+#### Tab ルール
+
+| from (simple_mod 後)  | 出力                  | 動作                                |
+| --------------------- | --------------------- | ----------------------------------- |
+| Cmd+Tab               | Ctrl+Tab              | アプリ内タブ切り替え (Caps+Tab 経由) |
+| Option+Shift+Tab      | Option+Shift+Tab      | AltTab 起動 (逆順)                  |
+| Option+Tab            | Option+Tab            | AltTab 起動                         |
+| Ctrl+Tab              | Ctrl+↑ (up_arrow)     | Mission Control                     |
+
+AltTab は「Hold ⌥ (Option) + press Tab」に設定する。
+Mission Control の出力は macOS 標準ショートカット `Ctrl+↑`。
+
+#### なぜ Cmd を `right_option` ではなく `left_option` に変換するか
+
+一時期 MacBook Air の `left_command → right_option`（汎用エントリ）と、Tab ルール側で
+`right_option+tab → left_option+tab` という二段変換を行っていたが、
+**Cmd を押したまま Shift を追加した瞬間に AltTab が閉じる**問題があった。
+
+原因: Tab ルールが Shift 有無で別 manipulator に切り替わるとき、Karabiner が
+「`right_option` を release → `left_option` を再 press」という修飾子調整を行い、
+その一瞬の `left_option` UP イベントで AltTab が「修飾キーが離された」と判断して終了する。
+
+最初から `left_command → left_option` にすれば、Cmd 押下中ずっと `left_option` が
+保持され、Shift を足してもグリッチしない。Tab ルール側も `right_option+tab` の枝は不要。
+
+#### ターミナル系の補正 (基本ルールより先に評価)
+
+ターミナル系では Cmd/Ctrl swap により修飾子がずれるため、事前に補正して
+非ターミナルと同じ物理キー体験を維持する。
 
 | swap 後の修飾子     | 補正出力              | 結果                                    |
 | ------------------- | --------------------- | --------------------------------------- |
 | Ctrl+Tab (物理 Cmd) | Ctrl+Tab (パススルー) | タブ切り替え (非ターミナルと同じ)       |
 | Cmd+Tab (物理 Ctrl) | Option+Tab            | ウィンドウ切り替え (非ターミナルと同じ) |
+
+> ターミナル内では現状 Mission Control を Tab 系で起動できない (補正ルールが option+tab に
+> 寄せているため)。ターミナルから出すには macOS 標準ショートカット `Ctrl+↑` を直接使う。
 
 ### JIS キーボード
 
