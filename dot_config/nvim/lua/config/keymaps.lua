@@ -162,6 +162,69 @@ vim.keymap.set('n', '<leader>Z', ':cd <c-r>=getcwd(-1)<CR><CR>', { desc = "Chang
 vim.keymap.set('n', '<leader>e', ':e <C-R>=expand("%:p:h") . "/" <CR>', { desc = "Edit file in current directory" })
 -- vim.keymap.set('n', '<leader>te', ':tabe <C-R>=expand("%:p:h") . "/" <CR>', { desc = "Edit in new tab" })
 
+-- gf: open file under cursor (or visual selection); create new buffer if missing
+local function resolve_and_edit(cfile)
+  cfile = vim.fn.trim(cfile)
+  if cfile == '' then
+    vim.notify('gf: no file specified', vim.log.levels.WARN)
+    return
+  end
+
+  -- Reject characters that cannot appear in a normal file path
+  -- (NUL, newline, carriage return, tab). Spaces in the middle are allowed.
+  local bad = cfile:match('[%z\n\r\t]')
+  if bad then
+    vim.notify(
+      string.format('gf: selection contains an invalid path character (0x%02X)', string.byte(bad)),
+      vim.log.levels.ERROR
+    )
+    return
+  end
+
+  -- Expand ~ and $VAR, but NOT % / # (those would mean current/alt file)
+  local normalized = vim.fs.normalize(cfile)
+
+  -- Try to resolve via 'path' first (same as builtin gf)
+  local found = vim.fn.findfile(normalized, '.;')
+  if found == '' then
+    -- Fall back to resolving relative to the current file's directory
+    local base = vim.fn.expand('%:p:h')
+    if base ~= '' and normalized:sub(1, 1) ~= '/' then
+      found = base .. '/' .. normalized
+    else
+      found = normalized
+    end
+  end
+
+  -- fnameescape() escapes spaces and Ex-command metacharacters for :edit
+  vim.cmd('edit ' .. vim.fn.fnameescape(found))
+end
+
+-- Capture the *current* visual selection (not the previous one via `gv`).
+-- We read the live cursor + anchor before exiting visual mode, then use
+-- getregion() which respects 'selection' (inclusive/exclusive) and mode.
+local function get_visual_selection()
+  local mode = vim.fn.mode()
+  -- 'v' = charwise, 'V' = linewise, '\22' (Ctrl-V) = blockwise
+  if mode ~= 'v' and mode ~= 'V' and mode ~= '\22' then
+    return ''
+  end
+  local anchor = vim.fn.getpos('v')   -- where the selection started
+  local cursor = vim.fn.getpos('.')   -- current cursor position
+  local lines = vim.fn.getregion(anchor, cursor, { type = mode })
+  -- Leave visual mode so subsequent :edit runs cleanly
+  vim.cmd('normal! \27')  -- <Esc>
+  return table.concat(lines, '\n')
+end
+
+vim.keymap.set('n', 'gf', function()
+  resolve_and_edit(vim.fn.expand('<cfile>'))
+end, { desc = "Open file under cursor (create if missing)" })
+
+vim.keymap.set('x', 'gf', function()
+  resolve_and_edit(get_visual_selection())
+end, { desc = "Open file from visual selection (create if missing)" })
+
 -- Text selection and yanking
 vim.keymap.set('n', 'vaa', 'gg<S-v>G', { desc = "Select all" })
 vim.keymap.set('n', 'yaa', 'mzggyG`z', { desc = "Yank all" })
