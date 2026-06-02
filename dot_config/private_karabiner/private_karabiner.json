@@ -393,8 +393,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "tab",
-                                        "modifiers": ["option"]
+                                        "key_code": "mission_control"
                                     }
                                 ],
                                 "type": "basic"
@@ -462,8 +461,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "up_arrow",
-                                        "modifiers": ["control"]
+                                        "key_code": "mission_control"
                                     }
                                 ],
                                 "type": "basic"
