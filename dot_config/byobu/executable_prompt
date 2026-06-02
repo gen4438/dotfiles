@@ -1,4 +1,5 @@
 if [ "$TMUX" ]; then
+  [ -d "$BYOBU_PREFIX" ] || BYOBU_PREFIX="/opt/homebrew"
   source $BYOBU_PREFIX/share/byobu/profiles/bashrc #byobu-prompt#
   # delete byobu_prompt_runtime
   
