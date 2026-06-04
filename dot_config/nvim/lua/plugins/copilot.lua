@@ -95,7 +95,10 @@ return {
           trigger_on_accept = true,
           keymap = {
             accept = "<C-j>",
-            accept_word = "<C-w>",
+            -- accept_word は copilot 組み込みではなく自前マップ（下記参照）。
+            -- 組み込みだとサジェスト非表示時に Vim デフォルトの「直前の単語削除」へ
+            -- フォールスルーして文字が消えてしまうため、false にして自前で吸収する。
+            accept_word = false,
             accept_line = "<C-l>",
             next = "<c-f>",
             dismiss = "<C-]>",
@@ -133,6 +136,15 @@ return {
         copilot_node_command = 'node',
         server_opts_overrides = {}
       })
+
+      -- <C-w> は Copilot のサジェストが表示されているときだけ accept_word。
+      -- 表示されていないときは no-op（Vim デフォルトの「直前の単語削除」を抑止）。
+      vim.keymap.set("i", "<C-w>", function()
+        local ok, suggestion = pcall(require, "copilot.suggestion")
+        if ok and suggestion.is_visible() then
+          suggestion.accept_word()
+        end
+      end, { desc = "Accept Copilot word (no-op if no suggestion)" })
     end,
     keys = {
       {
