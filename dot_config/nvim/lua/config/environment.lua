@@ -140,20 +140,31 @@ M.setup_clipboard = function()
   
   if is_remote then
     vim.opt.clipboard = "unnamedplus"
-    
-    -- Use OSC 52 sequences for clipboard in remote environments
+
+    -- Write-only OSC 52 clipboard.
+    -- Windows Terminal does not reply to OSC 52 read queries, so any
+    -- synchronous "read clipboard" path would hang Neovim for tens of
+    -- seconds. We therefore never query the terminal: copy writes via
+    -- OSC 52, and paste returns the unnamed register locally.
+    local function osc52_copy(lines, _)
+      local text = table.concat(lines, "\n")
+      local b64 = vim.base64.encode(text)
+      local seq = string.format("\027]52;c;%s\027\\", b64)
+      io.stdout:write(seq)
+    end
+
     local function paste()
       return {
-        vim.fn.split(vim.fn.getreg(""), "\n"),
-        vim.fn.getregtype(""),
+        vim.fn.split(vim.fn.getreg('"'), "\n"),
+        vim.fn.getregtype('"'),
       }
     end
-    
+
     vim.g.clipboard = {
-      name = "OSC 52",
+      name = "OSC 52 (write-only)",
       copy = {
-        ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-        ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+        ["+"] = osc52_copy,
+        ["*"] = osc52_copy,
       },
       paste = {
         ["+"] = paste,
