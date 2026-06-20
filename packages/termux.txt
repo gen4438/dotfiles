@@ -41,6 +41,10 @@ uv
 # Python linter/formatter (uv tool install panics on Termux; use pkg)
 ruff
 
+# psutil for ipython: upstream pip build refuses Android ("platform android
+# is not supported"); use the Termux-patched pkg so pip won't try to rebuild.
+python-psutil
+
 # Node.js
 nodejs
 
