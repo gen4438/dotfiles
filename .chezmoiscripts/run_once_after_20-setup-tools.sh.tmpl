@@ -8,7 +8,7 @@
 # Native pkg files: Brewfile (macOS), packages/linux-*.txt, packages/termux.txt
 # ---------------------------------------------------------------------------
 #   fzf            — keybindings install (binary comes from .chezmoiexternal)
-#   mise           — linux/darwin: curl mise.run / android: cargo install
+#   mise           — linux/darwin: curl mise.run / android: musl static binary
 #   mise tools     — `mise install` against ~/.config/mise/config.toml
 #   Zim modules    — `zimfw install` (zsh plugin manager; clone via external)
 #   tmux plugins   — TPM bin/install_plugins
@@ -52,16 +52,16 @@ if check_command mise; then
 else
     log_running "Installing mise..."
     {{- if eq .chezmoi.os "android" }}
-    # Termux: no native pkg; build via cargo (rust pkg from packages/termux.txt)
-    if check_command cargo; then
-        if cargo install mise --locked; then
-            export PATH="$HOME/.cargo/bin:$PATH"
-            log_success "mise installed via cargo"
-        else
-            log_warning "Failed to install mise via cargo"
-        fi
+    # Termux: cargo build fails (rattler_pty uses ptsname_r, absent on Bionic),
+    # and mise.run picks a glibc build that won't run on Android. Download the
+    # statically-linked musl binary, which runs directly on Termux/Bionic.
+    MISE_ARCH="{{ .chezmoi.arch | replace "amd64" "x64" }}"
+    mkdir -p "$HOME/.local/bin"
+    if curl -fsSL "https://mise.jdx.dev/mise-latest-linux-${MISE_ARCH}-musl" -o "$HOME/.local/bin/mise" && chmod +x "$HOME/.local/bin/mise"; then
+        export PATH="$HOME/.local/bin:$PATH"
+        log_success "mise installed (musl static binary)"
     else
-        log_warning "cargo not found; install 'rust' pkg first"
+        log_warning "Failed to install mise"
     fi
     {{- else }}
     if curl https://mise.run | sh; then
