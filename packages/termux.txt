@@ -19,6 +19,8 @@ fd
 bat
 git-delta
 atuin
+zoxide
+fzf
 sd
 broot
 procs

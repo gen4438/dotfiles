@@ -10,7 +10,7 @@
 # macOS x86_64: fzf-{version}-darwin_amd64.tar.gz
 # macOS aarch64: fzf-{version}-darwin_arm64.tar.gz
 # Windows x86_64: fzf-{version}-windows_amd64.zip
-# Android (arm64): Uses Linux arm64 binary
+# Android (Termux): installed via packages/termux.txt (pkg), external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/fzf.exe"]
     type = "archive-file"
@@ -18,7 +18,7 @@
     executable = true
     path = "fzf.exe"
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/fzf"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" (eq .chezmoi.os "android" | ternary "linux" .chezmoi.os) (.chezmoi.arch | replace "x86_64" "amd64" | replace "aarch64" "arm64")) | quote }}
@@ -35,7 +35,7 @@
 # macOS x86_64: delta-{version}-x86_64-apple-darwin.tar.gz
 # macOS aarch64: delta-{version}-aarch64-apple-darwin.tar.gz
 # Windows x86_64: delta-{version}-x86_64-pc-windows-msvc.zip
-# Android (arm64): Uses Linux aarch64 binary
+# Android (Termux): installed via packages/termux.txt (git-delta pkg); glibc binary won't run on Android, external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/delta.exe"]
     type = "archive-file"
@@ -44,7 +44,7 @@
     path = "delta.exe"
     stripComponents = 1
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/delta"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
@@ -62,7 +62,7 @@
 # macOS x86_64: bat-v{version}-x86_64-apple-darwin.tar.gz
 # macOS aarch64: bat-v{version}-aarch64-apple-darwin.tar.gz
 # Windows x86_64: bat-v{version}-x86_64-pc-windows-msvc.zip
-# Android (arm64): Uses Linux aarch64 binary
+# Android (Termux): installed via packages/termux.txt (pkg); glibc binary won't run on Android, external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/bat.exe"]
     type = "archive-file"
@@ -71,7 +71,7 @@
     path = "bat.exe"
     stripComponents = 1
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/bat"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
@@ -89,7 +89,7 @@
 # macOS x86_64: fd-v{version}-x86_64-apple-darwin.tar.gz
 # macOS aarch64: fd-v{version}-aarch64-apple-darwin.tar.gz
 # Windows x86_64: fd-v{version}-x86_64-pc-windows-msvc.zip
-# Android (arm64): Uses Linux aarch64 binary
+# Android (Termux): installed via packages/termux.txt (pkg); glibc binary won't run on Android, external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/fd.exe"]
     type = "archive-file"
@@ -98,7 +98,7 @@
     path = "fd.exe"
     stripComponents = 1
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/fd"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-v*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq .chezmoi.arch "arm" | ternary "unknown-linux-gnueabihf" "unknown-linux-gnu"))) | quote }}
@@ -116,7 +116,7 @@
 # macOS x86_64: ripgrep-{version}-x86_64-apple-darwin.tar.gz
 # macOS aarch64: ripgrep-{version}-aarch64-apple-darwin.tar.gz
 # Windows x86_64: ripgrep-{version}-x86_64-pc-windows-msvc.zip
-# Android (arm64): Uses Linux aarch64 binary
+# Android (Termux): installed via packages/termux.txt (pkg); glibc binary won't run on Android, external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/rg.exe"]
     type = "archive-file"
@@ -125,7 +125,7 @@
     path = "rg.exe"
     stripComponents = 1
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/rg"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "darwin" | ternary "apple-darwin" (eq (.chezmoi.arch | replace "amd64" "x86_64") "x86_64" | ternary "unknown-linux-musl" "unknown-linux-gnu"))) | quote }}
@@ -143,7 +143,7 @@
 # macOS x86_64: zoxide-{version}-x86_64-apple-darwin.tar.gz
 # macOS aarch64: zoxide-{version}-aarch64-apple-darwin.tar.gz
 # Windows x86_64: zoxide-{version}-x86_64-pc-windows-msvc.zip
-# Android (arm64): zoxide-{version}-aarch64-linux-android.tar.gz
+# Android (Termux): installed via packages/termux.txt (pkg), external skipped
 {{- if eq .chezmoi.os "windows" }}
 [".local/bin/zoxide.exe"]
     type = "archive-file"
@@ -151,7 +151,7 @@
     executable = true
     path = "zoxide.exe"
     refreshPeriod = "168h"
-{{- else }}
+{{- else if ne .chezmoi.os "android" }}
 [".local/bin/zoxide"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "ajeetdsouza/zoxide" (printf "zoxide-*-%s-%s.tar.gz" (.chezmoi.arch | replace "amd64" "x86_64" | replace "arm64" "aarch64") (eq .chezmoi.os "android" | ternary "linux-android" (eq .chezmoi.os "darwin" | ternary "apple-darwin" "unknown-linux-musl"))) | quote }}

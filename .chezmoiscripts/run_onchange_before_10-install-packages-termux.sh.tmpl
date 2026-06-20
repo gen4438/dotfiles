@@ -2,6 +2,7 @@
 {{ template "shebang-bash.tmpl" . }}
 # Install essential packages for Termux (Android)
 # This script is refactored to use common libraries and external package lists
+# termux.txt hash: {{ include "packages/termux.txt" | sha256sum }}
 
 set -e
 
