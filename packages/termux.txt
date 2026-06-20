@@ -38,6 +38,9 @@ python
 # Python package manager
 uv
 
+# Python linter/formatter (uv tool install panics on Termux; use pkg)
+ruff
+
 # Node.js
 nodejs
 

@@ -252,12 +252,15 @@ log_step "Setting up Android/Termux specific tools..."
 # Cargo tools on Termux:
 #   atuin/sd/broot/procs/just are installed via packages/termux.txt (pkg).
 #   bottom has no termux pkg → build via cargo (requires 'rust' pkg).
+#   --no-default-features drops the 'battery' feature, whose starship-battery
+#   dependency fails to compile on Android (unsupported target OS). The battery
+#   widget is unavailable on Android regardless, so nothing is lost.
 if check_command cargo; then
     if check_command btm; then
         log_success "bottom (btm) is already installed"
     else
-        log_running "Installing bottom via cargo..."
-        if cargo install bottom --locked; then
+        log_running "Installing bottom via cargo (no battery feature)..."
+        if cargo install bottom --locked --no-default-features; then
             log_success "bottom installed via cargo"
         else
             log_warning "Failed to install bottom"
@@ -293,8 +296,30 @@ else
 fi
 {{- end }}
 
-# Install uv tools (also runs on android once uv is available via pkg)
-{{- if ne .chezmoi.os "windows" }}
+# Install Python tools (ruff, ipython)
+# Android: `uv tool install` panics on Termux (rustls-platform-verifier is not
+# initialized), so ruff comes from packages/termux.txt (pkg) and ipython is
+# installed via pip.
+{{- if eq .chezmoi.os "android" }}
+log_step "Installing Python tools (Termux)..."
+if check_command ruff; then
+    log_success "ruff is already installed"
+else
+    log_warning "ruff not found (should be installed via packages/termux.txt)"
+fi
+if check_command ipython; then
+    log_success "ipython is already installed"
+elif check_command pip; then
+    log_running "Installing ipython via pip..."
+    if pip install ipython; then
+        log_success "ipython installed successfully"
+    else
+        log_warning "Failed to install ipython"
+    fi
+else
+    log_warning "pip not found; skipping ipython installation"
+fi
+{{- else if ne .chezmoi.os "windows" }}
 if check_command uv; then
     log_step "Installing uv tools..."
     for tool in ruff ipython; do
