@@ -78,55 +78,46 @@ return {
       local ts_select = require('nvim-treesitter-textobjects.select')
       local ts_move = require('nvim-treesitter-textobjects.move')
 
-      -- Select keymaps
-      vim.keymap.set({ 'x', 'o' }, 'af', function() ts_select.select_textobject('@function.outer') end,
-        { desc = 'Select outer function' })
-      vim.keymap.set({ 'x', 'o' }, 'if', function() ts_select.select_textobject('@function.inner') end,
-        { desc = 'Select inner function' })
-      vim.keymap.set({ 'x', 'o' }, 'ac', function() ts_select.select_textobject('@class.outer') end,
-        { desc = 'Select outer class' })
-      vim.keymap.set({ 'x', 'o' }, 'ic', function() ts_select.select_textobject('@class.inner') end,
-        { desc = 'Select inner class' })
-      vim.keymap.set({ 'x', 'o' }, 'as', function() ts_select.select_textobject('@scope', 'locals') end,
-        { desc = 'Select language scope' })
-      -- markdown code fence (defined in queries/markdown/textobjects.scm)
-      vim.keymap.set({ 'x', 'o' }, 'ik', function() ts_select.select_textobject('@code_fence.content') end,
-        { desc = 'Select code fence content' })
-      vim.keymap.set({ 'x', 'o' }, 'ak', function() ts_select.select_textobject('@code_fence.outer') end,
-        { desc = 'Select outer code fence' })
+      -- Select keymaps: { lhs, textobject, desc, query_group? }
+      -- 例: vik = inner code fence を選択 (markdown のコードブロック中身)
+      local selects = {
+        { 'af', '@function.outer',      'outer function' },
+        { 'if', '@function.inner',      'inner function' },
+        { 'ac', '@class.outer',         'outer class' },
+        { 'ic', '@class.inner',         'inner class' },
+        { 'as', '@scope',               'language scope', 'locals' },
+        -- markdown code fence (queries/markdown/textobjects.scm で定義)
+        { 'ik', '@code_fence.content',  'code fence content' },
+        { 'ak', '@code_fence.outer',    'outer code fence' },
+      }
+      for _, m in ipairs(selects) do
+        local obj, group = m[2], m[4]
+        vim.keymap.set({ 'x', 'o' }, m[1], function() ts_select.select_textobject(obj, group) end,
+          { desc = 'Select ' .. m[3] })
+      end
 
-      -- Move keymaps
-      vim.keymap.set({ 'n', 'x', 'o' }, ']m', function() ts_move.goto_next_start('@function.outer') end,
-        { desc = 'Next function start' })
-      vim.keymap.set({ 'n', 'x', 'o' }, ']]', function() ts_move.goto_next_start('@class.outer') end,
-        { desc = 'Next class start' })
-      vim.keymap.set({ 'n', 'x', 'o' }, ']o', function() ts_move.goto_next_start('@loop.*') end, { desc = 'Next loop' })
-      vim.keymap.set({ 'n', 'x', 'o' }, ']k', function() ts_move.goto_next_start('@code_fence.outer') end,
-        { desc = 'Next code fence' })
-      vim.keymap.set({ 'n', 'x', 'o' }, ']M', function() ts_move.goto_next_end('@function.outer') end,
-        { desc = 'Next function end' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '][', function() ts_move.goto_next_end('@class.outer') end,
-        { desc = 'Next class end' })
-      vim.keymap.set({ 'n', 'x', 'o' }, ']K', function() ts_move.goto_next_end('@code_fence.outer') end,
-        { desc = 'Next code fence end' })
-
-      vim.keymap.set({ 'n', 'x', 'o' }, '[m', function() ts_move.goto_previous_start('@function.outer') end,
-        { desc = 'Previous function start' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[[', function() ts_move.goto_previous_start('@class.outer') end,
-        { desc = 'Previous class start' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[k', function() ts_move.goto_previous_start('@code_fence.outer') end,
-        { desc = 'Previous code fence' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[M', function() ts_move.goto_previous_end('@function.outer') end,
-        { desc = 'Previous function end' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[]', function() ts_move.goto_previous_end('@class.outer') end,
-        { desc = 'Previous class end' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[K', function() ts_move.goto_previous_end('@code_fence.outer') end,
-        { desc = 'Previous code fence end' })
-
-      vim.keymap.set({ 'n', 'x', 'o' }, ']d', function() ts_move.goto_next('@conditional.outer') end,
-        { desc = 'Next conditional' })
-      vim.keymap.set({ 'n', 'x', 'o' }, '[d', function() ts_move.goto_previous('@conditional.outer') end,
-        { desc = 'Previous conditional' })
+      -- Move keymaps: { lhs, move_fn, textobject, desc }
+      local moves = {
+        { ']m', 'goto_next_start',     '@function.outer',    'Next function start' },
+        { ']]', 'goto_next_start',     '@class.outer',       'Next class start' },
+        { ']o', 'goto_next_start',     '@loop.*',            'Next loop' },
+        { ']k', 'goto_next_start',     '@code_fence.outer',  'Next code fence' },
+        { ']M', 'goto_next_end',       '@function.outer',    'Next function end' },
+        { '][', 'goto_next_end',       '@class.outer',       'Next class end' },
+        { ']K', 'goto_next_end',       '@code_fence.outer',  'Next code fence end' },
+        { '[m', 'goto_previous_start', '@function.outer',    'Previous function start' },
+        { '[[', 'goto_previous_start', '@class.outer',       'Previous class start' },
+        { '[k', 'goto_previous_start', '@code_fence.outer',  'Previous code fence' },
+        { '[M', 'goto_previous_end',   '@function.outer',    'Previous function end' },
+        { '[]', 'goto_previous_end',   '@class.outer',       'Previous class end' },
+        { '[K', 'goto_previous_end',   '@code_fence.outer',  'Previous code fence end' },
+        { ']d', 'goto_next',           '@conditional.outer', 'Next conditional' },
+        { '[d', 'goto_previous',       '@conditional.outer', 'Previous conditional' },
+      }
+      for _, m in ipairs(moves) do
+        local fn, obj = m[2], m[3]
+        vim.keymap.set({ 'n', 'x', 'o' }, m[1], function() ts_move[fn](obj) end, { desc = m[4] })
+      end
     end
   },
 
