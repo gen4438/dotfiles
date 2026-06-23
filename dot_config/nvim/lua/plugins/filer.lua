@@ -110,6 +110,19 @@ return {
         ["g."] = { "actions.toggle_hidden", mode = "n" },
         ["g\\"] = { "actions.toggle_trash", mode = "n" },
 
+        -- 開いているディレクトリのパスをヤンク
+        ["yd"] = {
+          function()
+            local current_dir = require("oil").get_current_dir()
+            if current_dir then
+              vim.fn.setreg(vim.v.register, current_dir)
+              vim.notify("Yanked: " .. current_dir)
+            end
+          end,
+          mode = "n",
+          desc = "Yank the current oil directory path"
+        },
+
         -- Add custom keybinding for fzf-lua in oil.nvim
         [";ff"] = {
           function()
