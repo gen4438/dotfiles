@@ -123,6 +123,51 @@ return {
           desc = "Yank the current oil directory path"
         },
 
+        -- カーソル行のファイルをフルパスでヤンク
+        ["yp"] = {
+          function()
+            local oil = require("oil")
+            local dir = oil.get_current_dir()
+            local entry = oil.get_cursor_entry()
+            if dir and entry then
+              local path = dir .. entry.name
+              vim.fn.setreg(vim.v.register, path)
+              vim.notify("Yanked: " .. path)
+            end
+          end,
+          mode = "n",
+          desc = "Yank the full path of the file under cursor"
+        },
+
+        -- カーソル行のファイルを相対パスでヤンク
+        ["yr"] = {
+          function()
+            local oil = require("oil")
+            local dir = oil.get_current_dir()
+            local entry = oil.get_cursor_entry()
+            if dir and entry then
+              local path = vim.fn.fnamemodify(dir .. entry.name, ":.")
+              vim.fn.setreg(vim.v.register, path)
+              vim.notify("Yanked: " .. path)
+            end
+          end,
+          mode = "n",
+          desc = "Yank the relative path of the file under cursor"
+        },
+
+        -- カーソル行のファイル名のみをヤンク
+        ["yn"] = {
+          function()
+            local entry = require("oil").get_cursor_entry()
+            if entry then
+              vim.fn.setreg(vim.v.register, entry.name)
+              vim.notify("Yanked: " .. entry.name)
+            end
+          end,
+          mode = "n",
+          desc = "Yank the file name under cursor"
+        },
+
         -- Add custom keybinding for fzf-lua in oil.nvim
         [";ff"] = {
           function()
