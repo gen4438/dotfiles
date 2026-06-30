@@ -97,7 +97,24 @@ return {
             end
           end
 
+          -- gitignore トグル用に fd コマンドを明示的に組み立てる。
+          -- complete_path は標準の actions.toggle_ignore が効かない
+          -- （cmd に --no-ignore を注入する処理を通らない）ため、
+          -- 自前で cmd を切り替えて再表示する。
+          local fd_bin = vim.fn.executable("fd") == 1 and "fd"
+            or (vim.fn.executable("fdfind") == 1 and "fdfind")
+            or nil
+
+          local function path_cmd(no_ignore)
+            if not fd_bin then return nil end -- fd 不在時は complete_path の既定にフォールバック
+            return ("%s --strip-cwd-prefix%s"):format(fd_bin, no_ignore and " --no-ignore" or "")
+          end
+
+          -- <c-g> アクションから再帰的に呼べるよう前方宣言
+          local open
+          open = function(no_ignore)
           require("fzf-lua").complete_path({
+            cmd = path_cmd(no_ignore),
             previewer = require("fzf-lua.defaults")._default_previewer_fn(),
             file_icons = true,
             fzf_opts = {
@@ -109,10 +126,15 @@ return {
                 hidden = false,
                 layout = "horizontal",
                 horizontal = "right:50%",
-                title = "複数選択可能 (TAB: 選択切替, Ctrl-A: 全選択)",
+                title = (no_ignore and "[.gitignore 無視] " or "")
+                  .. "複数選択可能 (TAB: 選択切替, Ctrl-A: 全選択, Ctrl-G: gitignore切替)",
               }
             },
             actions = {
+              -- gitignore の尊重/無視をトグルして再表示
+              ["ctrl-g"] = function(_, _)
+                vim.schedule(function() open(not no_ignore) end)
+              end,
               ["default"] = function(selected, opts)
                 if #selected == 0 then
                   return_to_insert(opts)
@@ -173,6 +195,9 @@ return {
               end
             }
           })
+          end
+
+          open(false)
         end,
         mode = { "i", "v" },
         desc = "Insert multiple file paths"
