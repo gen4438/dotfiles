@@ -31,6 +31,7 @@ return {
     lazy = false,
     keys = {
       { "--", ":Oil<CR>", mode = "n", desc = "Open parent directory" },
+      { "-z", function() require("oil").open(vim.fn.getcwd()) end, mode = "n", desc = "Open oil in pwd" },
     },
     cmd = "Oil",
     opts = {
