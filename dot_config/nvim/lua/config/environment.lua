@@ -134,7 +134,12 @@ M.setup_clipboard = function()
     return
   end
   
+  -- SSH_CONNECTION alone is unreliable: it is not propagated into tmux/screen
+  -- panes or across sudo/su, so a yank there would fall back to the X11
+  -- provider and hang for tens of seconds. Check SSH_TTY / SSH_CLIENT too.
   local is_ssh = vim.env.SSH_CONNECTION ~= nil
+    or vim.env.SSH_TTY ~= nil
+    or vim.env.SSH_CLIENT ~= nil
   local is_wsl = vim.env.WSL_DISTRO_NAME ~= nil
   local is_remote = is_ssh or is_wsl
   
