@@ -42,6 +42,22 @@ cdlist() {
     fi
 }
 
+# zoxide の履歴のうち、カレントディレクトリ以下のディレクトリに限定して fzf で選択・移動する
+# （zoxide 本体にはスコープを限定するオプションがないため、query --list を prefix で絞り込む）
+zic() {
+    if ! command -v zoxide >/dev/null 2>&1; then
+        echo "Error: zoxide command not found" >&2
+        return 1
+    fi
+
+    local dir
+    dir=$(zoxide query --list | awk -v prefix="$PWD/" 'index($0, prefix) == 1' | \
+        fzf --no-multi --reverse --height "${FZF_TMUX_HEIGHT:-40%}") || return
+
+    # zoxide init のフックが cd 後にスコアを自動更新する
+    cd "$dir" || return 1
+}
+
 # Fix for fz filter function (if fz is installed)
 __fz_filter() {
     if ! command -v fzf >/dev/null 2>&1; then

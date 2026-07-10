@@ -328,22 +328,79 @@ if [[ $- =~ i ]]; then
 fi
 
 
-# fzf で カレントディレクトリ直下のファイル、隠しファイルを含むを対象、recursive しない
-_fzf_current_dir_files() {
-  shopt -s dotglob
-  local files
-  files=$(printf "%s\n" *)
-  shopt -u dotglob
+# fzf によるパス補完
+#   <C-f><C-f>: カレントディレクトリ直下のパス（隠しファイル含む・non-recursive）
+#   <C-f><C-t>: カレントディレクトリ以下のファイルパス（recursive）
+#   <C-f><C-d>: カレントディレクトリ以下のディレクトリパス（recursive）
+# ※ <C-t> は ~/.fzf.bash 標準の recursive ファイル補完（FZF_CTRL_T_COMMAND）のまま
 
-  local selected
-  selected=$(printf "%s\n" "$files" | fzf --no-hscroll --no-multi --ansi) || return 1
+# 選択されたパスを readline の入力行のカーソル位置に挿入する
+__fzf_insert_path() {
+  local selected="$1"
+  [[ -n "$selected" ]] || return 1
 
-  # 選択結果を readline の入力行に挿入
-  # 現在カーソル位置 READLINE_POINT の位置に挿入
-  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:READLINE_POINT}"
+  # 空白などを含むパスをシェル用にクォート
+  selected=$(printf '%q' "$selected")
+
+  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
 }
 
+# 一覧コマンドを fzf で選択する
+#   $1: gitignore を考慮した一覧コマンド（初期表示）
+#   $2: gitignore を無視した一覧コマンド
+# fzf 内の <C-g> で両者をトグルする（プロンプト表示で現在のモードを判定）
+__fzf_select_path() {
+  eval "$1" | FZF_LIST_GIT="$1" FZF_LIST_ALL="$2" fzf --no-hscroll --no-multi --ansi \
+    --prompt 'git> ' --header 'C-g: toggle gitignore' \
+    --bind 'ctrl-g:transform:if [ "$FZF_PROMPT" = "git> " ]; then echo "change-prompt(all> )+reload(eval \"\$FZF_LIST_ALL\")"; else echo "change-prompt(git> )+reload(eval \"\$FZF_LIST_GIT\")"; fi'
+}
 
-# bash の readline に登録
-bind -x '"\C-f\C-f": _fzf_current_dir_files'
+# カレントディレクトリ直下のパス（non-recursive、ディレクトリは末尾に / が付く）
+_fzf_complete_current_dir() {
+  local cmd_git cmd_all="command ls -Ap"
+  if command -v fd >/dev/null 2>&1; then
+    cmd_git="fd --max-depth 1 --hidden --exclude .git"
+  else
+    cmd_git="$cmd_all"
+  fi
+  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+}
+
+# カレントディレクトリ以下のファイルパス（recursive）
+_fzf_complete_files() {
+  local cmd_git cmd_all
+  if command -v rg >/dev/null 2>&1; then
+    cmd_git="rg --files --hidden --follow --glob '!.git/*' 2>/dev/null"
+    cmd_all="rg --files --hidden --follow --no-ignore --glob '!.git/*' 2>/dev/null"
+  else
+    cmd_git="command find . -mindepth 1 -name .git -prune -o -type f -print 2>/dev/null | sed 's|^\./||'"
+    cmd_all="$cmd_git"
+  fi
+  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+}
+
+# カレントディレクトリ以下のディレクトリパス（recursive）
+_fzf_complete_dirs() {
+  local cmd_git cmd_all
+  if command -v fd >/dev/null 2>&1; then
+    cmd_git="fd --type d --hidden --follow --exclude .git"
+    cmd_all="fd --type d --hidden --follow --no-ignore --exclude .git"
+  else
+    cmd_git="command find . -mindepth 1 -name .git -prune -o -type d -print 2>/dev/null | sed 's|^\./||'"
+    cmd_all="$cmd_git"
+  fi
+  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+}
+
+# bash の readline に登録（emacs / vi 両モード）
+if [[ $- =~ i ]]; then
+  bind -m emacs-standard -x '"\C-f\C-f": _fzf_complete_current_dir'
+  bind -m vi-insert      -x '"\C-f\C-f": _fzf_complete_current_dir'
+
+  bind -m emacs-standard -x '"\C-f\C-t": _fzf_complete_files'
+  bind -m vi-insert      -x '"\C-f\C-t": _fzf_complete_files'
+
+  bind -m emacs-standard -x '"\C-f\C-d": _fzf_complete_dirs'
+  bind -m vi-insert      -x '"\C-f\C-d": _fzf_complete_dirs'
+fi
