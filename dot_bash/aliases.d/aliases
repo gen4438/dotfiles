@@ -136,3 +136,4 @@ alias update_display='export DISPLAY=$(tmux show-env | sed -n "s/^DISPLAY=//p")'
 # Claude / Copilot
 alias claude-yolo='claude --allow-dangerously-skip-permissions'
 alias copilot-yolo='copilot --yolo'
+alias agy-yolo='agy --dangerously-skip-permissions'
