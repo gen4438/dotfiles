@@ -17,8 +17,9 @@
   "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true,
   "statusLine": {
-    "command": "printf '\\e[38;5;40m%s\\e[0m@\\e[38;5;34m%s\\e[0m:\\e[38;5;82m%s\\e[0m' \"$(whoami)\" \"$(hostname -s)\" \"$(pwd)\"",
-    "type": "command"
+    "command": "~/.claude/statusline.sh",
+    "type": "command",
+    "padding": 0
   },
   "tui": "default"
 }

@@ -1,0 +1,65 @@
+{{ template "shebang-bash.tmpl" . }}
+# Claude Code statusline
+# stdin で渡される JSON セッションデータからコンテキスト量・モデル・コスト等を 2 行で表示する。
+# 参考: https://code.claude.com/docs/en/statusline
+
+input=$(cat)
+
+# --- フィールド抽出（null/欠損は // でフォールバック） ---
+MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
+EFFORT=$(echo "$input" | jq -r '.effort.level // empty')
+DIR=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+USED=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
+SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
+COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+DUR=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+DEL=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+# 数値でない場合に備えた保険
+[[ "$PCT" =~ ^[0-9]+$ ]] || PCT=0
+
+# --- k/M 表記ヘルパー: 1000000->1M, それ以外は切り捨て(n/1000)k ---
+humanize() {
+  local n="$1"
+  if [ "$n" -ge 1000000 ]; then
+    # 1M, 1.5M のように小数第1位まで（末尾 .0 は削る）
+    awk -v v="$n" 'BEGIN{ m=v/1000000; s=sprintf("%.1f", m); sub(/\.0$/,"",s); print s "M" }'
+  else
+    echo "$((n / 1000))k"
+  fi
+}
+
+# --- 色 ---
+CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'; DIM='\033[2m'; RESET='\033[0m'
+
+# バー色（使用率の閾値: >=90 赤 / >=70 黄 / それ以外 緑）
+if [ "$PCT" -ge 90 ]; then BAR_COLOR="$RED"
+elif [ "$PCT" -ge 70 ]; then BAR_COLOR="$YELLOW"
+else BAR_COLOR="$GREEN"; fi
+
+# --- プログレスバー（幅10） ---
+FILLED=$((PCT / 10))
+[ "$FILLED" -gt 10 ] && FILLED=10
+EMPTY=$((10 - FILLED))
+BAR=""
+[ "$FILLED" -gt 0 ] && printf -v FILL "%${FILLED}s" && BAR="${FILL// /█}"
+[ "$EMPTY" -gt 0 ] && printf -v PAD "%${EMPTY}s" && BAR="${BAR}${PAD// /░}"
+
+# --- 経過時間（ms -> 分秒。1分未満は秒のみ） ---
+DUR_SEC=$((DUR / 1000))
+MINS=$((DUR_SEC / 60))
+SECS=$((DUR_SEC % 60))
+if [ "$MINS" -gt 0 ]; then DUR_FMT="${MINS}m ${SECS}s"; else DUR_FMT="${SECS}s"; fi
+
+# --- 各パーツ整形 ---
+MODEL_LABEL="$MODEL"
+[ -n "$EFFORT" ] && MODEL_LABEL="${MODEL}·${EFFORT}"
+DIR_NAME="${DIR##*/}"
+COST_FMT=$(printf '$%.2f' "$COST")
+CTX="${PCT}% ($(humanize "$USED")/$(humanize "$SIZE"))"
+
+# --- 出力（2 行） ---
+echo -e "${CYAN}[${MODEL_LABEL}]${RESET} 📁 ${DIR_NAME}"
+echo -e "${BAR_COLOR}${BAR}${RESET} ${CTX} ${DIM}|${RESET} ${YELLOW}${COST_FMT}${RESET} ${DIM}|${RESET} ⏱️ ${DUR_FMT} ${DIM}|${RESET} ${GREEN}+${ADD}${RESET}/${RED}-${DEL}${RESET}"
