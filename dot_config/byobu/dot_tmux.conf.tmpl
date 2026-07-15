@@ -26,6 +26,9 @@ set -g set-clipboard on
 set -g status-right '#(gitmux -cfg ~/.config/byobu/.gitmux.conf "#{pane_current_path}")'
 set -g status-right-length 200
 
+# byobu デフォルトの毎秒更新は CPU 消費と描画負荷が大きいので緩和する
+set -g status-interval 5
+
 # # 元の表示（全システム情報付き）
 # set -g status-right '#(gitmux -cfg ~/.config/byobu/.gitmux.conf "#{pane_current_path}") #(byobu-status tmux_right)'
 # set -g status-right-length 200
