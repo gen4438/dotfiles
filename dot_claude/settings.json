@@ -14,6 +14,7 @@
   },
   "includeCoAuthoredBy": false,
   "language": "Japanese",
+  "model": "claude-fable-5[1m]",
   "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true,
   "statusLine": {
