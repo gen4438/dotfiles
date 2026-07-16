@@ -1,3 +1,14 @@
+# Standard venv (.venv in project root, created with python3 -m venv)
+layout_venv() {
+  VIRTUAL_ENV="$(pwd)/.venv"
+  if [[ ! -d "$VIRTUAL_ENV" ]]; then
+    log_status "creating venv with python3 -m venv"
+    python3 -m venv "$VIRTUAL_ENV"
+  fi
+  PATH_add "$VIRTUAL_ENV/bin"
+  export VIRTUAL_ENV
+}
+
 # uv - Python project management with automatic venv
 layout_uv() {
   VIRTUAL_ENV=$(pwd)/.venv
