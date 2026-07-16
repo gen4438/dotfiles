@@ -334,26 +334,57 @@ fi
 #   <C-f><C-d>: カレントディレクトリ以下のディレクトリパス（recursive）
 # ※ <C-t> は ~/.fzf.bash 標準の recursive ファイル補完（FZF_CTRL_T_COMMAND）のまま
 
-# 選択されたパスを readline の入力行のカーソル位置に挿入する
+# 選択されたパスを readline の入力行に挿入する
+#   $1: 挿入する文字列、$2: カーソル直前の置き換える文字数（入力途中の名前の長さ）
 __fzf_insert_path() {
-  local selected="$1"
+  local selected="$1" replace_len="${2:-0}"
   [[ -n "$selected" ]] || return 1
 
   # 空白などを含むパスをシェル用にクォート
   selected=$(printf '%q' "$selected")
 
-  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
-  READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
+  local start=$(( READLINE_POINT - replace_len ))
+  READLINE_LINE="${READLINE_LINE:0:$start}$selected${READLINE_LINE:$READLINE_POINT}"
+  READLINE_POINT=$(( start + ${#selected} ))
 }
 
 # 一覧コマンドを fzf で選択する
 #   $1: gitignore を考慮した一覧コマンド（初期表示）
 #   $2: gitignore を無視した一覧コマンド
-# fzf 内の <C-g> で両者をトグルする（プロンプト表示で現在のモードを判定）
+#   $3: 基準ディレクトリ（省略時はカレント）
+#   $4: fzf の初期クエリ
+# fzf 内の <C-g> で $1/$2 をトグルする（プロンプト表示で現在のモードを判定）
 __fzf_select_path() {
-  eval "$1" | FZF_LIST_GIT="$1" FZF_LIST_ALL="$2" fzf --no-hscroll --no-multi --ansi \
-    --prompt 'git> ' --header 'C-g: toggle gitignore' \
-    --bind 'ctrl-g:transform:if [ "$FZF_PROMPT" = "git> " ]; then echo "change-prompt(all> )+reload(eval \"\$FZF_LIST_ALL\")"; else echo "change-prompt(git> )+reload(eval \"\$FZF_LIST_GIT\")"; fi'
+  (
+    cd -- "${3:-.}" 2>/dev/null || exit 1
+    eval "$1" | FZF_LIST_GIT="$1" FZF_LIST_ALL="$2" fzf --no-hscroll --no-multi --ansi \
+      --prompt 'git> ' --header 'C-g: toggle gitignore' --query "${4:-}" \
+      --bind 'ctrl-g:transform:if [ "$FZF_PROMPT" = "git> " ]; then echo "change-prompt(all> )+reload(eval \"\$FZF_LIST_ALL\")"; else echo "change-prompt(git> )+reload(eval \"\$FZF_LIST_GIT\")"; fi'
+  )
+}
+
+# カーソル直前のパストークンを解析し、そのディレクトリ基準で fzf 補完を行う
+#   $1: gitignore を考慮した一覧コマンド、$2: gitignore を無視した一覧コマンド
+# 例: `cd ../` の直後で起動すると ../ 以下の候補を表示し、../ の後ろに挿入する。
+# 入力途中の名前（最後の / 以降）は fzf の初期クエリになり、選択結果で置き換える。
+__fzf_complete_path() {
+  local left="${READLINE_LINE:0:$READLINE_POINT}"
+  local word="${left##*[[:space:]]}"
+  local base="${word##*/}"
+  local dir="${word%"$base"}"
+
+  # ~ をホームディレクトリに展開（実行用。入力行の表記はそのまま残す）
+  local dir_exp="${dir/#\~/$HOME}"
+
+  # ディレクトリとして解釈できない場合はカレント基準で単語全体をクエリにする
+  if [[ -n "$dir_exp" && ! -d "$dir_exp" ]]; then
+    dir_exp=""
+    base="$word"
+  fi
+
+  local selected
+  selected=$(__fzf_select_path "$1" "$2" "$dir_exp" "$base") || return 1
+  __fzf_insert_path "$selected" "${#base}"
 }
 
 # カレントディレクトリ直下のパス（non-recursive、ディレクトリは末尾に / が付く）
@@ -364,7 +395,7 @@ _fzf_complete_current_dir() {
   else
     cmd_git="$cmd_all"
   fi
-  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+  __fzf_complete_path "$cmd_git" "$cmd_all"
 }
 
 # カレントディレクトリ以下のファイルパス（recursive）
@@ -377,7 +408,7 @@ _fzf_complete_files() {
     cmd_git="command find . -mindepth 1 -name .git -prune -o -type f -print 2>/dev/null | sed 's|^\./||'"
     cmd_all="$cmd_git"
   fi
-  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+  __fzf_complete_path "$cmd_git" "$cmd_all"
 }
 
 # カレントディレクトリ以下のディレクトリパス（recursive）
@@ -390,7 +421,7 @@ _fzf_complete_dirs() {
     cmd_git="command find . -mindepth 1 -name .git -prune -o -type d -print 2>/dev/null | sed 's|^\./||'"
     cmd_all="$cmd_git"
   fi
-  __fzf_insert_path "$(__fzf_select_path "$cmd_git" "$cmd_all")"
+  __fzf_complete_path "$cmd_git" "$cmd_all"
 }
 
 # bash の readline に登録（emacs / vi 両モード）
