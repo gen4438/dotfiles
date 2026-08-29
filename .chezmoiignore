@@ -67,6 +67,7 @@ Library/
 .DS_Store
 .config/karabiner/
 !.config/karabiner/karabiner.json
+.config/iterm2/
 {{- end }}
 
 {{- if ne .chezmoi.os "linux" }}

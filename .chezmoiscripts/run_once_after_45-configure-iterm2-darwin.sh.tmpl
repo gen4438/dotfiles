@@ -1,0 +1,17 @@
+{{- if eq .chezmoi.os "darwin" -}}
+{{ template "shebang-bash.tmpl" . }}
+# Configure iTerm2 to load preferences from the chezmoi-managed custom folder
+# (~/.config/iterm2/com.googlecode.iterm2.plist)
+
+set -e
+
+# Include common libraries
+{{ template "lib-logging.sh.tmpl" . }}
+
+log_info "Configuring iTerm2 to load preferences from ~/.config/iterm2..."
+
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string "${HOME}/.config/iterm2"
+defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+
+log_info "iTerm2 custom preferences folder configured (restart iTerm2 to take effect)"
+{{ end -}}

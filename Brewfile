@@ -72,6 +72,7 @@ brew "mas"  # Mac App Store CLI
 cask "copilot-cli"  # GitHub Copilot CLI
 
 # GUI applications (Cask)
+cask "iterm2"  # Terminal emulator
 cask "rectangle"  # Window management
 cask "karabiner-elements"  # Keyboard customization
 cask "flameshot"  # Screenshot tool
