@@ -12,6 +12,7 @@ vim
 
 # Shell
 zsh
+bash-completion
 
 # Modern CLI tools
 ripgrep
@@ -64,3 +65,4 @@ gh
 jq
 yq
 openssh
+mosh

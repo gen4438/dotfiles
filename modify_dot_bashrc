@@ -21,6 +21,13 @@ HISTFILESIZE=2000
 
 # Basic shell options
 shopt -s checkwinsize
+{{- if eq .chezmoi.os "android" }}
+
+# Termux: enable programmable completion (ssh/mosh host names, etc.)
+if ! shopt -oq posix && [ -f "$PREFIX/share/bash-completion/bash_completion" ]; then
+    . "$PREFIX/share/bash-completion/bash_completion"
+fi
+{{- end }}
 {{- end }}
 
 ### User Customizations
