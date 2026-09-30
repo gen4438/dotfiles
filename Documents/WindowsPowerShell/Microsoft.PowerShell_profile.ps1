@@ -30,6 +30,31 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 Import-Module PSReadLine
 
+# 外部ツールの init スクリプトをキャッシュして起動を高速化
+# 実行ファイル (scoop shim の場合は実体) のパス/更新日時/サイズが変わったら再生成する
+function Get-CachedInitScript {
+    param([string]$Name, [scriptblock]$Generator)
+    $cmd = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $cmd) { return $null }
+    $exe = $cmd.Source
+    $shim = [System.IO.Path]::ChangeExtension($exe, '.shim')
+    if ((Test-Path $shim) -and ((Get-Content $shim -Raw) -match 'path\s*=\s*"?([^"\r\n]+)')) {
+        $exe = $Matches[1].Trim()
+    }
+    $item = Get-Item $exe -ErrorAction SilentlyContinue
+    if (-not $item) { $item = Get-Item $cmd.Source }
+    $key = "# cache-key: $($item.FullName)|$($item.LastWriteTimeUtc.Ticks)|$($item.Length)"
+    $cacheDir = Join-Path $env:LOCALAPPDATA 'pwsh-init-cache'
+    $cache = Join-Path $cacheDir "$Name.ps1"
+    if (-not (Test-Path $cache) -or (Get-Content $cache -TotalCount 1) -ne $key) {
+        New-Item -ItemType Directory -Force $cacheDir | Out-Null
+        $script = & $Generator | Out-String
+        if (-not $script) { return $null }
+        Set-Content -Path $cache -Value ($key + "`n" + $script) -Encoding UTF8
+    }
+    return $cache
+}
+
 # Non-default PSReadLine settings for cursor movement optimization
 Set-PSReadLineOption -EditMode Vi
 Set-PSReadLineOption -BellStyle None
@@ -85,9 +110,6 @@ function prompt {
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 
-# Git completion (posh-git)
-Import-Module posh-git
-
 # Tab to complete commands and arguments
 Set-PSReadLineKeyHandler -Key Tab -Function Complete
 
@@ -95,8 +117,14 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteCharOrExit
 
 # Ctrl+r: atuin でコマンド履歴を検索 (フォールバック: fzf)
-if (Get-Command atuin -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&atuin init powershell --disable-up-arrow | Out-String)
+$_atuinInit = Get-CachedInitScript atuin { atuin init powershell --disable-up-arrow }
+if ($_atuinInit) {
+    # atuin init 内の `atuin uuid` プロセス起動 (~150ms) を省略するため事前にセッション ID を設定
+    if (-not $env:ATUIN_SESSION -or $env:ATUIN_PID -ne $PID) {
+        $env:ATUIN_SESSION = [guid]::NewGuid().ToString('N')
+        $env:ATUIN_PID = $PID
+    }
+    . $_atuinInit
 } elseif (Get-Command fzf -ErrorAction SilentlyContinue) {
     Set-PSReadLineKeyHandler -Key Ctrl+r -ScriptBlock {
         $line = $null
@@ -187,9 +215,14 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
 $env:EDITOR = 'nvim'
 $env:VISUAL = 'nvim'
 
-# GITHUB_TOKEN: gh CLI の認証トークンを環境変数に設定
-if (-not $env:GITHUB_TOKEN -and (Get-Command gh -ErrorAction SilentlyContinue)) {
-    $env:GITHUB_TOKEN = (gh auth token -h github.com 2>$null)
+# 重い初期化はプロンプト表示後のアイドル時に 1 回だけ実行 (起動を高速化)
+# - GITHUB_TOKEN: gh CLI の認証トークンを環境変数に設定
+# - posh-git: git のタブ補完
+$null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action {
+    if (-not $env:GITHUB_TOKEN -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+        $env:GITHUB_TOKEN = (gh auth token -h github.com 2>$null)
+    }
+    Import-Module posh-git -Global -ErrorAction SilentlyContinue
 }
 
 Set-Alias vi nvim
@@ -226,8 +259,9 @@ function copilot-yolo { copilot --yolo @args }
 # WindowsのIME設定でキーバインドをカスタマイズすることで解決可能
 # PowerShellでキー入力をデバッグする関数
 # zoxide (smarter cd command)
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+$_zoxideInit = Get-CachedInitScript zoxide { zoxide init powershell }
+if ($_zoxideInit) {
+    . $_zoxideInit
 
     # z <tab> で fzf によるインタラクティブ選択
     if (Get-Command fzf -ErrorAction SilentlyContinue) {
@@ -240,6 +274,7 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
         }
     }
 }
+Remove-Variable _atuinInit, _zoxideInit -ErrorAction SilentlyContinue
 
 function Test-KeyInput {
     Write-Host "Press any key to see its details (Ctrl+C to exit):" -ForegroundColor Yellow
