@@ -1,0 +1,71 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Link %LOCALAPPDATA%\nvim to ~/.config/nvim on Windows
+# Symbolic links require admin rights or Developer Mode, so this script falls
+# back to a directory junction (no privilege needed). Any failure is reported
+# as a warning and never aborts chezmoi apply/update.
+
+# Include common libraries
+{{ template "lib-logging.ps1.tmpl" . }}
+
+$ErrorActionPreference = "Continue"
+
+$source = [IO.Path]::GetFullPath((Join-Path "{{ .chezmoi.homeDir }}" ".config\nvim"))
+$localAppData = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { Join-Path "{{ .chezmoi.homeDir }}" "AppData\Local" }
+$target = Join-Path $localAppData "nvim"
+
+function Normalize-LinkPath {
+    param([string]$Path)
+    if (-not $Path) { return "" }
+    $p = $Path -replace '^\\\\\?\\', '' -replace '^\\\?\?\\', ''
+    return $p.Replace('/', '\').TrimEnd('\', '/').ToLowerInvariant()
+}
+
+try {
+    Log-Step "Linking Neovim config: $target -> $source"
+
+    if (-not (Test-Path -LiteralPath $source)) {
+        Log-Warning "Neovim config not found at $source, skipping link"
+        exit 0
+    }
+
+    $item = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
+    if ($item) {
+        $isLink = [bool]($item.Attributes -band [IO.FileAttributes]::ReparsePoint)
+        if (-not $isLink) {
+            Log-Warning "$target exists and is not a link; leaving it untouched"
+            Log-Info "Move or remove it manually, then re-run chezmoi apply"
+            exit 0
+        }
+
+        $current = @($item.Target)[0]
+        if ((Normalize-LinkPath $current) -eq (Normalize-LinkPath $source)) {
+            Log-Success "Neovim config link already in place ($($item.LinkType))"
+            exit 0
+        }
+
+        Log-Info "Replacing existing link ($current)"
+        # Delete only the link itself, never the directory it points to
+        $item.Delete()
+    }
+
+    New-Item -ItemType Directory -Path $localAppData -Force -ErrorAction SilentlyContinue | Out-Null
+
+    try {
+        New-Item -ItemType SymbolicLink -Path $target -Target $source -ErrorAction Stop | Out-Null
+        Log-Success "Created symbolic link $target -> $source"
+    } catch {
+        Log-Info "Symbolic link not permitted, falling back to junction"
+        try {
+            New-Item -ItemType Junction -Path $target -Target $source -ErrorAction Stop | Out-Null
+            Log-Success "Created junction $target -> $source"
+        } catch {
+            Log-Warning "Could not link Neovim config: $_"
+            Log-Info "Enable Developer Mode or run as administrator, then re-run chezmoi apply"
+        }
+    }
+} catch {
+    Log-Warning "Neovim config link setup failed: $_"
+}
+
+exit 0
+{{- end }}
