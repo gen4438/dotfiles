@@ -63,8 +63,6 @@
   },
   "github.copilot.nextEditSuggestions.enabled": true,
   "githubPullRequests.experimental.useQuickChat": true,
-  "gitlens.ai.model": "vscode",
-  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "gitlens.telemetry.enabled": false,
   "gitlens.views.branches.branches.layout": "list",
   "gitlens.views.scm.grouped.hiddenViews": {
