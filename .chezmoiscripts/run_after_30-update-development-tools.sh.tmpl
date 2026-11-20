@@ -43,6 +43,12 @@ if check_command mise; then
     # Setup Neovim Python provider using uv
     log_step "Setting up Neovim Python provider..."
     NVIM_VENV_DIR="$HOME/.local/share/nvim-venv"
+    # Recreate venv if its Python interpreter is broken
+    # (e.g. Homebrew upgraded python@3.x and removed the old version)
+    if [[ -d "$NVIM_VENV_DIR" ]] && ! "$NVIM_VENV_DIR/bin/python" --version >/dev/null 2>&1; then
+        log_warning "Neovim Python venv is broken (interpreter missing), recreating..."
+        rm -rf "$NVIM_VENV_DIR"
+    fi
     if [[ ! -d "$NVIM_VENV_DIR" ]]; then
         log_running "Creating Neovim Python virtual environment..."
         if check_command uv; then
