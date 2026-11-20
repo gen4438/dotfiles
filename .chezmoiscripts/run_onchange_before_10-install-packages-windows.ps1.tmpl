@@ -36,6 +36,26 @@ if (-not (Test-Path $packageFile)) {
 
 $config = Get-Content $packageFile | ConvertFrom-Json
 
+# Scoop reports most failures via Write-Host without throwing, so verify state explicitly
+function Get-ScoopBucketNames {
+    @(scoop bucket list | ForEach-Object { $_.Name })
+}
+
+function Test-ScoopAppInstalled([string]$Name) {
+    $prefix = scoop prefix $Name 2>$null
+    return ($LASTEXITCODE -eq 0 -and $prefix -and (Test-Path $prefix))
+}
+
+# git is required by `scoop bucket add`, so install it before adding buckets
+if (-not (Test-Command git)) {
+    Log-Running "Installing git (required for Scoop buckets)..."
+    scoop install git
+    if (-not (Test-Command git)) {
+        Log-Error "Failed to install git; Scoop buckets cannot be added"
+        exit 1
+    }
+}
+
 # Add required buckets
 Log-Step "Adding Scoop buckets..."
 $bucketsAdded = 0
@@ -43,13 +63,17 @@ $bucketsFailed = 0
 
 foreach ($bucket in $config.buckets) {
     try {
-        $existingBuckets = scoop bucket list
-        if ($bucket -in $existingBuckets.Name) {
+        if ($bucket -in (Get-ScoopBucketNames)) {
             Log-Success "Bucket already added: $bucket"
-        } else {
-            scoop bucket add $bucket | Out-Null
+            continue
+        }
+        scoop bucket add $bucket
+        if ($bucket -in (Get-ScoopBucketNames)) {
             Log-Success "Added bucket: $bucket"
             $bucketsAdded++
+        } else {
+            Log-Warning "Failed to add bucket: $bucket"
+            $bucketsFailed++
         }
     } catch {
         Log-Warning "Failed to add bucket $bucket : $_"
@@ -71,14 +95,18 @@ $appsFailed = 0
 
 foreach ($app in $config.apps) {
     try {
-        $installedApps = scoop list
-        if ($app -in $installedApps.Name) {
+        if (Test-ScoopAppInstalled $app) {
             Log-Info "$app is already installed"
-        } else {
-            Log-Running "Installing $app..."
-            scoop install $app | Out-Null
+            continue
+        }
+        Log-Running "Installing $app..."
+        scoop install $app
+        if (Test-ScoopAppInstalled $app) {
             Log-Success "$app installed successfully"
             $appsInstalled++
+        } else {
+            Log-Warning "Failed to install $app"
+            $appsFailed++
         }
     } catch {
         Log-Warning "Failed to install $app : $_"
