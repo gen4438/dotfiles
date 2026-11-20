@@ -1,0 +1,10 @@
+# Files committed with CRLF line endings: keep bytes as-is so core.autocrlf on Windows
+# does not report them as permanently modified.
+.chezmoiscripts/run_once_after_40-windows-settings.ps1.tmpl -text
+Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1 -text
+Library/Application[[:space:]]Support/Code/User/snippets/create_markdown.json -text
+dot_config/Code/User/snippets/create_markdown.json -text
+dot_config/manual-configs/windows/configs/office/PowerPoint[[:space:]]Customizations.exportedUI -text
+dot_mozc/keymap.txt -text
+scripts/packages/scoop.json -text
+scripts/packages/winget.json -text
