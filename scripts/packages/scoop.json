@@ -27,10 +27,12 @@
     "llvm",
     "cmake",
     "ninja",
-    "rustup"
+    "rustup",
+    "CascadiaCode-NF-Mono"
   ],
   "buckets": [
     "extras",
-    "main"
+    "main",
+    "nerd-fonts"
   ]
 }
