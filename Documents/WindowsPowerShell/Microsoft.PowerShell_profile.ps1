@@ -47,21 +47,36 @@ Import-Module PSReadLine
 
 # 外部ツールの init スクリプトをキャッシュして起動を高速化
 # 実行ファイル (scoop shim の場合は実体) のパス/更新日時/サイズが変わったら再生成する
+# 起動時に何度も呼ぶので Get-Command/Get-Item ではなく .NET API で PATH から <Name>.exe を探す
+function Find-Exe {
+    param([string]$Name)
+    foreach ($dir in $env:PATH.Split(';')) {
+        if (-not $dir) { continue }
+        $p = [System.IO.Path]::Combine($dir, "$Name.exe")
+        if ([System.IO.File]::Exists($p)) { return $p }
+    }
+    return $null
+}
+
 function Get-CachedInitScript {
     param([string]$Name, [scriptblock]$Generator)
-    $cmd = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (-not $cmd) { return $null }
-    $exe = $cmd.Source
+    $exe = Find-Exe $Name
+    if (-not $exe) { return $null }
     $shim = [System.IO.Path]::ChangeExtension($exe, '.shim')
-    if ((Test-Path $shim) -and ((Get-Content $shim -Raw) -match 'path\s*=\s*"?([^"\r\n]+)')) {
-        $exe = $Matches[1].Trim()
+    if ([System.IO.File]::Exists($shim) -and ([System.IO.File]::ReadAllText($shim) -match 'path\s*=\s*"?([^"\r\n]+)')) {
+        $real = $Matches[1].Trim()
+        if ([System.IO.File]::Exists($real)) { $exe = $real }
     }
-    $item = Get-Item $exe -ErrorAction SilentlyContinue
-    if (-not $item) { $item = Get-Item $cmd.Source }
+    $item = [System.IO.FileInfo]::new($exe)
     $key = "# cache-key: $($item.FullName)|$($item.LastWriteTimeUtc.Ticks)|$($item.Length)"
-    $cacheDir = Join-Path $env:LOCALAPPDATA 'pwsh-init-cache'
-    $cache = Join-Path $cacheDir "$Name.ps1"
-    if (-not (Test-Path $cache) -or (Get-Content $cache -TotalCount 1) -ne $key) {
+    $cacheDir = [System.IO.Path]::Combine($env:LOCALAPPDATA, 'pwsh-init-cache')
+    $cache = [System.IO.Path]::Combine($cacheDir, "$Name.ps1")
+    $firstLine = $null
+    if ([System.IO.File]::Exists($cache)) {
+        $reader = [System.IO.StreamReader]::new($cache)
+        try { $firstLine = $reader.ReadLine() } finally { $reader.Dispose() }
+    }
+    if ($firstLine -ne $key) {
         New-Item -ItemType Directory -Force $cacheDir | Out-Null
         $script = & $Generator | Out-String
         if (-not $script) { return $null }
@@ -87,6 +102,35 @@ Set-PSReadLineOption -ViModeIndicator Script -ViModeChangeHandler {
         Write-Host -NoNewline "$e[s$e[5 q$e[0G$e[36m[I]$e[0m$e[u"
     }
 }
+# プロンプト用のブランチ名取得。git プロセス起動 (~80ms) を避け .git/HEAD を直接読む
+# detached HEAD の場合は git rev-parse --abbrev-ref HEAD と同じく 'HEAD' を返す
+function Get-GitBranchFast {
+    param([string]$Dir)
+    while ($Dir) {
+        $dotGit = [System.IO.Path]::Combine($Dir, '.git')
+        $gitDir = $null
+        if ([System.IO.Directory]::Exists($dotGit)) {
+            $gitDir = $dotGit
+        } elseif ([System.IO.File]::Exists($dotGit)) {
+            # worktree / submodule: ".git" ファイルに "gitdir: <path>" が書かれている
+            $line = [System.IO.File]::ReadAllText($dotGit).Trim()
+            if ($line -match '^gitdir:\s*(.+)$') {
+                $gitDir = $Matches[1]
+                if (-not [System.IO.Path]::IsPathRooted($gitDir)) { $gitDir = [System.IO.Path]::Combine($Dir, $gitDir) }
+            }
+        }
+        if ($gitDir) {
+            $head = [System.IO.Path]::Combine($gitDir, 'HEAD')
+            if (-not [System.IO.File]::Exists($head)) { return $null }
+            $ref = [System.IO.File]::ReadAllText($head).Trim()
+            if ($ref -match '^ref:\s*refs/heads/(.+)$') { return $Matches[1] }
+            return 'HEAD'
+        }
+        $Dir = [System.IO.Path]::GetDirectoryName($Dir)
+    }
+    return $null
+}
+
 function prompt {
     $exitCode = $LASTEXITCODE
     $e = [char]0x1b
@@ -107,7 +151,7 @@ function prompt {
     }
 
     $path = $path -replace "^$([regex]::Escape($HOME))", '~'
-    $branch = git rev-parse --abbrev-ref HEAD 2>$null
+    $branch = Get-GitBranchFast $executionContext.SessionState.Path.CurrentFileSystemLocation.ProviderPath
 
     # Start with [I] (Insert mode) - ViModeChangeHandler overwrites this in-place
     $promptText = "$e[36m[I]$e[0m "
@@ -140,7 +184,7 @@ if ($_atuinInit) {
         $env:ATUIN_PID = $PID
     }
     . $_atuinInit
-} elseif (Get-Command fzf -ErrorAction SilentlyContinue) {
+} elseif (Find-Exe fzf) {
     Set-PSReadLineKeyHandler -Key Ctrl+r -ScriptBlock {
         $line = $null
         $cursor = $null
@@ -161,7 +205,7 @@ if ($_atuinInit) {
 }
 
 # Ctrl+f: Everything + fzf でファイル検索し、選択結果をコマンドラインに挿入
-if ((Get-Command es -ErrorAction SilentlyContinue) -and (Get-Command fzf -ErrorAction SilentlyContinue)) {
+if ((Find-Exe es) -and (Find-Exe fzf)) {
     Set-PSReadLineKeyHandler -Key Ctrl+f -ScriptBlock {
         $line = $null
         $cursor = $null
@@ -230,14 +274,30 @@ Register-ArgumentCompleter -CommandName ssh, scp, sftp -Native -ScriptBlock {
 $env:EDITOR = 'nvim'
 $env:VISUAL = 'nvim'
 
-# 重い初期化はプロンプト表示後のアイドル時に 1 回だけ実行 (起動を高速化)
-# - GITHUB_TOKEN: gh CLI の認証トークンを環境変数に設定
-# - posh-git: git のタブ補完
-$null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action {
-    if (-not $env:GITHUB_TOKEN -and (Get-Command gh -ErrorAction SilentlyContinue)) {
-        $env:GITHUB_TOKEN = (gh auth token -h github.com 2>$null)
+# GITHUB_TOKEN: gh CLI の認証トークンを環境変数に設定
+# gh の起動 (~200ms) で入力をブロックしないよう、別 runspace (バックグラウンドスレッド) で取得する。
+# 環境変数はプロセス共通なので、取得完了後はこのシェルと子プロセスから参照できる。
+if (-not $env:GITHUB_TOKEN -and (Find-Exe gh)) {
+    $global:__ghTokenPs = [powershell]::Create().AddScript({
+        $token = gh auth token -h github.com 2>$null
+        if ($token) { [System.Environment]::SetEnvironmentVariable('GITHUB_TOKEN', "$token".Trim()) }
+    })
+    $null = $global:__ghTokenPs.BeginInvoke()
+}
+
+# posh-git: git のタブ補完
+# Import に ~1.5s かかり、OnIdle で読み込むとプロンプト表示直後に入力が固まるため、
+# 最初に git <Tab> した時点で読み込む。Import 後は posh-git 自身の補完が登録され置き換わる。
+# (Get-Module -ListAvailable は全モジュールを走査して遅いので、ディレクトリの有無だけ確認する)
+if (@($env:PSModulePath.Split(';') | Where-Object { $_ -and [System.IO.Directory]::Exists([System.IO.Path]::Combine($_, 'posh-git')) }).Count -gt 0) {
+    Register-ArgumentCompleter -CommandName git, tgit, gitk -Native -ScriptBlock {
+        param($wordToComplete, $commandAst, $cursorPosition)
+        Import-Module posh-git -Global -ErrorAction SilentlyContinue
+        if (-not (Get-Command Expand-GitCommand -ErrorAction SilentlyContinue)) { return }
+        $padLength = $cursorPosition - $commandAst.Extent.StartOffset
+        $textToComplete = $commandAst.ToString().PadRight($padLength, ' ').Substring(0, $padLength)
+        Expand-GitCommand $textToComplete
     }
-    Import-Module posh-git -Global -ErrorAction SilentlyContinue
 }
 
 Set-Alias vi nvim
