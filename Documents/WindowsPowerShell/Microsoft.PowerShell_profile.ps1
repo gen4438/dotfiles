@@ -21,6 +21,21 @@ foreach ($_gitBin in @(
 }
 Remove-Variable _gitBin -ErrorAction SilentlyContinue
 
+# Claude Code on Windows は git-bash を必要とする。
+# scoop の shim 経由だと bash.exe の位置を推定できないため明示的に指定する
+if (-not ($env:CLAUDE_CODE_GIT_BASH_PATH -and (Test-Path $env:CLAUDE_CODE_GIT_BASH_PATH))) {
+    foreach ($_gitBash in @(
+        (Join-Path $HOME 'scoop\apps\git\current\bin\bash.exe'),
+        'C:\Program Files\Git\bin\bash.exe'
+    )) {
+        if (Test-Path $_gitBash) {
+            $env:CLAUDE_CODE_GIT_BASH_PATH = $_gitBash
+            break
+        }
+    }
+    Remove-Variable _gitBash -ErrorAction SilentlyContinue
+}
+
 # UTF-8 encoding settings for Japanese environment
 # Fixes mojibake when interacting with external commands (git, ripgrep, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8

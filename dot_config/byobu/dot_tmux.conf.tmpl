@@ -75,14 +75,14 @@ run '~/.tmux/plugins/tpm/tpm'
 
 # WSL2: tpm/tmux-sensible の後に配置し、組み込みキーバインドを確実に上書きする
 
-# デフォルトシェルをトグル (pwsh → bash → powershell → pwsh ...)
+# デフォルトシェルをトグル (bash → pwsh → powershell → bash ...)
 bind-key t run-shell '\
     current=$(tmux show-option -gqv @byobu-shell); \
     case "$current" in \
-        pwsh)       next=bash;       label="bash" ;; \
-        bash)       next=powershell; label="powershell.exe" ;; \
-        powershell) next=pwsh;       label="pwsh.exe" ;; \
-        *)          next=pwsh;       label="pwsh.exe" ;; \
+        bash)       next=pwsh;       label="pwsh.exe" ;; \
+        pwsh)       next=powershell; label="powershell.exe" ;; \
+        powershell) next=bash;       label="bash" ;; \
+        *)          next=bash;       label="bash" ;; \
     esac; \
     tmux set-option -g @byobu-shell "$next"; \
     tmux display-message "Default shell: $label"'
@@ -90,5 +90,6 @@ bind-key t run-shell '\
 # 明示的にシェルを指定して開く
 bind-key b new-window -n bash bash
 bind-key B split-window -h bash
-bind-key p new-window -n pwsh '~/.config/byobu/bin/powershell-wrapper.sh'
+bind-key p new-window -n pwsh '~/.config/byobu/bin/powershell-wrapper.sh pwsh'
+bind-key P split-window -h '~/.config/byobu/bin/powershell-wrapper.sh pwsh'
 {{- end }}

@@ -1,21 +1,21 @@
 {{ template "shebang-bash.tmpl" . }}
 # byobu/tmux の新規ペイン用シェルディスパッチャー
-# tmux オプション @byobu-shell の値に応じてシェルを切り替える
-#   pwsh        → pwsh.exe (デフォルト)
+# 引数、または tmux オプション @byobu-shell の値に応じてシェルを切り替える
+#   bash        → bash (デフォルト)
+#   pwsh        → pwsh.exe
 #   powershell  → powershell.exe
-#   bash        → bash
 
-SHELL_MODE=$(tmux show-option -gqv @byobu-shell 2>/dev/null)
+SHELL_MODE="${1:-$(tmux show-option -gqv @byobu-shell 2>/dev/null)}"
 
 case "$SHELL_MODE" in
-    bash)
-        exec bash
+    pwsh)
+        PWSH="pwsh.exe"
         ;;
     powershell)
         PWSH="powershell.exe"
         ;;
     *)
-        PWSH="pwsh.exe"
+        exec bash
         ;;
 esac
 
