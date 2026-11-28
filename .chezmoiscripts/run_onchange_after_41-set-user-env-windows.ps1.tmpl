@@ -1,0 +1,29 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Set persistent user environment variables (HKCU\Environment)
+# Re-runs whenever this file's content changes.
+
+{{ template "lib-logging.ps1.tmpl" . }}
+
+$userEnv = [ordered]@{
+    # pwsh 7 の起動時アップデート通知を無効化する。
+    # 狭いウィンドウ/psmux ペインで通知を描画すると ConsoleHost が
+    # String.PadRight の負数引数で FailFast してクラッシュするため。
+    # (プロセス起動前に必要なのでプロファイルではなくユーザー環境変数で設定する)
+    'POWERSHELL_UPDATECHECK' = 'Off'
+}
+
+foreach ($name in $userEnv.Keys) {
+    $value = $userEnv[$name]
+    try {
+        $current = [System.Environment]::GetEnvironmentVariable($name, [System.EnvironmentVariableTarget]::User)
+        if ($current -ne $value) {
+            [System.Environment]::SetEnvironmentVariable($name, $value, [System.EnvironmentVariableTarget]::User)
+            Log-Success "Set $name=$value for user environment"
+        } else {
+            Log-Info "$name is already set to $value"
+        }
+    } catch {
+        Log-Warning "Failed to set $name environment variable: $_"
+    }
+}
+{{- end }}
